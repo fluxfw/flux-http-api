@@ -1,11 +1,11 @@
 import { createServer as createServerHttp } from "node:http";
 import { createServer as createServerHttps } from "node:https";
 import express from "express";
-import { ShutdownHandler } from "../../../../../flux-shutdown-handler-api/src/Adapter/ShutdownHandler/ShutdownHandler.mjs";
 import { EXPRESS_SERVER_DEFAULT_LISTEN_HTTP_PORT, EXPRESS_SERVER_DEFAULT_LISTEN_HTTPS_PORT, EXPRESS_SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS, EXPRESS_SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS_PORT, EXPRESS_SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS_STATUS_CODE, EXPRESS_SERVER_LISTEN_HTTP_PORT_DISABLED, EXPRESS_SERVER_LISTEN_HTTPS_PORT_DISABLED } from "../../../Adapter/ExpressServer/EXPRESS_SERVER.mjs";
 
 /** @typedef {import("../../../Adapter/ExpressServer/ExpressServer.mjs").ExpressServer} ExpressServer */
 /** @typedef {import("../../../Adapter/ExpressServer/getRouter.mjs").getRouter} getRouter */
+/** @typedef {import("../../../../../flux-shutdown-handler-api/src/Adapter/ShutdownHandler/ShutdownHandler.mjs").ShutdownHandler} ShutdownHandler */
 
 export class RunExpressServerCommand {
     /**
@@ -109,14 +109,14 @@ export class RunExpressServerCommand {
                 }
 
                 this.#shutdown_handler.addShutdownTask(async () => {
-                    await new Promise((resolve, reject) => {
-                        node_server.close(error => {
-                            if (error) {
-                                reject(error);
+                    await new Promise((_resolve, _reject) => {
+                        node_server.close(_error => {
+                            if (_error) {
+                                _reject(_error);
                                 return;
                             }
 
-                            resolve();
+                            _resolve();
                         });
                     });
                 });

@@ -1,8 +1,8 @@
 import { ExpressServerService } from "../../Service/ExpressServer/Port/ExpressServerService.mjs";
-import { ShutdownHandler } from "../../../../flux-shutdown-handler-api/src/Adapter/ShutdownHandler/ShutdownHandler.mjs";
 
 /** @typedef {import("../ExpressServer/ExpressServer.mjs").ExpressServer} ExpressServer */
 /** @typedef {import("../ExpressServer/getRouter.mjs").getRouter} getRouter */
+/** @typedef {import("../../../../flux-shutdown-handler-api/src/Adapter/ShutdownHandler/ShutdownHandler.mjs").ShutdownHandler} ShutdownHandler */
 
 export class ExpressServerApi {
     /**

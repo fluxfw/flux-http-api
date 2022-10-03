@@ -1,8 +1,8 @@
 import { RunExpressServerCommand } from "../Command/RunExpressServerCommand.mjs";
-import { ShutdownHandler } from "../../../../../flux-shutdown-handler-api/src/Adapter/ShutdownHandler/ShutdownHandler.mjs";
 
 /** @typedef {import("../../../Adapter/ExpressServer/ExpressServer.mjs").ExpressServer} ExpressServer */
 /** @typedef {import("../../../Adapter/ExpressServer/getRouter.mjs").getRouter} getRouter */
+/** @typedef {import("../../../../../flux-shutdown-handler-api/src/Adapter/ShutdownHandler/ShutdownHandler.mjs").ShutdownHandler} ShutdownHandler */
 
 export class ExpressServerService {
     /**
