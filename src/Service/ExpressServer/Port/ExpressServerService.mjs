@@ -1,5 +1,3 @@
-import { RunExpressServerCommand } from "../Command/RunExpressServerCommand.mjs";
-
 /** @typedef {import("../../../Adapter/ExpressServer/ExpressServer.mjs").ExpressServer} ExpressServer */
 /** @typedef {import("../../../Adapter/ExpressServer/getRouter.mjs").getRouter} getRouter */
 /** @typedef {import("../../../../../flux-shutdown-handler-api/src/Adapter/ShutdownHandler/ShutdownHandler.mjs").ShutdownHandler} ShutdownHandler */
@@ -34,7 +32,7 @@ export class ExpressServerService {
      * @returns {Promise<void>}
      */
     async runExpressServer(get_router, express_server = null) {
-        await RunExpressServerCommand.new(
+        await (await import("../Command/RunExpressServerCommand.mjs")).RunExpressServerCommand.new(
             this.#shutdown_handler
         )
             .runExpressServer(
