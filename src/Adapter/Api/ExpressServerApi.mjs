@@ -1,6 +1,5 @@
-import { ExpressServerService } from "../../Service/ExpressServer/Port/ExpressServerService.mjs";
-
 /** @typedef {import("../ExpressServer/ExpressServer.mjs").ExpressServer} ExpressServer */
+/** @typedef {import("../../Service/ExpressServer/Port/ExpressServerService.mjs").ExpressServerService} ExpressServerService */
 /** @typedef {import("../ExpressServer/getRouter.mjs").getRouter} getRouter */
 /** @typedef {import("../../../../flux-shutdown-handler-api/src/Adapter/ShutdownHandler/ShutdownHandler.mjs").ShutdownHandler} ShutdownHandler */
 
@@ -36,7 +35,7 @@ export class ExpressServerApi {
      * @returns {Promise<void>}
      */
     async init() {
-        this.#express_server_service ??= this.#getExpressServerService();
+        this.#express_server_service ??= await this.#getExpressServerService();
     }
 
     /**
@@ -52,10 +51,10 @@ export class ExpressServerApi {
     }
 
     /**
-     * @returns {ExpressServerService}
+     * @returns {Promise<ExpressServerService>}
      */
-    #getExpressServerService() {
-        return ExpressServerService.new(
+    async #getExpressServerService() {
+        return (await import("../../Service/ExpressServer/Port/ExpressServerService.mjs")).ExpressServerService.new(
             this.#shutdown_handler
         );
     }
