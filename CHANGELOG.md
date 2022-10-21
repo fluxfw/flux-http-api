@@ -6,6 +6,12 @@ Changes:
 
 \-
 
+## v2022-10-21-1
+
+Changes:
+
+- Remove default JSON body parser
+
 ## v2022-10-17-1
 
 Changes:
