@@ -85,8 +85,6 @@ export class RunExpressServerCommand {
             });
         }
 
-        server.use(express.json());
-
         server.use(await get_router());
     }
 
