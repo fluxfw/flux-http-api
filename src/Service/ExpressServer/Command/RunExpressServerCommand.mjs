@@ -1,7 +1,7 @@
 import { createServer as createServerHttp } from "node:http";
 import { createServer as createServerHttps } from "node:https";
 import express from "express";
-import { EXPRESS_SERVER_DEFAULT_LISTEN_HTTP_PORT, EXPRESS_SERVER_DEFAULT_LISTEN_HTTPS_PORT, EXPRESS_SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS, EXPRESS_SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS_PORT, EXPRESS_SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS_STATUS_CODE, EXPRESS_SERVER_LISTEN_HTTP_PORT_DISABLED, EXPRESS_SERVER_LISTEN_HTTPS_PORT_DISABLED } from "../../../Adapter/ExpressServer/EXPRESS_SERVER.mjs";
+import { EXPRESS_SERVER_DEFAULT_LISTEN_HTTP_PORT, EXPRESS_SERVER_DEFAULT_LISTEN_HTTPS_PORT, EXPRESS_SERVER_DEFAULT_NO_REFERRER, EXPRESS_SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS, EXPRESS_SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS_PORT, EXPRESS_SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS_STATUS_CODE, EXPRESS_SERVER_LISTEN_HTTP_PORT_DISABLED, EXPRESS_SERVER_LISTEN_HTTPS_PORT_DISABLED } from "../../../Adapter/ExpressServer/EXPRESS_SERVER.mjs";
 
 /** @typedef {import("../../../Adapter/ExpressServer/ExpressServer.mjs").ExpressServer} ExpressServer */
 /** @typedef {import("../../../Adapter/ExpressServer/getRouter.mjs").getRouter} getRouter */
@@ -46,6 +46,7 @@ export class RunExpressServerCommand {
         const https_cert = express_server?.https_cert ?? null;
         const https_key = express_server?.https_key ?? null;
         const https_dhparam = express_server?.https_dhparam ?? null;
+        const no_referrer = express_server?.no_referrer ?? EXPRESS_SERVER_DEFAULT_NO_REFERRER;
 
         const server = express();
 
@@ -82,6 +83,13 @@ export class RunExpressServerCommand {
                 }
 
                 res.redirect(redirect_http_to_https_status_code, `https://${req.hostname}${redirect_http_to_https_port !== EXPRESS_SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS_PORT ? `:${redirect_http_to_https_port}` : ""}${req.url}`);
+            });
+        }
+
+        if (no_referrer) {
+            server.use((req, res, next) => {
+                res.setHeader("Referrer-Policy", "no-referrer");
+                next();
             });
         }
 

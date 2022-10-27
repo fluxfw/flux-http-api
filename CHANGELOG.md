@@ -6,6 +6,12 @@ Changes:
 
 \-
 
+## v2022-10-27-1
+
+Changes:
+
+- Disable referrer header
+
 ## v2022-10-21-1
 
 Changes:
