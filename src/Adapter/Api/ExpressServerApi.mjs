@@ -35,7 +35,7 @@ export class ExpressServerApi {
      * @returns {Promise<void>}
      */
     async init() {
-        this.#express_server_service ??= await this.#getExpressServerService();
+
     }
 
     /**
@@ -44,7 +44,7 @@ export class ExpressServerApi {
      * @returns {Promise<void>}
      */
     async runExpressServer(get_router, express_server = null) {
-        await this.#express_server_service.runExpressServer(
+        await (await this.#getExpressServerService()).runExpressServer(
             get_router,
             express_server
         );
@@ -54,8 +54,10 @@ export class ExpressServerApi {
      * @returns {Promise<ExpressServerService>}
      */
     async #getExpressServerService() {
-        return (await import("../../Service/ExpressServer/Port/ExpressServerService.mjs")).ExpressServerService.new(
+        this.#express_server_service ??= (await import("../../Service/ExpressServer/Port/ExpressServerService.mjs")).ExpressServerService.new(
             this.#shutdown_handler
         );
+
+        return this.#express_server_service;
     }
 }
