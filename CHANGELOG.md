@@ -6,6 +6,13 @@ Changes:
 
 \-
 
+## v2022-11-23-1
+
+Changes:
+
+- Enable production express mode
+- Disable powered by header
+
 ## v2022-10-28-1
 
 Changes:
