@@ -1,7 +1,7 @@
 import { createServer as createServerHttp } from "node:http";
 import { createServer as createServerHttps } from "node:https";
 import express from "express";
-import { EXPRESS_SERVER_DEFAULT_LISTEN_HTTP_PORT, EXPRESS_SERVER_DEFAULT_LISTEN_HTTPS_PORT, EXPRESS_SERVER_DEFAULT_NO_REFERRER, EXPRESS_SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS, EXPRESS_SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS_PORT, EXPRESS_SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS_STATUS_CODE, EXPRESS_SERVER_LISTEN_HTTP_PORT_DISABLED, EXPRESS_SERVER_LISTEN_HTTPS_PORT_DISABLED } from "../../../Adapter/ExpressServer/EXPRESS_SERVER.mjs";
+import { EXPRESS_SERVER_DEFAULT_DEVELOPMENT_MODE, EXPRESS_SERVER_DEFAULT_LISTEN_HTTP_PORT, EXPRESS_SERVER_DEFAULT_LISTEN_HTTPS_PORT, EXPRESS_SERVER_DEFAULT_NO_POWERED_BY, EXPRESS_SERVER_DEFAULT_NO_REFERRER, EXPRESS_SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS, EXPRESS_SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS_PORT, EXPRESS_SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS_STATUS_CODE, EXPRESS_SERVER_LISTEN_HTTP_PORT_DISABLED, EXPRESS_SERVER_LISTEN_HTTPS_PORT_DISABLED } from "../../../Adapter/ExpressServer/EXPRESS_SERVER.mjs";
 
 /** @typedef {import("../../../Adapter/ExpressServer/ExpressServer.mjs").ExpressServer} ExpressServer */
 /** @typedef {import("../../../Adapter/ExpressServer/getRouter.mjs").getRouter} getRouter */
@@ -37,6 +37,7 @@ export class RunExpressServerCommand {
      * @returns {Promise<void>}
      */
     async runExpressServer(get_router, express_server = null) {
+        const development_mode = express_server?.development_mode ?? EXPRESS_SERVER_DEFAULT_DEVELOPMENT_MODE;
         const listen_interface = express_server?.listen_interface ?? null;
         const listen_https_port = express_server?.listen_https_port ?? EXPRESS_SERVER_DEFAULT_LISTEN_HTTPS_PORT;
         const listen_http_port = express_server?.listen_http_port ?? EXPRESS_SERVER_DEFAULT_LISTEN_HTTP_PORT;
@@ -46,9 +47,13 @@ export class RunExpressServerCommand {
         const https_cert = express_server?.https_cert ?? null;
         const https_key = express_server?.https_key ?? null;
         const https_dhparam = express_server?.https_dhparam ?? null;
+        const no_powered_by = express_server?.no_powered_by ?? EXPRESS_SERVER_DEFAULT_NO_POWERED_BY;
         const no_referrer = express_server?.no_referrer ?? EXPRESS_SERVER_DEFAULT_NO_REFERRER;
 
         const server = express();
+
+        server.set("env", development_mode ? "development" : "production");
+        server.set("x-powered-by", no_powered_by);
 
         const https_server = listen_https_port !== EXPRESS_SERVER_LISTEN_HTTPS_PORT_DISABLED && https_cert !== null && https_key !== null;
         if (https_server) {
