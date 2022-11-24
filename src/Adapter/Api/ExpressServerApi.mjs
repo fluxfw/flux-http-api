@@ -32,13 +32,6 @@ export class ExpressServerApi {
     }
 
     /**
-     * @returns {Promise<void>}
-     */
-    async init() {
-
-    }
-
-    /**
      * @param {getRouter} get_router
      * @param {ExpressServer | null} express_server
      * @returns {Promise<void>}
