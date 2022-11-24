@@ -53,7 +53,7 @@ export class RunExpressServerCommand {
         const server = express();
 
         server.set("env", development_mode ? "development" : "production");
-        server.set("x-powered-by", no_powered_by);
+        server.set("x-powered-by", !no_powered_by);
 
         const https_server = listen_https_port !== EXPRESS_SERVER_LISTEN_HTTPS_PORT_DISABLED && https_cert !== null && https_key !== null;
         if (https_server) {

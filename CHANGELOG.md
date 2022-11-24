@@ -6,6 +6,12 @@ Changes:
 
 \-
 
+## v2022-11-24-2
+
+Changes:
+
+- Fix `no_powered_by`
+
 ## v2022-11-24-1
 
 Changes:
