@@ -1,13 +1,14 @@
 import { createServer as createServerHttp } from "node:http";
 import { createServer as createServerHttps } from "node:https";
 import express from "express";
-import { EXPRESS_SERVER_DEFAULT_DEVELOPMENT_MODE, EXPRESS_SERVER_DEFAULT_LISTEN_HTTP_PORT, EXPRESS_SERVER_DEFAULT_LISTEN_HTTPS_PORT, EXPRESS_SERVER_DEFAULT_NO_POWERED_BY, EXPRESS_SERVER_DEFAULT_NO_REFERRER, EXPRESS_SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS, EXPRESS_SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS_PORT, EXPRESS_SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS_STATUS_CODE, EXPRESS_SERVER_LISTEN_HTTP_PORT_DISABLED, EXPRESS_SERVER_LISTEN_HTTPS_PORT_DISABLED } from "../../../Adapter/ExpressServer/EXPRESS_SERVER.mjs";
+import { HEADER_LOCATION, HEADER_REFERRER_POLICY } from "../../../Adapter/Header/HEADER.mjs";
+import { HTTP_SERVER_DEFAULT_DEVELOPMENT_MODE, HTTP_SERVER_DEFAULT_LISTEN_HTTP_PORT, HTTP_SERVER_DEFAULT_LISTEN_HTTPS_PORT, HTTP_SERVER_DEFAULT_NO_POWERED_BY, HTTP_SERVER_DEFAULT_NO_REFERRER, HTTP_SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS, HTTP_SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS_PORT, HTTP_SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS_STATUS_CODE, HTTP_SERVER_LISTEN_HTTP_PORT_DISABLED, HTTP_SERVER_LISTEN_HTTPS_PORT_DISABLED } from "../../../Adapter/HttpServer/HTTP_SERVER.mjs";
 
-/** @typedef {import("../../../Adapter/ExpressServer/ExpressServer.mjs").ExpressServer} ExpressServer */
-/** @typedef {import("../../../Adapter/ExpressServer/getRouter.mjs").getRouter} getRouter */
+/** @typedef {import("../../../Adapter/HttpServer/getRouter.mjs").getRouter} getRouter */
+/** @typedef {import("../../../Adapter/HttpServer/HttpServer.mjs").HttpServer} HttpServer */
 /** @typedef {import("../../../../../flux-shutdown-handler-api/src/Adapter/ShutdownHandler/ShutdownHandler.mjs").ShutdownHandler} ShutdownHandler */
 
-export class RunExpressServerCommand {
+export class RunHttpServerCommand {
     /**
      * @type {ShutdownHandler}
      */
@@ -15,7 +16,7 @@ export class RunExpressServerCommand {
 
     /**
      * @param {ShutdownHandler} shutdown_handler
-     * @returns {RunExpressServerCommand}
+     * @returns {RunHttpServerCommand}
      */
     static new(shutdown_handler) {
         return new this(
@@ -33,30 +34,30 @@ export class RunExpressServerCommand {
 
     /**
      * @param {getRouter} get_router
-     * @param {ExpressServer | null} express_server
+     * @param {HttpServer | null} http_server
      * @returns {Promise<void>}
      */
-    async runExpressServer(get_router, express_server = null) {
-        const development_mode = express_server?.development_mode ?? EXPRESS_SERVER_DEFAULT_DEVELOPMENT_MODE;
-        const listen_interface = express_server?.listen_interface ?? null;
-        const listen_https_port = express_server?.listen_https_port ?? EXPRESS_SERVER_DEFAULT_LISTEN_HTTPS_PORT;
-        const listen_http_port = express_server?.listen_http_port ?? EXPRESS_SERVER_DEFAULT_LISTEN_HTTP_PORT;
-        const redirect_http_to_https = express_server?.redirect_http_to_https ?? EXPRESS_SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS;
-        const redirect_http_to_https_port = express_server?.redirect_http_to_https_port ?? EXPRESS_SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS_PORT;
-        const redirect_http_to_https_status_code = express_server?.redirect_http_to_https_status_code ?? EXPRESS_SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS_STATUS_CODE;
-        const https_cert = express_server?.https_cert ?? null;
-        const https_key = express_server?.https_key ?? null;
-        const https_dhparam = express_server?.https_dhparam ?? null;
-        const no_powered_by = express_server?.no_powered_by ?? EXPRESS_SERVER_DEFAULT_NO_POWERED_BY;
-        const no_referrer = express_server?.no_referrer ?? EXPRESS_SERVER_DEFAULT_NO_REFERRER;
+    async runHttpServer(get_router, http_server = null) {
+        const development_mode = http_server?.development_mode ?? HTTP_SERVER_DEFAULT_DEVELOPMENT_MODE;
+        const listen_interface = http_server?.listen_interface ?? null;
+        const listen_https_port = http_server?.listen_https_port ?? HTTP_SERVER_DEFAULT_LISTEN_HTTPS_PORT;
+        const listen_http_port = http_server?.listen_http_port ?? HTTP_SERVER_DEFAULT_LISTEN_HTTP_PORT;
+        const redirect_http_to_https = http_server?.redirect_http_to_https ?? HTTP_SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS;
+        const redirect_http_to_https_port = http_server?.redirect_http_to_https_port ?? HTTP_SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS_PORT;
+        const redirect_http_to_https_status_code = http_server?.redirect_http_to_https_status_code ?? HTTP_SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS_STATUS_CODE;
+        const https_cert = http_server?.https_cert ?? null;
+        const https_key = http_server?.https_key ?? null;
+        const https_dhparam = http_server?.https_dhparam ?? null;
+        const no_powered_by = http_server?.no_powered_by ?? HTTP_SERVER_DEFAULT_NO_POWERED_BY;
+        const no_referrer = http_server?.no_referrer ?? HTTP_SERVER_DEFAULT_NO_REFERRER;
 
         const server = express();
 
         server.set("env", development_mode ? "development" : "production");
         server.set("x-powered-by", !no_powered_by);
 
-        const https_server = listen_https_port !== EXPRESS_SERVER_LISTEN_HTTPS_PORT_DISABLED && https_cert !== null && https_key !== null;
-        if (https_server) {
+        const https = listen_https_port !== HTTP_SERVER_LISTEN_HTTPS_PORT_DISABLED && https_cert !== null && https_key !== null;
+        if (https) {
             await this.#createNodeServer(
                 server,
                 createServerHttps,
@@ -70,8 +71,8 @@ export class RunExpressServerCommand {
             );
         }
 
-        const http_server = listen_http_port !== EXPRESS_SERVER_LISTEN_HTTP_PORT_DISABLED;
-        if (http_server) {
+        const http = listen_http_port !== HTTP_SERVER_LISTEN_HTTP_PORT_DISABLED;
+        if (http) {
             await this.#createNodeServer(
                 server,
                 createServerHttp,
@@ -80,20 +81,22 @@ export class RunExpressServerCommand {
             );
         }
 
-        if (redirect_http_to_https && https_server && http_server) {
+        if (redirect_http_to_https && https && http) {
             server.use((req, res, next) => {
-                if (req.secure) {
+                if (req.socket.encrypted) {
                     next();
                     return;
                 }
 
-                res.redirect(redirect_http_to_https_status_code, `https://${req.hostname}${redirect_http_to_https_port !== EXPRESS_SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS_PORT ? `:${redirect_http_to_https_port}` : ""}${req.url}`);
+                res.statusCode = redirect_http_to_https_status_code;
+                res.setHeader(HEADER_LOCATION, `https://${req.hostname}${redirect_http_to_https_port !== HTTP_SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS_PORT ? `:${redirect_http_to_https_port}` : ""}${req.url}`);
+                res.end();
             });
         }
 
         if (no_referrer) {
             server.use((req, res, next) => {
-                res.setHeader("Referrer-Policy", "no-referrer");
+                res.setHeader(HEADER_REFERRER_POLICY, "no-referrer");
                 next();
             });
         }
