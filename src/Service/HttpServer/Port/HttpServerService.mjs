@@ -66,6 +66,7 @@ export class HttpServerService {
         }
 
         await (await import("../Command/RunHttpServerCommand.mjs")).RunHttpServerCommand.new(
+            this,
             this.#shutdown_handler
         )
             .runHttpServer(
