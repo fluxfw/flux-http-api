@@ -116,7 +116,7 @@ export class RunHttpServerCommand {
                 }
 
                 await this.#http_server_service.mapResponseToServerResponse(
-                    Response.redirect(`https://${request._urlObject.hostname}${redirect_http_to_https_port !== HTTP_SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS_PORT ? `:${redirect_http_to_https_port}` : ""}${req.url}`, redirect_http_to_https_status_code),
+                    Response.redirect(`https://${request._urlObject.hostname}${redirect_http_to_https_port !== HTTP_SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS_PORT ? `:${redirect_http_to_https_port}` : ""}${request._urlObject.pathname}${request._urlObject.search}`, redirect_http_to_https_status_code),
                     res,
                     request
                 );
