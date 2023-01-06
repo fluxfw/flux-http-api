@@ -1,35 +1,45 @@
 import { createServer as createServerHttp } from "node:http";
 import { createServer as createServerHttps } from "node:https";
 import express from "express";
-import { HEADER_LOCATION, HEADER_REFERRER_POLICY } from "../../../Adapter/Header/HEADER.mjs";
+import { HEADER_REFERRER_POLICY } from "../../../Adapter/Header/HEADER.mjs";
+import { STATUS_400 } from "../../../Adapter/Status/STATUS.mjs";
 import { HTTP_SERVER_DEFAULT_DEVELOPMENT_MODE, HTTP_SERVER_DEFAULT_LISTEN_HTTP_PORT, HTTP_SERVER_DEFAULT_LISTEN_HTTPS_PORT, HTTP_SERVER_DEFAULT_NO_POWERED_BY, HTTP_SERVER_DEFAULT_NO_REFERRER, HTTP_SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS, HTTP_SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS_PORT, HTTP_SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS_STATUS_CODE, HTTP_SERVER_LISTEN_HTTP_PORT_DISABLED, HTTP_SERVER_LISTEN_HTTPS_PORT_DISABLED } from "../../../Adapter/HttpServer/HTTP_SERVER.mjs";
 
 /** @typedef {import("../../../Adapter/HttpServer/getRouter.mjs").getRouter} getRouter */
 /** @typedef {import("../../../Adapter/HttpServer/HttpServer.mjs").HttpServer} HttpServer */
+/** @typedef {import("../Port/HttpServerService.mjs").HttpServerService} HttpServerService */
 /** @typedef {import("../../../../../flux-shutdown-handler-api/src/Adapter/ShutdownHandler/ShutdownHandler.mjs").ShutdownHandler} ShutdownHandler */
 
 export class RunHttpServerCommand {
+    /**
+     * @type {HttpServerService}
+     */
+    #http_server_service;
     /**
      * @type {ShutdownHandler}
      */
     #shutdown_handler;
 
     /**
+     * @param {HttpServerService} http_server_service
      * @param {ShutdownHandler} shutdown_handler
      * @returns {RunHttpServerCommand}
      */
-    static new(shutdown_handler) {
+    static new(http_server_service, shutdown_handler) {
         return new this(
+            http_server_service,
             shutdown_handler
         );
     }
 
     /**
+     * @param {HttpServerService} http_server_service
      * @param {ShutdownHandler} shutdown_handler
      * @private
      */
-    constructor(shutdown_handler) {
+    constructor(http_server_service, shutdown_handler) {
         this.#shutdown_handler = shutdown_handler;
+        this.#http_server_service = http_server_service;
     }
 
     /**
@@ -82,15 +92,34 @@ export class RunHttpServerCommand {
         }
 
         if (redirect_http_to_https && https && http) {
-            server.use((req, res, next) => {
+            server.use(async (req, res, next) => {
                 if (req.socket.encrypted) {
                     next();
                     return;
                 }
 
-                res.statusCode = redirect_http_to_https_status_code;
-                res.setHeader(HEADER_LOCATION, `https://${req.hostname}${redirect_http_to_https_port !== HTTP_SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS_PORT ? `:${redirect_http_to_https_port}` : ""}${req.url}`);
-                res.end();
+                let request;
+                try {
+                    request = await this.#http_server_service.mapServerRequestToRequest(
+                        req
+                    );
+                } catch (error) {
+                    console.error(error);
+
+                    await this.#http_server_service.mapResponseToServerResponse(
+                        new Response(null, {
+                            status: STATUS_400
+                        }),
+                        res
+                    );
+                    return;
+                }
+
+                await this.#http_server_service.mapResponseToServerResponse(
+                    Response.redirect(`https://${request._urlObject.hostname}${redirect_http_to_https_port !== HTTP_SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS_PORT ? `:${redirect_http_to_https_port}` : ""}${req.url}`, redirect_http_to_https_status_code),
+                    res,
+                    request
+                );
             });
         }
 
