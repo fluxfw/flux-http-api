@@ -1,43 +1,43 @@
 import { METHOD_GET } from "../../../Adapter/Method/METHOD.mjs";
 import { STATUS_401 } from "../../../Adapter/Status/STATUS.mjs";
-import { ASSERT_TYPE_CSS, ASSERT_TYPE_JSON } from "../../../Adapter/AssertType/ASSERT_TYPE.mjs";
 import { CONTENT_TYPE_CSS, CONTENT_TYPE_JSON } from "../../../Adapter/ContentType/CONTENT_TYPE.mjs";
+import { FETCH_ASSERT_TYPE_CSS, FETCH_ASSERT_TYPE_JSON } from "../../../Adapter/Fetch/FETCH_ASSERT_TYPE.mjs";
 import { HEADER_ACCEPT, HEADER_CONTENT_TYPE } from "../../../Adapter/Header/HEADER.mjs";
 
-/** @typedef {import("../../../Adapter/Fetch/authenticate.mjs").authenticate} _authenticate */
 /** @typedef {import("../../../Adapter/Fetch/Fetch.mjs").Fetch} Fetch */
-/** @typedef {import("../../../Adapter/Fetch/showError.mjs").showError} showError */
+/** @typedef {import("../../../Adapter/Fetch/fetchAuthenticate.mjs").fetchAuthenticate} fetchAuthenticate */
+/** @typedef {import("../../../Adapter/Fetch/fetchShowError.mjs").fetchShowError} fetchShowError */
 
 export class FetchCommand {
     /**
-     * @type {_authenticate | null}
+     * @type {fetchAuthenticate | null}
      */
-    #authenticate;
+    #fetch_authenticate;
     /**
-     * @type {showError | null}
+     * @type {fetchShowError | null}
      */
-    #show_error;
+    #fetch_show_error;
 
     /**
-     * @param {_authenticate | null} authenticate
-     * @param {showError | null} show_error
+     * @param {fetchAuthenticate | null} fetch_authenticate
+     * @param {fetchShowError | null} fetch_show_error
      * @returns {FetchCommand}
      */
-    static new(authenticate = null, show_error = null) {
+    static new(fetch_authenticate = null, fetch_show_error = null) {
         return new this(
-            authenticate,
-            show_error
+            fetch_authenticate,
+            fetch_show_error
         );
     }
 
     /**
-     * @param {_authenticate | null} authenticate
-     * @param {showError | null} show_error
+     * @param {fetchAuthenticate | null} fetch_authenticate
+     * @param {fetchShowError | null} fetch_show_error
      * @private
      */
-    constructor(authenticate, show_error) {
-        this.#authenticate = authenticate;
-        this.#show_error = show_error;
+    constructor(fetch_authenticate, fetch_show_error) {
+        this.#fetch_authenticate = fetch_authenticate;
+        this.#fetch_show_error = fetch_show_error;
     }
 
     /**
@@ -51,10 +51,10 @@ export class FetchCommand {
         const data = _fetch.data ?? null;
         const abort_signal = _fetch.abort_signal ?? null;
 
-        const error_ui = !_fetch.no_ui && !_fetch.no_error_ui && this.#show_error !== null;
-        const authenticate = !_fetch.no_ui && !_fetch.no_authenticate && this.#authenticate !== null;
+        const error_ui = !_fetch.no_ui && !_fetch.no_error_ui && this.#fetch_show_error !== null;
+        const authenticate = !_fetch.no_ui && !_fetch.no_authenticate && this.#fetch_authenticate !== null;
 
-        const assert_type = _fetch.assert_type ?? ASSERT_TYPE_JSON;
+        const assert_type = _fetch.assert_type ?? FETCH_ASSERT_TYPE_JSON;
 
         try {
             const url = new URL(_fetch.url.startsWith("/") ? `${location.origin}${_fetch.url}` : _fetch.url);
@@ -75,11 +75,11 @@ export class FetchCommand {
 
             let accept;
             switch (assert_type) {
-                case ASSERT_TYPE_CSS:
+                case FETCH_ASSERT_TYPE_CSS:
                     accept = CONTENT_TYPE_CSS;
                     break;
 
-                case ASSERT_TYPE_JSON:
+                case FETCH_ASSERT_TYPE_JSON:
                     accept = CONTENT_TYPE_JSON;
                     break;
 
@@ -96,14 +96,14 @@ export class FetchCommand {
                 body = null;
             }
 
-            const response = await fetch(url, {
+            const response = await fetch(`${url}`, {
                 method,
                 body,
                 headers,
                 signal: abort_signal
             });
 
-            if (authenticate && response.status === STATUS_401 && await this.#authenticate()) {
+            if (authenticate && response.status === STATUS_401 && await this.#fetch_authenticate()) {
                 return this.fetch(
                     _fetch
                 );
@@ -112,7 +112,7 @@ export class FetchCommand {
             if (!response.ok) {
                 console.error("Fetch non-ok response (", response, ")");
 
-                if (error_ui && await this.#show_error(
+                if (error_ui && await this.#fetch_show_error(
                     response
                 )) {
                     return this.fetch(
@@ -125,14 +125,14 @@ export class FetchCommand {
 
             const content_type = response.headers.get(HEADER_CONTENT_TYPE) ?? "";
             switch (assert_type) {
-                case ASSERT_TYPE_CSS:
+                case FETCH_ASSERT_TYPE_CSS:
                     if (!content_type.includes(CONTENT_TYPE_CSS)) {
                         throw new Error(`Response header ${HEADER_CONTENT_TYPE} need to be ${CONTENT_TYPE_CSS}, got ${content_type}`);
                     }
 
                     return response.text();
 
-                case ASSERT_TYPE_JSON:
+                case FETCH_ASSERT_TYPE_JSON:
                     if (!content_type.includes(CONTENT_TYPE_JSON)) {
                         throw new Error(`Response header ${HEADER_CONTENT_TYPE} need to be ${CONTENT_TYPE_JSON}, got ${content_type}`);
                     }
@@ -145,7 +145,7 @@ export class FetchCommand {
         } catch (error) {
             console.error("Fetch error (", error, ")");
 
-            if (error_ui && await this.#show_error(
+            if (error_ui && await this.#fetch_show_error(
                 error
             )) {
                 return this.fetch(

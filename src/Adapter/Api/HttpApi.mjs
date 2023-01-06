@@ -1,15 +1,18 @@
-/** @typedef {import("../Fetch/authenticate.mjs").authenticate} _authenticate */
 /** @typedef {import("../Fetch/Fetch.mjs").Fetch} Fetch */
+/** @typedef {import("../Fetch/fetchAuthenticate.mjs").fetchAuthenticate} fetchAuthenticate */
 /** @typedef {import("../../Service/Fetch/Port/FetchService.mjs").FetchService} FetchService */
+/** @typedef {import("../Fetch/fetchShowError.mjs").fetchShowError} fetchShowError */
 /** @typedef {import("../HttpServer/getRouter.mjs").getRouter} getRouter */
+/** @typedef {import("node:http")} http */
 /** @typedef {import("../HttpServer/HttpServer.mjs").HttpServer} HttpServer */
+/** @typedef {import("../Request/HttpServerRequest.mjs").HttpServerRequest} HttpServerRequest */
+/** @typedef {import("../Response/HttpServerResponse.mjs").HttpServerResponse} HttpServerResponse */
 /** @typedef {import("../../Service/HttpServer/Port/HttpServerService.mjs").HttpServerService} HttpServerService */
-/** @typedef {import("../Fetch/showError.mjs").showError} showError */
 /** @typedef {import("../../../../flux-shutdown-handler-api/src/Adapter/ShutdownHandler/ShutdownHandler.mjs").ShutdownHandler} ShutdownHandler */
 
 export class HttpApi {
     /**
-     * @type {_authenticate | null}
+     * @type {fetchAuthenticate | null}
      */
     #fetch_authenticate;
     /**
@@ -17,7 +20,7 @@ export class HttpApi {
      */
     #fetch_service = null;
     /**
-     * @type {showError | null}
+     * @type {fetchShowError | null}
      */
     #fetch_show_error;
     /**
@@ -31,8 +34,8 @@ export class HttpApi {
 
     /**
      * @param {ShutdownHandler | null} shutdown_handler
-     * @param {_authenticate | null} fetch_authenticate
-     * @param {showError | null} fetch_show_error
+     * @param {fetchAuthenticate | null} fetch_authenticate
+     * @param {fetchShowError | null} fetch_show_error
      * @returns {HttpApi}
      */
     static new(shutdown_handler = null, fetch_authenticate = null, fetch_show_error = null) {
@@ -45,8 +48,8 @@ export class HttpApi {
 
     /**
      * @param {ShutdownHandler | null} shutdown_handler
-     * @param {_authenticate | null} fetch_authenticate
-     * @param {showError | null} fetch_show_error
+     * @param {fetchAuthenticate | null} fetch_authenticate
+     * @param {fetchShowError | null} fetch_show_error
      * @private
      */
     constructor(shutdown_handler, fetch_authenticate, fetch_show_error) {
@@ -62,6 +65,30 @@ export class HttpApi {
     async fetch(_fetch) {
         return (await this.#getFetchService()).fetch(
             _fetch
+        );
+    }
+
+    /**
+     * @param {HttpServerResponse} response
+     * @param {http.ServerResponse} res
+     * @param {HttpServerRequest | null} request
+     * @returns {Promise<void>}
+     */
+    async mapResponseToServerResponse(response, res, request = null) {
+        await (await this.#getHttpServerService()).mapResponseToServerResponse(
+            response,
+            res,
+            request
+        );
+    }
+
+    /**
+     * @param {http.IncomingMessage} req
+     * @returns {Promise<HttpServerRequest>}
+     */
+    async mapServerRequestToRequest(req) {
+        return (await this.#getHttpServerService()).mapServerRequestToRequest(
+            req
         );
     }
 

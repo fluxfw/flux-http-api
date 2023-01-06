@@ -15,7 +15,3 @@ export const STATUS_404 = 404;
 export const STATUS_405 = 405;
 
 export const STATUS_500 = 500;
-
-/**
- * @typedef {STATUS_200 | STATUS_201 | STATUS_302 | STATUS_400 | STATUS_401 | STATUS_403 | STATUS_404 | STATUS_405 | STATUS_500} STATUS
- */

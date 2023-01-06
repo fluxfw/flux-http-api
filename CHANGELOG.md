@@ -6,6 +6,12 @@ Changes:
 
 \-
 
+## v2023-01-06-1
+
+Changes:
+
+- `mapServerRequestToRequest` / `mapResponseToServerResponse`
+
 ## v2023-01-03-1
 
 Changes:

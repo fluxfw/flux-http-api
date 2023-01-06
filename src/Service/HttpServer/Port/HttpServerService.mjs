@@ -1,5 +1,8 @@
 /** @typedef {import("../../../Adapter/HttpServer/getRouter.mjs").getRouter} getRouter */
+/** @typedef {import("node:http")} http */
 /** @typedef {import("../../../Adapter/HttpServer/HttpServer.mjs").HttpServer} HttpServer */
+/** @typedef {import("../../../Adapter/Request/HttpServerRequest.mjs").HttpServerRequest} HttpServerRequest */
+/** @typedef {import("../../../Adapter/Response/HttpServerResponse.mjs").HttpServerResponse} HttpServerResponse */
 /** @typedef {import("../../../../../flux-shutdown-handler-api/src/Adapter/ShutdownHandler/ShutdownHandler.mjs").ShutdownHandler} ShutdownHandler */
 
 export class HttpServerService {
@@ -24,6 +27,32 @@ export class HttpServerService {
      */
     constructor(shutdown_handler) {
         this.#shutdown_handler = shutdown_handler;
+    }
+
+    /**
+     * @param {HttpServerResponse} response
+     * @param {http.ServerResponse} res
+     * @param {HttpServerRequest | null} request
+     * @returns {Promise<void>}
+     */
+    async mapResponseToServerResponse(response, res, request = null) {
+        await (await import("../Command/MapResponseToServerResponseCommand.mjs")).MapResponseToServerResponseCommand.new()
+            .mapResponseToServerResponse(
+                response,
+                res,
+                request
+            );
+    }
+
+    /**
+     * @param {http.IncomingMessage} req
+     * @returns {Promise<HttpServerRequest>}
+     */
+    async mapServerRequestToRequest(req) {
+        return (await import("../Command/MapServerRequestToRequestCommand.mjs")).MapServerRequestToRequestCommand.new()
+            .mapServerRequestToRequest(
+                req
+            );
     }
 
     /**
