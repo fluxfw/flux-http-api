@@ -1,11 +1,11 @@
 import { createServer as createServerHttp } from "node:http";
 import { createServer as createServerHttps } from "node:https";
-import express from "express";
 import { HEADER_REFERRER_POLICY } from "../../../Adapter/Header/HEADER.mjs";
-import { STATUS_400 } from "../../../Adapter/Status/STATUS.mjs";
-import { HTTP_SERVER_DEFAULT_DEVELOPMENT_MODE, HTTP_SERVER_DEFAULT_LISTEN_HTTP_PORT, HTTP_SERVER_DEFAULT_LISTEN_HTTPS_PORT, HTTP_SERVER_DEFAULT_NO_POWERED_BY, HTTP_SERVER_DEFAULT_NO_REFERRER, HTTP_SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS, HTTP_SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS_PORT, HTTP_SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS_STATUS_CODE, HTTP_SERVER_LISTEN_HTTP_PORT_DISABLED, HTTP_SERVER_LISTEN_HTTPS_PORT_DISABLED } from "../../../Adapter/HttpServer/HTTP_SERVER.mjs";
+import { HTTP_SERVER_DEFAULT_LISTEN_HTTP_PORT, HTTP_SERVER_DEFAULT_LISTEN_HTTPS_PORT, HTTP_SERVER_DEFAULT_NO_DATE, HTTP_SERVER_DEFAULT_NO_REFERRER, HTTP_SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS, HTTP_SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS_PORT, HTTP_SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS_STATUS_CODE, HTTP_SERVER_LISTEN_HTTP_PORT_DISABLED, HTTP_SERVER_LISTEN_HTTPS_PORT_DISABLED } from "../../../Adapter/HttpServer/HTTP_SERVER.mjs";
+import { STATUS_400, STATUS_404, STATUS_500 } from "../../../Adapter/Status/STATUS.mjs";
 
-/** @typedef {import("../../../Adapter/HttpServer/getRouter.mjs").getRouter} getRouter */
+/** @typedef {import("../../../Adapter/HttpServer/handleRequest.mjs").handleRequest} handleRequest */
+/** @typedef {import("node:http")} http */
 /** @typedef {import("../../../Adapter/HttpServer/HttpServer.mjs").HttpServer} HttpServer */
 /** @typedef {import("../Port/HttpServerService.mjs").HttpServerService} HttpServerService */
 /** @typedef {import("../../../../../flux-shutdown-handler-api/src/Adapter/ShutdownHandler/ShutdownHandler.mjs").ShutdownHandler} ShutdownHandler */
@@ -38,17 +38,16 @@ export class RunHttpServerCommand {
      * @private
      */
     constructor(http_server_service, shutdown_handler) {
-        this.#shutdown_handler = shutdown_handler;
         this.#http_server_service = http_server_service;
+        this.#shutdown_handler = shutdown_handler;
     }
 
     /**
-     * @param {getRouter} get_router
+     * @param {handleRequest} handle_request
      * @param {HttpServer | null} http_server
      * @returns {Promise<void>}
      */
-    async runHttpServer(get_router, http_server = null) {
-        const development_mode = http_server?.development_mode ?? HTTP_SERVER_DEFAULT_DEVELOPMENT_MODE;
+    async runHttpServer(handle_request, http_server = null) {
         const listen_interface = http_server?.listen_interface ?? null;
         const listen_https_port = http_server?.listen_https_port ?? HTTP_SERVER_DEFAULT_LISTEN_HTTPS_PORT;
         const listen_http_port = http_server?.listen_http_port ?? HTTP_SERVER_DEFAULT_LISTEN_HTTP_PORT;
@@ -58,18 +57,33 @@ export class RunHttpServerCommand {
         const https_cert = http_server?.https_cert ?? null;
         const https_key = http_server?.https_key ?? null;
         const https_dhparam = http_server?.https_dhparam ?? null;
-        const no_powered_by = http_server?.no_powered_by ?? HTTP_SERVER_DEFAULT_NO_POWERED_BY;
+        const no_date = http_server?.no_date ?? HTTP_SERVER_DEFAULT_NO_DATE;
         const no_referrer = http_server?.no_referrer ?? HTTP_SERVER_DEFAULT_NO_REFERRER;
 
-        const server = express();
-
-        server.set("env", development_mode ? "development" : "production");
-        server.set("x-powered-by", !no_powered_by);
-
         const https = listen_https_port !== HTTP_SERVER_LISTEN_HTTPS_PORT_DISABLED && https_cert !== null && https_key !== null;
+        const http = listen_http_port !== HTTP_SERVER_LISTEN_HTTP_PORT_DISABLED;
+
+        /**
+         * @param {http.IncomingMessage} req
+         * @param {http.ServerResponse} res
+         * @returns {Promise<void>}
+         */
+        const _handle_request = async (req, res) => {
+            await this.#handleRequest(
+                req,
+                res,
+                handle_request,
+                redirect_http_to_https && https && http,
+                redirect_http_to_https_port,
+                redirect_http_to_https_status_code,
+                no_date,
+                no_referrer
+            );
+        };
+
         if (https) {
-            await this.#createNodeServer(
-                server,
+            await this.#createServer(
+                _handle_request,
                 createServerHttps,
                 listen_https_port,
                 listen_interface,
@@ -81,71 +95,29 @@ export class RunHttpServerCommand {
             );
         }
 
-        const http = listen_http_port !== HTTP_SERVER_LISTEN_HTTP_PORT_DISABLED;
         if (http) {
-            await this.#createNodeServer(
-                server,
+            await this.#createServer(
+                _handle_request,
                 createServerHttp,
                 listen_http_port,
                 listen_interface
             );
         }
-
-        if (redirect_http_to_https && https && http) {
-            server.use(async (req, res, next) => {
-                if (req.socket.encrypted) {
-                    next();
-                    return;
-                }
-
-                let request;
-                try {
-                    request = await this.#http_server_service.mapServerRequestToRequest(
-                        req
-                    );
-                } catch (error) {
-                    console.error(error);
-
-                    await this.#http_server_service.mapResponseToServerResponse(
-                        new Response(null, {
-                            status: STATUS_400
-                        }),
-                        res
-                    );
-                    return;
-                }
-
-                await this.#http_server_service.mapResponseToServerResponse(
-                    Response.redirect(`https://${request._urlObject.hostname}${redirect_http_to_https_port !== HTTP_SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS_PORT ? `:${redirect_http_to_https_port}` : ""}${request._urlObject.pathname}${request._urlObject.search}`, redirect_http_to_https_status_code),
-                    res,
-                    request
-                );
-            });
-        }
-
-        if (no_referrer) {
-            server.use((req, res, next) => {
-                res.setHeader(HEADER_REFERRER_POLICY, "no-referrer");
-                next();
-            });
-        }
-
-        server.use(await get_router());
     }
 
     /**
-     * @param {express} server
-     * @param {createServerHttp | createServerHttps} createServer
+     * @param {(req: http.IncomingMessage, res: http.ServerResponse) => Promise<void>} handle_request
+     * @param {createServerHttp | createServerHttps} create_server
      * @param {number} port
      * @param {string | null} server_listen_interface
      * @param {{[key: string]: *}} options
      * @returns {Promise<void>}
      */
-    async #createNodeServer(server, createServer, port, server_listen_interface, options = {}) {
+    async #createServer(handle_request, create_server, port, server_listen_interface, options = {}) {
         await new Promise((resolve, reject) => {
-            const node_server = createServer(options, server);
+            const server = create_server(options, handle_request);
 
-            node_server.listen(port, server_listen_interface, error => {
+            server.listen(port, server_listen_interface, error => {
                 if (error) {
                     reject(error);
                     return;
@@ -153,7 +125,7 @@ export class RunHttpServerCommand {
 
                 this.#shutdown_handler.addShutdownTask(async () => {
                     await new Promise((_resolve, _reject) => {
-                        node_server.close(_error => {
+                        server.close(_error => {
                             if (_error) {
                                 _reject(_error);
                                 return;
@@ -167,5 +139,83 @@ export class RunHttpServerCommand {
                 resolve();
             });
         });
+    }
+
+    /**
+     * @param {http.IncomingMessage} req
+     * @param {http.ServerResponse} res
+     * @param {handleRequest} handle_request
+     * @param {boolean} redirect_http_to_https
+     * @param {number} redirect_http_to_https_port
+     * @param {number} redirect_http_to_https_status_code
+     * @param {boolean} no_date
+     * @param {boolean} no_referrer
+     * @returns {Promise<void>}
+     */
+    async #handleRequest(req, res, handle_request, redirect_http_to_https, redirect_http_to_https_port, redirect_http_to_https_status_code, no_date, no_referrer) {
+        res.sendDate = !no_date;
+
+        if (no_referrer) {
+            res.setHeader(HEADER_REFERRER_POLICY, "no-referrer");
+        }
+
+        const request = await this.#http_server_service.mapServerRequestToRequest(
+            req,
+            res
+        );
+
+        if (request === null) {
+            await this.#http_server_service.mapResponseToServerResponse(
+                new Response(null, {
+                    status: STATUS_400
+                }),
+                res
+            );
+            return;
+        }
+
+        if (redirect_http_to_https && request._urlObject.protocol !== "https:") {
+            await this.#http_server_service.mapResponseToServerResponse(
+                Response.redirect(`https://${request._urlObject.hostname}${redirect_http_to_https_port !== HTTP_SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS_PORT ? `:${redirect_http_to_https_port}` : ""}${request._urlObject.pathname}${request._urlObject.search}`, redirect_http_to_https_status_code),
+                res,
+                request
+            );
+            return;
+        }
+
+        let response;
+        try {
+            response = await handle_request(
+                request
+            );
+        } catch (error) {
+            console.error(error);
+
+            await this.#http_server_service.mapResponseToServerResponse(
+                new Response(null, {
+                    status: STATUS_500
+                }),
+                res,
+                request
+            );
+
+            return;
+        }
+
+        if (response !== null) {
+            await this.#http_server_service.mapResponseToServerResponse(
+                response,
+                res,
+                request
+            );
+        } else {
+            await this.#http_server_service.mapResponseToServerResponse(
+                new Response(null, {
+                    status: STATUS_404
+                }),
+                res,
+                request
+            );
+        }
     }
 }

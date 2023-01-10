@@ -2,8 +2,7 @@
 /** @typedef {import("../Fetch/fetchAuthenticate.mjs").fetchAuthenticate} fetchAuthenticate */
 /** @typedef {import("../../Service/Fetch/Port/FetchService.mjs").FetchService} FetchService */
 /** @typedef {import("../Fetch/fetchShowError.mjs").fetchShowError} fetchShowError */
-/** @typedef {import("../HttpServer/getRouter.mjs").getRouter} getRouter */
-/** @typedef {import("node:http")} http */
+/** @typedef {import("../HttpServer/handleRequest.mjs").handleRequest} handleRequest */
 /** @typedef {import("../HttpServer/HttpServer.mjs").HttpServer} HttpServer */
 /** @typedef {import("../Request/HttpServerRequest.mjs").HttpServerRequest} HttpServerRequest */
 /** @typedef {import("../Response/HttpServerResponse.mjs").HttpServerResponse} HttpServerResponse */
@@ -69,37 +68,43 @@ export class HttpApi {
     }
 
     /**
-     * @param {HttpServerResponse} response
-     * @param {http.ServerResponse} res
-     * @param {HttpServerRequest | null} request
-     * @returns {Promise<void>}
+     * @param {string} root
+     * @param {string} path
+     * @param {HttpServerRequest} request
+     * @param {string | null} mime_type
+     * @returns {Promise<HttpServerResponse | null>}
      */
-    async mapResponseToServerResponse(response, res, request = null) {
-        await (await this.#getHttpServerService()).mapResponseToServerResponse(
-            response,
-            res,
-            request
+    async getFilteredStaticFileResponse(root, path, request, mime_type = null) {
+        return (await this.#getHttpServerService()).getFilteredStaticFileResponse(
+            root,
+            path,
+            request,
+            mime_type
         );
     }
 
     /**
-     * @param {http.IncomingMessage} req
-     * @returns {Promise<HttpServerRequest>}
+     * @param {string} path
+     * @param {HttpServerRequest} request
+     * @param {string | null} mime_type
+     * @returns {Promise<HttpServerResponse | null>}
      */
-    async mapServerRequestToRequest(req) {
-        return (await this.#getHttpServerService()).mapServerRequestToRequest(
-            req
+    async getStaticFileResponse(path, request, mime_type = null) {
+        return (await this.#getHttpServerService()).getStaticFileResponse(
+            path,
+            request,
+            mime_type
         );
     }
 
     /**
-     * @param {getRouter} get_router
+     * @param {handleRequest} handle_request
      * @param {HttpServer | null} http_server
      * @returns {Promise<void>}
      */
-    async runHttpServer(get_router, http_server = null) {
+    async runHttpServer(handle_request, http_server = null) {
         await (await this.#getHttpServerService()).runHttpServer(
-            get_router,
+            handle_request,
             http_server
         );
     }

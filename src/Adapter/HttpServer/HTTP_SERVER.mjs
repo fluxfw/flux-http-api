@@ -1,12 +1,10 @@
 import { STATUS_302 } from "../Status/STATUS.mjs";
 
-export const HTTP_SERVER_DEFAULT_DEVELOPMENT_MODE = false;
-
 export const HTTP_SERVER_DEFAULT_LISTEN_HTTPS_PORT = 8_443;
 
 export const HTTP_SERVER_DEFAULT_LISTEN_HTTP_PORT = 8_080;
 
-export const HTTP_SERVER_DEFAULT_NO_POWERED_BY = true;
+export const HTTP_SERVER_DEFAULT_NO_DATE = true;
 
 export const HTTP_SERVER_DEFAULT_NO_REFERRER = true;
 

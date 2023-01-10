@@ -1,6 +1,7 @@
 import { HEADER_SET_COOKIE } from "../../../Adapter/Header/HEADER.mjs";
 import { METHOD_HEAD } from "../../../Adapter/Method/METHOD.mjs";
 import { SET_COOKIE_SAME_SITE_LAX } from "../../../Adapter/Cookie/SET_COOKIE_SAME_SITE.mjs";
+import { STATUS_500 } from "../../../Adapter/Status/STATUS.mjs";
 import { Writable } from "node:stream";
 import { SET_COOKIE_OPTION_EXPIRES, SET_COOKIE_OPTION_HTTP_ONLY, SET_COOKIE_OPTION_MAX_AGE, SET_COOKIE_OPTION_PATH, SET_COOKIE_OPTION_SAME_SITE, SET_COOKIE_OPTION_SECURE } from "../../../Adapter/Cookie/SET_COOKIE_OPTION.mjs";
 
@@ -32,7 +33,7 @@ export class MapResponseToServerResponseCommand {
     async mapResponseToServerResponse(response, res, request = null) {
         try {
             res.statusCode = response.status;
-            res.statusMessage = response.statusMessage;
+            res.statusMessage = response.statusText;
 
             for (const [
                 key,
@@ -80,11 +81,18 @@ export class MapResponseToServerResponseCommand {
                 }
             }
 
-            if (response.body !== null && request.method !== METHOD_HEAD) {
+            if (response.body !== null && request?.method !== METHOD_HEAD) {
                 await response.body.pipeTo(Writable.toWeb(res));
+            } else {
+                response.body?.cancel();
             }
         } catch (error) {
             console.error(error);
+
+            if (!res.headersSent) {
+                res.statusCode = STATUS_500;
+                res.statusMessage = "";
+            }
         } finally {
             res.end();
         }
@@ -152,10 +160,13 @@ export class MapResponseToServerResponseCommand {
     #setHeader(res, key, value) {
         const _value = res.getHeader(key) ?? null;
 
-        res.setHeader(key, _value !== null ? (Array.isArray(_value) ? _value : [
-            _value
-        ]).concat(Array.isArray(value) ? value : [
-            value
-        ]) : value);
+        res.setHeader(key, _value !== null ? [
+            ...Array.isArray(_value) ? _value : [
+                _value
+            ],
+            ...Array.isArray(value) ? value : [
+                value
+            ]
+        ] : value);
     }
 }
