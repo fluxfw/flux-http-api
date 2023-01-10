@@ -1,4 +1,4 @@
-/** @typedef {import("../../../Adapter/HttpServer/getRouter.mjs").getRouter} getRouter */
+/** @typedef {import("../../../Adapter/HttpServer/handleRequest.mjs").handleRequest} handleRequest */
 /** @typedef {import("node:http")} http */
 /** @typedef {import("../../../Adapter/HttpServer/HttpServer.mjs").HttpServer} HttpServer */
 /** @typedef {import("../../../Adapter/Request/HttpServerRequest.mjs").HttpServerRequest} HttpServerRequest */
@@ -30,6 +30,40 @@ export class HttpServerService {
     }
 
     /**
+     * @param {string} root
+     * @param {string} path
+     * @param {HttpServerRequest} request
+     * @param {string | null} mime_type
+     * @returns {Promise<HttpServerResponse | null>}
+     */
+    async getFilteredStaticFileResponse(root, path, request, mime_type = null) {
+        return (await import("../Command/GetFilteredStaticFileResponseCommand.mjs")).GetFilteredStaticFileResponseCommand.new(
+            this
+        )
+            .getFilteredStaticFileResponse(
+                root,
+                path,
+                request,
+                mime_type
+            );
+    }
+
+    /**
+     * @param {string} path
+     * @param {HttpServerRequest} request
+     * @param {string | null} mime_type
+     * @returns {Promise<HttpServerResponse | null>}
+     */
+    async getStaticFileResponse(path, request, mime_type = null) {
+        return (await import("../Command/GetStaticFileResponseCommand.mjs")).GetStaticFileResponseCommand.new()
+            .getStaticFileResponse(
+                path,
+                request,
+                mime_type
+            );
+    }
+
+    /**
      * @param {HttpServerResponse} response
      * @param {http.ServerResponse} res
      * @param {HttpServerRequest | null} request
@@ -46,21 +80,23 @@ export class HttpServerService {
 
     /**
      * @param {http.IncomingMessage} req
-     * @returns {Promise<HttpServerRequest>}
+     * @param {http.ServerResponse} res
+     * @returns {Promise<HttpServerRequest | null>}
      */
-    async mapServerRequestToRequest(req) {
+    async mapServerRequestToRequest(req, res) {
         return (await import("../Command/MapServerRequestToRequestCommand.mjs")).MapServerRequestToRequestCommand.new()
             .mapServerRequestToRequest(
-                req
+                req,
+                res
             );
     }
 
     /**
-     * @param {getRouter} get_router
+     * @param {handleRequest} handle_request
      * @param {HttpServer | null} http_server
      * @returns {Promise<void>}
      */
-    async runHttpServer(get_router, http_server = null) {
+    async runHttpServer(handle_request, http_server = null) {
         if (this.#shutdown_handler === null) {
             throw new Error("Missing ShutdownHandler");
         }
@@ -70,7 +106,7 @@ export class HttpServerService {
             this.#shutdown_handler
         )
             .runHttpServer(
-                get_router,
+                handle_request,
                 http_server
             );
     }
