@@ -1,10 +1,10 @@
 import { extname } from "node:path/posix";
-import { HEADER_CONTENT_LENGTH, HEADER_CONTENT_TYPE } from "../../../Adapter/Header/HEADER.mjs";
+import { METHOD_HEAD } from "../../../Adapter/Method/METHOD.mjs";
 import MIME_DB from "../../../../../mime-db/db.json" assert {type: "json"};
 import { Readable } from "node:stream";
-import { createReadStream, existsSync } from "node:fs";
 import { stat } from "node:fs/promises";
-import { METHOD_HEAD } from "../../../Adapter/Method/METHOD.mjs";
+import { createReadStream, existsSync } from "node:fs";
+import { HEADER_CONTENT_LENGTH, HEADER_CONTENT_TYPE } from "../../../Adapter/Header/HEADER.mjs";
 
 /** @typedef {import("../../../Adapter/Request/HttpServerRequest.mjs").HttpServerRequest} HttpServerRequest */
 /** @typedef {import("../../../Adapter/Response/HttpServerResponse.mjs").HttpServerResponse} HttpServerResponse */
