@@ -56,16 +56,13 @@ export class GetStaticFileResponseCommand {
             value
         ]) => value?.extensions?.includes(ext) ?? false)?.[0] ?? null;
 
-        const headers = new Headers();
-
-        if (_content_type !== null) {
-            headers.set(HEADER_CONTENT_TYPE, _content_type);
-        }
-
-        headers.set(HEADER_CONTENT_LENGTH, _stat.size);
-
         return new Response(request.method !== METHOD_HEAD ? Readable.toWeb(createReadStream(path)) : null, {
-            headers
+            headers: {
+                ..._content_type !== null ? {
+                    [HEADER_CONTENT_TYPE]: _content_type
+                } : {},
+                [HEADER_CONTENT_LENGTH]: _stat.size
+            }
         });
     }
 }

@@ -6,6 +6,12 @@ Changes:
 
 \-
 
+## v2023-01-10-3
+
+Changes:
+
+- Remove `express`
+
 ## v2023-01-10-2
 
 Changes:
