@@ -104,12 +104,16 @@ export class FetchCommand {
             });
 
             if (authenticate && response.status === STATUS_401 && await this.#fetch_authenticate()) {
+                response.body?.cancel();
+
                 return this.fetch(
                     _fetch
                 );
             }
 
             if (!response.ok) {
+                response.body?.cancel();
+
                 console.error("Fetch non-ok response (", response, ")");
 
                 if (error_ui && await this.#fetch_show_error(

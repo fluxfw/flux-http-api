@@ -84,7 +84,8 @@ export class ProxyRequestCommand {
 
         if (!response_status && !response.ok) {
             response.body?.cancel();
-            throw response;
+
+            return Promise.reject(response);
         }
 
         if (!response_body || proxy_request.request.method === METHOD_HEAD) {
