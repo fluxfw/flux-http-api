@@ -3,7 +3,7 @@ import { METHOD_HEAD } from "../../../Adapter/Method/METHOD.mjs";
 import { stat } from "node:fs/promises";
 import { STATUS_302 } from "../../../Adapter/Status/STATUS.mjs";
 import { createReadStream, existsSync } from "node:fs";
-import { HEADER_CONTENT_LENGTH, HEADER_CONTENT_TYPE } from "../../../Adapter/Header/HEADER.mjs";
+import { HEADER_CONTENT_LENGTH, HEADER_CONTENT_TYPE, HEADER_LOCATION } from "../../../Adapter/Header/HEADER.mjs";
 
 /** @typedef {import("../../../Adapter/Request/HttpServerRequest.mjs").HttpServerRequest} HttpServerRequest */
 /** @typedef {import("../../../Adapter/Response/HttpServerResponse.mjs").HttpServerResponse} HttpServerResponse */
@@ -52,7 +52,12 @@ export class GetStaticFileResponseCommand {
             }
 
             if (!request._urlObject.pathname.endsWith("/")) {
-                return Response.redirect(`${request._urlObject.href}/`, STATUS_302);
+                return new Response(null, {
+                    status: STATUS_302,
+                    headers: {
+                        [HEADER_LOCATION]: `${request._urlObject.href}/`
+                    }
+                });
             }
 
             return this.getStaticFileResponse(

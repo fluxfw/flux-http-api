@@ -1,6 +1,6 @@
 import { createServer as createServerHttp } from "node:http";
 import { createServer as createServerHttps } from "node:https";
-import { HEADER_REFERRER_POLICY } from "../../../Adapter/Header/HEADER.mjs";
+import { HEADER_LOCATION, HEADER_REFERRER_POLICY } from "../../../Adapter/Header/HEADER.mjs";
 import { HTTP_SERVER_DEFAULT_LISTEN_HTTP_PORT, HTTP_SERVER_DEFAULT_LISTEN_HTTPS_PORT, HTTP_SERVER_DEFAULT_NO_DATE, HTTP_SERVER_DEFAULT_NO_REFERRER, HTTP_SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS, HTTP_SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS_PORT, HTTP_SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS_STATUS_CODE, HTTP_SERVER_LISTEN_HTTP_PORT_DISABLED, HTTP_SERVER_LISTEN_HTTPS_PORT_DISABLED } from "../../../Adapter/HttpServer/HTTP_SERVER.mjs";
 import { STATUS_400, STATUS_404, STATUS_500 } from "../../../Adapter/Status/STATUS.mjs";
 
@@ -178,7 +178,12 @@ export class RunHttpServerCommand {
 
         if (redirect_http_to_https && request._urlObject.protocol !== "https:") {
             await this.#http_server_service.mapResponseToServerResponse(
-                Response.redirect(`https://${request._urlObject.hostname}${redirect_http_to_https_port !== HTTP_SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS_PORT ? `:${redirect_http_to_https_port}` : ""}${request._urlObject.pathname}${request._urlObject.search}`, redirect_http_to_https_status_code),
+                new Response(null, {
+                    status: redirect_http_to_https_status_code,
+                    headers: {
+                        [HEADER_LOCATION]: `https://${request._urlObject.hostname}${redirect_http_to_https_port !== HTTP_SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS_PORT ? `:${redirect_http_to_https_port}` : ""}${request._urlObject.pathname}${request._urlObject.search}`
+                    }
+                }),
                 res,
                 request
             );
