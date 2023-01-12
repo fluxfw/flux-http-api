@@ -1,27 +1,36 @@
-import { extname } from "node:path/posix";
+import { join } from "node:path/posix";
 import { METHOD_HEAD } from "../../../Adapter/Method/METHOD.mjs";
-import MIME_DB from "../../../../../mime-db/db.json" assert {type: "json"};
-import { Readable } from "node:stream";
 import { stat } from "node:fs/promises";
+import { STATUS_302 } from "../../../Adapter/Status/STATUS.mjs";
 import { createReadStream, existsSync } from "node:fs";
 import { HEADER_CONTENT_LENGTH, HEADER_CONTENT_TYPE } from "../../../Adapter/Header/HEADER.mjs";
 
 /** @typedef {import("../../../Adapter/Request/HttpServerRequest.mjs").HttpServerRequest} HttpServerRequest */
 /** @typedef {import("../../../Adapter/Response/HttpServerResponse.mjs").HttpServerResponse} HttpServerResponse */
+/** @typedef {import("../Port/HttpServerService.mjs").HttpServerService} HttpServerService */
 
 export class GetStaticFileResponseCommand {
     /**
+     * @type {HttpServerService}
+     */
+    #http_server_service;
+
+    /**
+     * @param {HttpServerService} http_server_service
      * @returns {GetStaticFileResponseCommand}
      */
-    static new() {
-        return new this();
+    static new(http_server_service) {
+        return new this(
+            http_server_service
+        );
     }
 
     /**
+     * @param {HttpServerService} http_server_service
      * @private
      */
-    constructor() {
-
+    constructor(http_server_service) {
+        this.#http_server_service = http_server_service;
     }
 
     /**
@@ -38,31 +47,38 @@ export class GetStaticFileResponseCommand {
         const _stat = await stat(path);
 
         if (!_stat.isFile()) {
-            if (mime_type === null && _stat.isDirectory()) {
-                return this.getStaticFileResponse(
-                    `${path}${!path.endsWith("/") ? "/" : ""}index.html`,
-                    request,
-                    mime_type
-                );
+            if (mime_type !== null || !_stat.isDirectory()) {
+                return null;
             }
 
-            return null;
+            if (!request._urlObject.pathname.endsWith("/")) {
+                return Response.redirect(`${request._urlObject.href}/`, STATUS_302);
+            }
+
+            return this.getStaticFileResponse(
+                join(path, "index.html"),
+                request,
+                mime_type
+            );
         }
 
-        const ext = extname(path).substring(1).toLowerCase();
+        const _mime_type = mime_type ?? await this.#http_server_service.getMimeTypeByPath(
+            path
+        );
 
-        const _content_type = mime_type ?? Object.entries(MIME_DB).find(([
-            ,
-            value
-        ]) => value?.extensions?.includes(ext) ?? false)?.[0] ?? null;
-
-        return new Response(request.method !== METHOD_HEAD ? Readable.toWeb(createReadStream(path)) : null, {
+        const response = new Response(null, {
             headers: {
-                ..._content_type !== null ? {
-                    [HEADER_CONTENT_TYPE]: _content_type
+                ..._mime_type !== null ? {
+                    [HEADER_CONTENT_TYPE]: _mime_type
                 } : {},
                 [HEADER_CONTENT_LENGTH]: _stat.size
             }
         });
+
+        if (request.method !== METHOD_HEAD) {
+            response._bodyNode = createReadStream(path);
+        }
+
+        return response;
     }
 }

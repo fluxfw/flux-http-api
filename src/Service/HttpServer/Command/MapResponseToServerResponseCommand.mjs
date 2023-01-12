@@ -1,13 +1,14 @@
 import { HEADER_SET_COOKIE } from "../../../Adapter/Header/HEADER.mjs";
 import { METHOD_HEAD } from "../../../Adapter/Method/METHOD.mjs";
+import { pipeline } from "node:stream/promises";
+import { Readable } from "node:stream";
 import { SET_COOKIE_SAME_SITE_LAX } from "../../../Adapter/Cookie/SET_COOKIE_SAME_SITE.mjs";
 import { STATUS_500 } from "../../../Adapter/Status/STATUS.mjs";
-import { Writable } from "node:stream";
 import { SET_COOKIE_OPTION_EXPIRES, SET_COOKIE_OPTION_HTTP_ONLY, SET_COOKIE_OPTION_MAX_AGE, SET_COOKIE_OPTION_PATH, SET_COOKIE_OPTION_SAME_SITE, SET_COOKIE_OPTION_SECURE } from "../../../Adapter/Cookie/SET_COOKIE_OPTION.mjs";
 
-/** @typedef {import("node:http")} http */
 /** @typedef {import("../../../Adapter/Request/HttpServerRequest.mjs").HttpServerRequest} HttpServerRequest */
 /** @typedef {import("../../../Adapter/Response/HttpServerResponse.mjs").HttpServerResponse} HttpServerResponse */
+/** @typedef {import("node:http").ServerResponse} ServerResponse */
 
 export class MapResponseToServerResponseCommand {
     /**
@@ -26,7 +27,7 @@ export class MapResponseToServerResponseCommand {
 
     /**
      * @param {HttpServerResponse} response
-     * @param {http.ServerResponse} res
+     * @param {ServerResponse} res
      * @param {HttpServerRequest | null} request
      * @returns {Promise<void>}
      */
@@ -81,10 +82,17 @@ export class MapResponseToServerResponseCommand {
                 }
             }
 
-            if (response.body !== null && request?.method !== METHOD_HEAD) {
-                await response.body.pipeTo(Writable.toWeb(res));
+            if (request?.method !== METHOD_HEAD) {
+                if (response.body !== null) {
+                    await pipeline(Readable.fromWeb(response.body), res);
+                } else {
+                    if ((response._bodyNode ?? null) !== null) {
+                        await pipeline(response._bodyNode, res);
+                    }
+                }
             } else {
                 response.body?.cancel();
+                response._bodyNode?.destroy();
             }
         } catch (error) {
             console.error(error);
@@ -99,7 +107,7 @@ export class MapResponseToServerResponseCommand {
     }
 
     /**
-     * @param {http.ServerResponse} res
+     * @param {ServerResponse} res
      * @param {string} key
      * @param {{[key: string]: *} | null} options
      * @returns {void}
@@ -118,7 +126,7 @@ export class MapResponseToServerResponseCommand {
     }
 
     /**
-     * @param {http.ServerResponse} res
+     * @param {ServerResponse} res
      * @param {string} key
      * @param {*} value
      * @param {{[key: string]: *} | null} options
@@ -152,7 +160,7 @@ export class MapResponseToServerResponseCommand {
     }
 
     /**
-     * @param {http.ServerResponse} res
+     * @param {ServerResponse} res
      * @param {string} key
      * @param {string | string[]} value
      * @returns {void}

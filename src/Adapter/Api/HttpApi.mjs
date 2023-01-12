@@ -7,6 +7,7 @@
 /** @typedef {import("../Request/HttpServerRequest.mjs").HttpServerRequest} HttpServerRequest */
 /** @typedef {import("../Response/HttpServerResponse.mjs").HttpServerResponse} HttpServerResponse */
 /** @typedef {import("../../Service/HttpServer/Port/HttpServerService.mjs").HttpServerService} HttpServerService */
+/** @typedef {import("../Proxy/ProxyRequest.mjs").ProxyRequest} ProxyRequest */
 /** @typedef {import("../../../../flux-shutdown-handler-api/src/Adapter/ShutdownHandler/ShutdownHandler.mjs").ShutdownHandler} ShutdownHandler */
 
 export class HttpApi {
@@ -84,6 +85,26 @@ export class HttpApi {
     }
 
     /**
+     * @param {string} extension
+     * @returns {Promise<string | null>}
+     */
+    async getMimeTypeByExtension(extension) {
+        return (await this.#getHttpServerService()).getMimeTypeByExtension(
+            extension
+        );
+    }
+
+    /**
+     * @param {string} path
+     * @returns {Promise<string | null>}
+     */
+    async getMimeTypeByPath(path) {
+        return (await this.#getHttpServerService()).getMimeTypeByPath(
+            path
+        );
+    }
+
+    /**
      * @param {string} path
      * @param {HttpServerRequest} request
      * @param {string | null} mime_type
@@ -98,6 +119,16 @@ export class HttpApi {
     }
 
     /**
+     * @param {ProxyRequest} proxy_request
+     * @returns {Promise<HttpServerResponse>}
+     */
+    async proxyRequest(proxy_request) {
+        return (await this.#getHttpServerService()).proxyRequest(
+            proxy_request
+        );
+    }
+
+    /**
      * @param {handleRequest} handle_request
      * @param {HttpServer | null} http_server
      * @returns {Promise<void>}
@@ -106,6 +137,18 @@ export class HttpApi {
         await (await this.#getHttpServerService()).runHttpServer(
             handle_request,
             http_server
+        );
+    }
+
+    /**
+     * @param {HttpServerRequest} request
+     * @param {string[]} methods
+     * @returns {Promise<HttpServerResponse | null>}
+     */
+    async validateMethods(request, methods) {
+        return (await this.#getHttpServerService()).validateMethods(
+            request,
+            methods
         );
     }
 

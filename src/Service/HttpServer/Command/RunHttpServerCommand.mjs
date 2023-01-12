@@ -8,6 +8,8 @@ import { STATUS_400, STATUS_404, STATUS_500 } from "../../../Adapter/Status/STAT
 /** @typedef {import("node:http")} http */
 /** @typedef {import("../../../Adapter/HttpServer/HttpServer.mjs").HttpServer} HttpServer */
 /** @typedef {import("../Port/HttpServerService.mjs").HttpServerService} HttpServerService */
+/** @typedef {import("node:http").IncomingMessage} IncomingMessage */
+/** @typedef {import("node:http").ServerResponse} ServerResponse */
 /** @typedef {import("../../../../../flux-shutdown-handler-api/src/Adapter/ShutdownHandler/ShutdownHandler.mjs").ShutdownHandler} ShutdownHandler */
 
 export class RunHttpServerCommand {
@@ -64,8 +66,8 @@ export class RunHttpServerCommand {
         const http = listen_http_port !== HTTP_SERVER_LISTEN_HTTP_PORT_DISABLED;
 
         /**
-         * @param {http.IncomingMessage} req
-         * @param {http.ServerResponse} res
+         * @param {IncomingMessage} req
+         * @param {ServerResponse} res
          * @returns {Promise<void>}
          */
         const _handle_request = async (req, res) => {
@@ -142,8 +144,8 @@ export class RunHttpServerCommand {
     }
 
     /**
-     * @param {http.IncomingMessage} req
-     * @param {http.ServerResponse} res
+     * @param {IncomingMessage} req
+     * @param {ServerResponse} res
      * @param {handleRequest} handle_request
      * @param {boolean} redirect_http_to_https
      * @param {number} redirect_http_to_https_port

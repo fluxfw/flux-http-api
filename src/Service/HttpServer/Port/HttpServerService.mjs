@@ -3,6 +3,9 @@
 /** @typedef {import("../../../Adapter/HttpServer/HttpServer.mjs").HttpServer} HttpServer */
 /** @typedef {import("../../../Adapter/Request/HttpServerRequest.mjs").HttpServerRequest} HttpServerRequest */
 /** @typedef {import("../../../Adapter/Response/HttpServerResponse.mjs").HttpServerResponse} HttpServerResponse */
+/** @typedef {import("node:http").IncomingMessage} IncomingMessage */
+/** @typedef {import("../../../Adapter/Proxy/ProxyRequest.mjs").ProxyRequest} ProxyRequest */
+/** @typedef {import("node:http").ServerResponse} ServerResponse */
 /** @typedef {import("../../../../../flux-shutdown-handler-api/src/Adapter/ShutdownHandler/ShutdownHandler.mjs").ShutdownHandler} ShutdownHandler */
 
 export class HttpServerService {
@@ -49,13 +52,39 @@ export class HttpServerService {
     }
 
     /**
+     * @param {string} extension
+     * @returns {Promise<string | null>}
+     */
+    async getMimeTypeByExtension(extension) {
+        return (await import("../Command/GetMimeTypeByExtensionCommand.mjs")).GetMimeTypeByExtensionCommand.new()
+            .getMimeTypeByExtension(
+                extension
+            );
+    }
+
+    /**
+     * @param {string} path
+     * @returns {Promise<string | null>}
+     */
+    async getMimeTypeByPath(path) {
+        return (await import("../Command/GetMimeTypeByPathCommand.mjs")).GetMimeTypeByPathCommand.new(
+            this
+        )
+            .getMimeTypeByPath(
+                path
+            );
+    }
+
+    /**
      * @param {string} path
      * @param {HttpServerRequest} request
      * @param {string | null} mime_type
      * @returns {Promise<HttpServerResponse | null>}
      */
     async getStaticFileResponse(path, request, mime_type = null) {
-        return (await import("../Command/GetStaticFileResponseCommand.mjs")).GetStaticFileResponseCommand.new()
+        return (await import("../Command/GetStaticFileResponseCommand.mjs")).GetStaticFileResponseCommand.new(
+            this
+        )
             .getStaticFileResponse(
                 path,
                 request,
@@ -65,7 +94,7 @@ export class HttpServerService {
 
     /**
      * @param {HttpServerResponse} response
-     * @param {http.ServerResponse} res
+     * @param {ServerResponse} res
      * @param {HttpServerRequest | null} request
      * @returns {Promise<void>}
      */
@@ -79,8 +108,8 @@ export class HttpServerService {
     }
 
     /**
-     * @param {http.IncomingMessage} req
-     * @param {http.ServerResponse} res
+     * @param {IncomingMessage} req
+     * @param {ServerResponse} res
      * @returns {Promise<HttpServerRequest | null>}
      */
     async mapServerRequestToRequest(req, res) {
@@ -88,6 +117,17 @@ export class HttpServerService {
             .mapServerRequestToRequest(
                 req,
                 res
+            );
+    }
+
+    /**
+     * @param {ProxyRequest} proxy_request
+     * @returns {Promise<HttpServerResponse>}
+     */
+    async proxyRequest(proxy_request) {
+        return (await import("../Command/ProxyRequestCommand.mjs")).ProxyRequestCommand.new()
+            .proxyRequest(
+                proxy_request
             );
     }
 
@@ -108,6 +148,19 @@ export class HttpServerService {
             .runHttpServer(
                 handle_request,
                 http_server
+            );
+    }
+
+    /**
+     * @param {HttpServerRequest} request
+     * @param {string[]} methods
+     * @returns {Promise<HttpServerResponse | null>}
+     */
+    async validateMethods(request, methods) {
+        return (await import("../Command/ValidateMethodsCommand.mjs")).ValidateMethodsCommand.new()
+            .validateMethods(
+                request,
+                methods
             );
     }
 }
