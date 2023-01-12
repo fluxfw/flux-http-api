@@ -4,6 +4,8 @@ import { METHOD_GET, METHOD_HEAD } from "../../../Adapter/Method/METHOD.mjs";
 
 /** @typedef {import("node:http")} http */
 /** @typedef {import("../../../Adapter/Request/HttpServerRequest.mjs").HttpServerRequest} HttpServerRequest */
+/** @typedef {import("node:http").IncomingMessage} IncomingMessage */
+/** @typedef {import("node:http").ServerResponse} ServerResponse */
 
 export class MapServerRequestToRequestCommand {
     /**
@@ -21,8 +23,8 @@ export class MapServerRequestToRequestCommand {
     }
 
     /**
-     * @param {http.IncomingMessage} req
-     * @param {http.ServerResponse} res
+     * @param {IncomingMessage} req
+     * @param {ServerResponse} res
      * @returns {Promise<HttpServerRequest | null>}
      */
     async mapServerRequestToRequest(req, res) {

@@ -166,8 +166,8 @@ export const HEADER_WANT_DIGEST = "Want-Digest";
 
 export const HEADER_WWW_AUTHENTICATE = "WWW-Authenticate";
 
-export const CUSTOM_HEADER_SUFFIX = "X-";
+export const CUSTOM_HEADER_PREFIX = "X-";
 
-export const HEADER_X_CONTENT_TYPE_OPTIONS = `${CUSTOM_HEADER_SUFFIX}Content-Type-Options`;
+export const HEADER_X_CONTENT_TYPE_OPTIONS = `${CUSTOM_HEADER_PREFIX}Content-Type-Options`;
 
-export const HEADER_X_FRAME_OPTIONS = `${CUSTOM_HEADER_SUFFIX}Frame-Options`;
+export const HEADER_X_FRAME_OPTIONS = `${CUSTOM_HEADER_PREFIX}Frame-Options`;
