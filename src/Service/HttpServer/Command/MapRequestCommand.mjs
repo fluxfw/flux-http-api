@@ -7,9 +7,9 @@ import { METHOD_GET, METHOD_HEAD } from "../../../Adapter/Method/METHOD.mjs";
 /** @typedef {import("node:http").IncomingMessage} IncomingMessage */
 /** @typedef {import("node:http").ServerResponse} ServerResponse */
 
-export class MapServerRequestToRequestCommand {
+export class MapRequestCommand {
     /**
-     * @returns {MapServerRequestToRequestCommand}
+     * @returns {MapRequestCommand}
      */
     static new() {
         return new this();
@@ -27,7 +27,7 @@ export class MapServerRequestToRequestCommand {
      * @param {ServerResponse} res
      * @returns {Promise<HttpServerRequest | null>}
      */
-    async mapServerRequestToRequest(req, res) {
+    async mapRequest(req, res) {
         try {
             const { method } = req;
 

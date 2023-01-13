@@ -10,9 +10,9 @@ import { SET_COOKIE_OPTION_EXPIRES, SET_COOKIE_OPTION_HTTP_ONLY, SET_COOKIE_OPTI
 /** @typedef {import("../../../Adapter/Response/HttpServerResponse.mjs").HttpServerResponse} HttpServerResponse */
 /** @typedef {import("node:http").ServerResponse} ServerResponse */
 
-export class MapResponseToServerResponseCommand {
+export class MapResponseCommand {
     /**
-     * @returns {MapResponseToServerResponseCommand}
+     * @returns {MapResponseCommand}
      */
     static new() {
         return new this();
@@ -31,7 +31,7 @@ export class MapResponseToServerResponseCommand {
      * @param {HttpServerRequest | null} request
      * @returns {Promise<void>}
      */
-    async mapResponseToServerResponse(response, res, request = null) {
+    async mapResponse(response, res, request = null) {
         try {
             res.statusCode = response.status;
             res.statusMessage = response.statusText;

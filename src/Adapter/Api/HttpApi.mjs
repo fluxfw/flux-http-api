@@ -8,6 +8,8 @@
 /** @typedef {import("../Response/HttpServerResponse.mjs").HttpServerResponse} HttpServerResponse */
 /** @typedef {import("../../Service/HttpServer/Port/HttpServerService.mjs").HttpServerService} HttpServerService */
 /** @typedef {import("../Proxy/ProxyRequest.mjs").ProxyRequest} ProxyRequest */
+/** @typedef {import("../Range/RangeUnit.mjs").RangeUnit} RangeUnit */
+/** @typedef {import("../Range/RangeValue.mjs").RangeValue} RangeValue */
 /** @typedef {import("../../../../flux-shutdown-handler-api/src/Adapter/ShutdownHandler/ShutdownHandler.mjs").ShutdownHandler} ShutdownHandler */
 
 export class HttpApi {
@@ -73,7 +75,7 @@ export class HttpApi {
      * @param {string} path
      * @param {HttpServerRequest} request
      * @param {string | null} mime_type
-     * @returns {Promise<HttpServerResponse | null>}
+     * @returns {Promise<HttpServerResponse>}
      */
     async getFilteredStaticFileResponse(root, path, request, mime_type = null) {
         return (await this.#getHttpServerService()).getFilteredStaticFileResponse(
@@ -108,7 +110,7 @@ export class HttpApi {
      * @param {string} path
      * @param {HttpServerRequest} request
      * @param {string | null} mime_type
-     * @returns {Promise<HttpServerResponse | null>}
+     * @returns {Promise<HttpServerResponse>}
      */
     async getStaticFileResponse(path, request, mime_type = null) {
         return (await this.#getHttpServerService()).getStaticFileResponse(
@@ -149,6 +151,18 @@ export class HttpApi {
         return (await this.#getHttpServerService()).validateMethods(
             request,
             methods
+        );
+    }
+
+    /**
+     * @param {HttpServerRequest} request
+     * @param {RangeUnit[]} units
+     * @returns {Promise<RangeValue | HttpServerResponse | null>}
+     */
+    async validateRanges(request, units) {
+        return (await this.#getHttpServerService()).validateRanges(
+            request,
+            units
         );
     }
 

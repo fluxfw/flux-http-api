@@ -5,6 +5,8 @@
 /** @typedef {import("../../../Adapter/Response/HttpServerResponse.mjs").HttpServerResponse} HttpServerResponse */
 /** @typedef {import("node:http").IncomingMessage} IncomingMessage */
 /** @typedef {import("../../../Adapter/Proxy/ProxyRequest.mjs").ProxyRequest} ProxyRequest */
+/** @typedef {import("../../../Adapter/Range/RangeUnit.mjs").RangeUnit} RangeUnit */
+/** @typedef {import("../../../Adapter/Range/RangeValue.mjs").RangeValue} RangeValue */
 /** @typedef {import("node:http").ServerResponse} ServerResponse */
 /** @typedef {import("../../../../../flux-shutdown-handler-api/src/Adapter/ShutdownHandler/ShutdownHandler.mjs").ShutdownHandler} ShutdownHandler */
 
@@ -37,7 +39,7 @@ export class HttpServerService {
      * @param {string} path
      * @param {HttpServerRequest} request
      * @param {string | null} mime_type
-     * @returns {Promise<HttpServerResponse | null>}
+     * @returns {Promise<HttpServerResponse>}
      */
     async getFilteredStaticFileResponse(root, path, request, mime_type = null) {
         return (await import("../Command/GetFilteredStaticFileResponseCommand.mjs")).GetFilteredStaticFileResponseCommand.new(
@@ -79,7 +81,7 @@ export class HttpServerService {
      * @param {string} path
      * @param {HttpServerRequest} request
      * @param {string | null} mime_type
-     * @returns {Promise<HttpServerResponse | null>}
+     * @returns {Promise<HttpServerResponse>}
      */
     async getStaticFileResponse(path, request, mime_type = null) {
         return (await import("../Command/GetStaticFileResponseCommand.mjs")).GetStaticFileResponseCommand.new(
@@ -93,30 +95,30 @@ export class HttpServerService {
     }
 
     /**
+     * @param {IncomingMessage} req
+     * @param {ServerResponse} res
+     * @returns {Promise<HttpServerRequest | null>}
+     */
+    async mapRequest(req, res) {
+        return (await import("../Command/MapRequestCommand.mjs")).MapRequestCommand.new()
+            .mapRequest(
+                req,
+                res
+            );
+    }
+
+    /**
      * @param {HttpServerResponse} response
      * @param {ServerResponse} res
      * @param {HttpServerRequest | null} request
      * @returns {Promise<void>}
      */
-    async mapResponseToServerResponse(response, res, request = null) {
-        await (await import("../Command/MapResponseToServerResponseCommand.mjs")).MapResponseToServerResponseCommand.new()
-            .mapResponseToServerResponse(
+    async mapResponse(response, res, request = null) {
+        await (await import("../Command/MapResponseCommand.mjs")).MapResponseCommand.new()
+            .mapResponse(
                 response,
                 res,
                 request
-            );
-    }
-
-    /**
-     * @param {IncomingMessage} req
-     * @param {ServerResponse} res
-     * @returns {Promise<HttpServerRequest | null>}
-     */
-    async mapServerRequestToRequest(req, res) {
-        return (await import("../Command/MapServerRequestToRequestCommand.mjs")).MapServerRequestToRequestCommand.new()
-            .mapServerRequestToRequest(
-                req,
-                res
             );
     }
 
@@ -161,6 +163,19 @@ export class HttpServerService {
             .validateMethods(
                 request,
                 methods
+            );
+    }
+
+    /**
+     * @param {HttpServerRequest} request
+     * @param {RangeUnit[]} units
+     * @returns {Promise<RangeValue | HttpServerResponse | null>}
+     */
+    async validateRanges(request, units) {
+        return (await import("../Command/ValidateRangesCommand.mjs")).ValidateRangesCommand.new()
+            .validateRanges(
+                request,
+                units
             );
     }
 }
