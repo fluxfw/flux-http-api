@@ -1,5 +1,6 @@
 import { createServer as createServerHttp } from "node:http";
 import { createServer as createServerHttps } from "node:https";
+import { REFERRER_POLICY_NO_REFERRER } from "../../../Adapter/Referrer/REFERRER_POLICY.mjs";
 import { HEADER_LOCATION, HEADER_REFERRER_POLICY } from "../../../Adapter/Header/HEADER.mjs";
 import { HTTP_SERVER_DEFAULT_LISTEN_HTTP_PORT, HTTP_SERVER_DEFAULT_LISTEN_HTTPS_PORT, HTTP_SERVER_DEFAULT_NO_DATE, HTTP_SERVER_DEFAULT_NO_REFERRER, HTTP_SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS, HTTP_SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS_PORT, HTTP_SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS_STATUS_CODE, HTTP_SERVER_LISTEN_HTTP_PORT_DISABLED, HTTP_SERVER_LISTEN_HTTPS_PORT_DISABLED } from "../../../Adapter/HttpServer/HTTP_SERVER.mjs";
 import { STATUS_400, STATUS_404, STATUS_500 } from "../../../Adapter/Status/STATUS.mjs";
@@ -158,16 +159,16 @@ export class RunHttpServerCommand {
         res.sendDate = !no_date;
 
         if (no_referrer) {
-            res.setHeader(HEADER_REFERRER_POLICY, "no-referrer");
+            res.setHeader(HEADER_REFERRER_POLICY, REFERRER_POLICY_NO_REFERRER);
         }
 
-        const request = await this.#http_server_service.mapServerRequestToRequest(
+        const request = await this.#http_server_service.mapRequest(
             req,
             res
         );
 
         if (request === null) {
-            await this.#http_server_service.mapResponseToServerResponse(
+            await this.#http_server_service.mapResponse(
                 new Response(null, {
                     status: STATUS_400
                 }),
@@ -177,7 +178,7 @@ export class RunHttpServerCommand {
         }
 
         if (redirect_http_to_https && request._urlObject.protocol !== "https:") {
-            await this.#http_server_service.mapResponseToServerResponse(
+            await this.#http_server_service.mapResponse(
                 new Response(null, {
                     status: redirect_http_to_https_status_code,
                     headers: {
@@ -198,7 +199,7 @@ export class RunHttpServerCommand {
         } catch (error) {
             console.error(error);
 
-            await this.#http_server_service.mapResponseToServerResponse(
+            await this.#http_server_service.mapResponse(
                 new Response(null, {
                     status: STATUS_500
                 }),
@@ -210,13 +211,13 @@ export class RunHttpServerCommand {
         }
 
         if (response !== null) {
-            await this.#http_server_service.mapResponseToServerResponse(
+            await this.#http_server_service.mapResponse(
                 response,
                 res,
                 request
             );
         } else {
-            await this.#http_server_service.mapResponseToServerResponse(
+            await this.#http_server_service.mapResponse(
                 new Response(null, {
                     status: STATUS_404
                 }),
