@@ -1,9 +1,9 @@
 import { HEADER_ALLOW } from "../../../Adapter/Header/HEADER.mjs";
+import { HttpResponse } from "../../../Adapter/Response/HttpResponse.mjs";
 import { METHOD_OPTIONS } from "../../../Adapter/Method/METHOD.mjs";
 import { STATUS_204, STATUS_405 } from "../../../Adapter/Status/STATUS.mjs";
 
-/** @typedef {import("../../../Adapter/Request/HttpServerRequest.mjs").HttpServerRequest} HttpServerRequest */
-/** @typedef {import("../../../Adapter/Response/HttpServerResponse.mjs").HttpServerResponse} HttpServerResponse */
+/** @typedef {import("../../../Adapter/Request/HttpRequest.mjs").HttpRequest} HttpRequest */
 
 export class ValidateMethodsCommand {
     /**
@@ -21,27 +21,29 @@ export class ValidateMethodsCommand {
     }
 
     /**
-     * @param {HttpServerRequest} request
+     * @param {HttpRequest} request
      * @param {string[]} methods
-     * @returns {Promise<HttpServerResponse | null>}
+     * @returns {Promise<HttpResponse | null>}
      */
     async validateMethods(request, methods) {
         if (!methods.includes(request.method)) {
-            return new Response(null, {
-                status: STATUS_405,
-                headers: {
+            return HttpResponse.new(
+                null,
+                STATUS_405,
+                {
                     [HEADER_ALLOW]: methods.join(", ")
                 }
-            });
+            );
         }
 
         if (request.method === METHOD_OPTIONS) {
-            return new Response(null, {
-                status: STATUS_204,
-                headers: {
+            return HttpResponse.new(
+                null,
+                STATUS_204,
+                {
                     [HEADER_ALLOW]: methods.join(", ")
                 }
-            });
+            );
         }
 
         return null;

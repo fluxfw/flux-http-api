@@ -1,8 +1,8 @@
+import { HttpResponse } from "../../../Adapter/Response/HttpResponse.mjs";
 import { STATUS_416 } from "../../../Adapter/Status/STATUS.mjs";
 import { HEADER_ACCEPT_RANGES, HEADER_CONTENT_RANGE, HEADER_RANGE } from "../../../Adapter/Header/HEADER.mjs";
 
-/** @typedef {import("../../../Adapter/Request/HttpServerRequest.mjs").HttpServerRequest} HttpServerRequest */
-/** @typedef {import("../../../Adapter/Response/HttpServerResponse.mjs").HttpServerResponse} HttpServerResponse */
+/** @typedef {import("../../../Adapter/Request/HttpRequest.mjs").HttpRequest} HttpRequest */
 /** @typedef {import("../../../Adapter/Range/RangeUnit.mjs").RangeUnit} RangeUnit */
 /** @typedef {import("../../../Adapter/Range/RangeValue.mjs").RangeValue} RangeValue */
 
@@ -22,14 +22,16 @@ export class ValidateRangesCommand {
     }
 
     /**
-     * @param {HttpServerRequest} request
+     * @param {HttpRequest} request
      * @param {RangeUnit[]} units
-     * @returns {Promise<RangeValue | HttpServerResponse | null>}
+     * @returns {Promise<RangeValue | HttpResponse | null>}
      */
     async validateRanges(request, units) {
-        request._res.setHeader(HEADER_ACCEPT_RANGES, units.map(_unit => _unit.name).join(", "));
+        request._res?.setHeader(HEADER_ACCEPT_RANGES, units.map(_unit => _unit.name).join(", "));
 
-        const range_header = request.headers.get(HEADER_RANGE);
+        const range_header = request.getHeader(
+            HEADER_RANGE
+        );
 
         if (range_header === null) {
             return null;
@@ -51,17 +53,15 @@ export class ValidateRangesCommand {
         const ranges = _ranges.join("=").split(",").map(range => {
             const [
                 start,
-                ..._end
+                ...end
             ] = range.trim().split("-");
-
-            const end = _end.join("-");
 
             return {
                 start: this.#stringToNumber(
                     start
                 ),
                 end: this.#stringToNumber(
-                    end
+                    end.join("-")
                 )
             };
         });
@@ -112,17 +112,18 @@ export class ValidateRangesCommand {
 
     /**
      * @param {RangeUnit | null} unit
-     * @returns {HttpServerResponse}
+     * @returns {HttpResponse}
      */
     #response416(unit = null) {
-        return new Response(null, {
-            status: STATUS_416,
-            headers: {
+        return HttpResponse.new(
+            null,
+            STATUS_416,
+            {
                 [HEADER_CONTENT_RANGE]: this.#range(
                     unit
                 )
             }
-        });
+        );
     }
 
     /**

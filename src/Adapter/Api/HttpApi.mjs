@@ -2,14 +2,14 @@
 /** @typedef {import("../Fetch/fetchAuthenticate.mjs").fetchAuthenticate} fetchAuthenticate */
 /** @typedef {import("../../Service/Fetch/Port/FetchService.mjs").FetchService} FetchService */
 /** @typedef {import("../Fetch/fetchShowError.mjs").fetchShowError} fetchShowError */
-/** @typedef {import("../HttpServer/handleRequest.mjs").handleRequest} handleRequest */
-/** @typedef {import("../HttpServer/HttpServer.mjs").HttpServer} HttpServer */
-/** @typedef {import("../Request/HttpServerRequest.mjs").HttpServerRequest} HttpServerRequest */
-/** @typedef {import("../Response/HttpServerResponse.mjs").HttpServerResponse} HttpServerResponse */
-/** @typedef {import("../../Service/HttpServer/Port/HttpServerService.mjs").HttpServerService} HttpServerService */
+/** @typedef {import("../Server/handleRequest.mjs").handleRequest} handleRequest */
+/** @typedef {import("../Request/HttpRequest.mjs").HttpRequest} HttpRequest */
+/** @typedef {import("../Response/HttpResponse.mjs").HttpResponse} HttpResponse */
 /** @typedef {import("../Proxy/ProxyRequest.mjs").ProxyRequest} ProxyRequest */
 /** @typedef {import("../Range/RangeUnit.mjs").RangeUnit} RangeUnit */
 /** @typedef {import("../Range/RangeValue.mjs").RangeValue} RangeValue */
+/** @typedef {import("../Server/_Server.mjs").Server} Server */
+/** @typedef {import("../../Service/Server/Port/ServerService.mjs").ServerService} ServerService */
 /** @typedef {import("../../../../flux-shutdown-handler-api/src/Adapter/ShutdownHandler/ShutdownHandler.mjs").ShutdownHandler} ShutdownHandler */
 
 export class HttpApi {
@@ -26,9 +26,9 @@ export class HttpApi {
      */
     #fetch_show_error;
     /**
-     * @type {HttpServerService | null}
+     * @type {ServerService | null}
      */
-    #http_server_service = null;
+    #server_service = null;
     /**
      * @type {ShutdownHandler | null}
      */
@@ -73,12 +73,12 @@ export class HttpApi {
     /**
      * @param {string} root
      * @param {string} path
-     * @param {HttpServerRequest} request
+     * @param {HttpRequest} request
      * @param {string | null} mime_type
-     * @returns {Promise<HttpServerResponse>}
+     * @returns {Promise<HttpResponse>}
      */
     async getFilteredStaticFileResponse(root, path, request, mime_type = null) {
-        return (await this.#getHttpServerService()).getFilteredStaticFileResponse(
+        return (await this.#getServerService()).getFilteredStaticFileResponse(
             root,
             path,
             request,
@@ -91,7 +91,7 @@ export class HttpApi {
      * @returns {Promise<string | null>}
      */
     async getMimeTypeByExtension(extension) {
-        return (await this.#getHttpServerService()).getMimeTypeByExtension(
+        return (await this.#getServerService()).getMimeTypeByExtension(
             extension
         );
     }
@@ -101,19 +101,19 @@ export class HttpApi {
      * @returns {Promise<string | null>}
      */
     async getMimeTypeByPath(path) {
-        return (await this.#getHttpServerService()).getMimeTypeByPath(
+        return (await this.#getServerService()).getMimeTypeByPath(
             path
         );
     }
 
     /**
      * @param {string} path
-     * @param {HttpServerRequest} request
+     * @param {HttpRequest} request
      * @param {string | null} mime_type
-     * @returns {Promise<HttpServerResponse>}
+     * @returns {Promise<HttpResponse>}
      */
     async getStaticFileResponse(path, request, mime_type = null) {
-        return (await this.#getHttpServerService()).getStaticFileResponse(
+        return (await this.#getServerService()).getStaticFileResponse(
             path,
             request,
             mime_type
@@ -122,45 +122,45 @@ export class HttpApi {
 
     /**
      * @param {ProxyRequest} proxy_request
-     * @returns {Promise<HttpServerResponse>}
+     * @returns {Promise<HttpResponse>}
      */
     async proxyRequest(proxy_request) {
-        return (await this.#getHttpServerService()).proxyRequest(
+        return (await this.#getServerService()).proxyRequest(
             proxy_request
         );
     }
 
     /**
      * @param {handleRequest} handle_request
-     * @param {HttpServer | null} http_server
+     * @param {Server | null} server
      * @returns {Promise<void>}
      */
-    async runHttpServer(handle_request, http_server = null) {
-        await (await this.#getHttpServerService()).runHttpServer(
+    async runServer(handle_request, server = null) {
+        await (await this.#getServerService()).runServer(
             handle_request,
-            http_server
+            server
         );
     }
 
     /**
-     * @param {HttpServerRequest} request
+     * @param {HttpRequest} request
      * @param {string[]} methods
-     * @returns {Promise<HttpServerResponse | null>}
+     * @returns {Promise<HttpResponse | null>}
      */
     async validateMethods(request, methods) {
-        return (await this.#getHttpServerService()).validateMethods(
+        return (await this.#getServerService()).validateMethods(
             request,
             methods
         );
     }
 
     /**
-     * @param {HttpServerRequest} request
+     * @param {HttpRequest} request
      * @param {RangeUnit[]} units
-     * @returns {Promise<RangeValue | HttpServerResponse | null>}
+     * @returns {Promise<RangeValue | HttpResponse | null>}
      */
     async validateRanges(request, units) {
-        return (await this.#getHttpServerService()).validateRanges(
+        return (await this.#getServerService()).validateRanges(
             request,
             units
         );
@@ -179,13 +179,13 @@ export class HttpApi {
     }
 
     /**
-     * @returns {Promise<HttpServerService>}
+     * @returns {Promise<ServerService>}
      */
-    async #getHttpServerService() {
-        this.#http_server_service ??= (await import("../../Service/HttpServer/Port/HttpServerService.mjs")).HttpServerService.new(
+    async #getServerService() {
+        this.#server_service ??= (await import("../../Service/Server/Port/ServerService.mjs")).ServerService.new(
             this.#shutdown_handler
         );
 
-        return this.#http_server_service;
+        return this.#server_service;
     }
 }
