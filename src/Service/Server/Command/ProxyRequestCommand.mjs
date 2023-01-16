@@ -1,6 +1,6 @@
+import { HttpResponse } from "../../../Adapter/Response/HttpResponse.mjs";
 import { METHOD_HEAD } from "../../../Adapter/Method/METHOD.mjs";
 
-/** @typedef {import("../../../Adapter/Response/HttpServerResponse.mjs").HttpServerResponse} HttpServerResponse */
 /** @typedef {import("../../../Adapter/Proxy/ProxyRequest.mjs").ProxyRequest} ProxyRequest */
 
 export class ProxyRequestCommand {
@@ -20,7 +20,7 @@ export class ProxyRequestCommand {
 
     /**
      * @param {ProxyRequest} proxy_request
-     * @returns {Promise<HttpServerResponse>}
+     * @returns {Promise<HttpResponse>}
      */
     async proxyRequest(proxy_request) {
         const request_method = proxy_request.request_method ?? false;
@@ -36,13 +36,13 @@ export class ProxyRequestCommand {
 
         if (Array.isArray(request_query_params)) {
             for (const key of request_query_params) {
-                if (!proxy_request.request._urlObject.searchParams.has(key)) {
+                if (!proxy_request.request.url.searchParams.has(key)) {
                     continue;
                 }
 
                 for (const [
                     value
-                ] of proxy_request.request._urlObject.searchParams.getAll(request_query_params)) {
+                ] of proxy_request.request.url.searchParams.getAll(request_query_params)) {
                     _url.searchParams.append(key, value);
                 }
             }
@@ -51,7 +51,7 @@ export class ProxyRequestCommand {
                 for (const [
                     key,
                     value
-                ] of proxy_request.request._urlObject.searchParams.entries()) {
+                ] of proxy_request.request.url.searchParams) {
                     _url.searchParams.append(key, value);
                 }
             }
@@ -63,11 +63,11 @@ export class ProxyRequestCommand {
             } : {},
             ...Array.isArray(request_headers) ? {
                 headers: request_headers.reduce((headers, key) => {
-                    if (!proxy_request.request.headers.has(key)) {
+                    if (!proxy_request.request.hasHeader(key)) {
                         return headers;
                     }
 
-                    headers[key] = proxy_request.request.headers.get(key);
+                    headers[key] = proxy_request.request.getHeader(key);
 
                     return headers;
                 }, {})
@@ -75,7 +75,7 @@ export class ProxyRequestCommand {
                 headers: proxy_request.request.headers
             } : {},
             ...request_body ? {
-                body: proxy_request.request.body
+                body: proxy_request.request.web_body
             } : {},
             ...response_redirect ? {
                 redirect: "manual"
@@ -92,24 +92,19 @@ export class ProxyRequestCommand {
             response.body?.cancel();
         }
 
-        return new Response(response_body && proxy_request.request.method !== METHOD_HEAD ? response.body : null, {
-            ...response_status ? {
-                status: response.status,
-                statusText: response.statusText
-            } : {},
-            ...Array.isArray(response_headers) ? {
-                headers: response_headers.reduce((headers, key) => {
-                    if (!response.headers.has(key)) {
-                        return headers;
-                    }
-
-                    headers[key] = response.headers.get(key);
-
+        return HttpResponse.newWebBody(
+            response_body && proxy_request.request.method !== METHOD_HEAD ? response.body : null,
+            response_status ? response.status : null,
+            response_status ? response.statusText : null,
+            Array.isArray(response_headers) ? response_headers.reduce((headers, key) => {
+                if (!response.headers.has(key)) {
                     return headers;
-                }, {})
-            } : response_headers ? {
-                headers: response.headers
-            } : {}
-        });
+                }
+
+                headers[key] = response.headers.get(key);
+
+                return headers;
+            }, {}) : response_headers ? Object.fromEntries(response.headers) : null
+        );
     }
 }

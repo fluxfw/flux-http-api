@@ -1,13 +1,12 @@
 import { HEADER_SET_COOKIE } from "../../../Adapter/Header/HEADER.mjs";
 import { METHOD_HEAD } from "../../../Adapter/Method/METHOD.mjs";
 import { pipeline } from "node:stream/promises";
-import { Readable } from "node:stream";
 import { SET_COOKIE_SAME_SITE_LAX } from "../../../Adapter/Cookie/SET_COOKIE_SAME_SITE.mjs";
 import { STATUS_500 } from "../../../Adapter/Status/STATUS.mjs";
 import { SET_COOKIE_OPTION_EXPIRES, SET_COOKIE_OPTION_HTTP_ONLY, SET_COOKIE_OPTION_MAX_AGE, SET_COOKIE_OPTION_PATH, SET_COOKIE_OPTION_SAME_SITE, SET_COOKIE_OPTION_SECURE } from "../../../Adapter/Cookie/SET_COOKIE_OPTION.mjs";
 
-/** @typedef {import("../../../Adapter/Request/HttpServerRequest.mjs").HttpServerRequest} HttpServerRequest */
-/** @typedef {import("../../../Adapter/Response/HttpServerResponse.mjs").HttpServerResponse} HttpServerResponse */
+/** @typedef {import("../../../Adapter/Request/HttpRequest.mjs").HttpRequest} HttpRequest */
+/** @typedef {import("../../../Adapter/Response/HttpResponse.mjs").HttpResponse} HttpResponse */
 /** @typedef {import("node:http").ServerResponse} ServerResponse */
 
 export class MapResponseCommand {
@@ -26,20 +25,20 @@ export class MapResponseCommand {
     }
 
     /**
-     * @param {HttpServerResponse} response
+     * @param {HttpResponse} response
      * @param {ServerResponse} res
-     * @param {HttpServerRequest | null} request
+     * @param {HttpRequest | null} request
      * @returns {Promise<void>}
      */
     async mapResponse(response, res, request = null) {
         try {
-            res.statusCode = response.status;
-            res.statusMessage = response.statusText;
+            res.statusCode = response.status_code;
+            res.statusMessage = response.status_message;
 
             for (const [
                 key,
                 value
-            ] of response.headers.entries()) {
+            ] of Object.entries(response.headers)) {
                 this.#setHeader(
                     res,
                     key,
@@ -50,7 +49,7 @@ export class MapResponseCommand {
             for (const [
                 key,
                 value
-            ] of Object.entries(response._cookies ?? {})) {
+            ] of Object.entries(response.cookies)) {
                 if (value === null) {
                     this.#deleteCookie(
                         res,
@@ -82,17 +81,8 @@ export class MapResponseCommand {
                 }
             }
 
-            if (request?.method !== METHOD_HEAD) {
-                if (response.body !== null) {
-                    await pipeline(Readable.fromWeb(response.body), res);
-                } else {
-                    if ((response._bodyNode ?? null) !== null) {
-                        await pipeline(response._bodyNode, res);
-                    }
-                }
-            } else {
-                response.body?.cancel();
-                response._bodyNode?.destroy();
+            if (request?.method !== METHOD_HEAD && response.body !== null) {
+                await pipeline(response.body, res);
             }
         } catch (error) {
             console.error(error);
@@ -103,6 +93,7 @@ export class MapResponseCommand {
             }
         } finally {
             res.end();
+            response.body?.destroy();
         }
     }
 
@@ -166,11 +157,11 @@ export class MapResponseCommand {
      * @returns {void}
      */
     #setHeader(res, key, value) {
-        const _value = res.getHeader(key) ?? null;
+        const values = res.getHeader(key) ?? null;
 
-        res.setHeader(key, _value !== null ? [
-            ...Array.isArray(_value) ? _value : [
-                _value
+        res.setHeader(key, values !== null ? [
+            ...Array.isArray(values) ? values : [
+                values
             ],
             ...Array.isArray(value) ? value : [
                 value
