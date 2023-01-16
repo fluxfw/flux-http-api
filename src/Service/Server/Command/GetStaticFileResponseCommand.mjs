@@ -38,12 +38,13 @@ export class GetStaticFileResponseCommand {
      * @param {string} path
      * @param {HttpRequest} request
      * @param {string | null} mime_type
+     * @param {{[key: string]: string | string[]} | null} headers
      * @returns {Promise<HttpResponse>}
      */
-    async getStaticFileResponse(path, request, mime_type = null) {
+    async getStaticFileResponse(path, request, mime_type = null, headers = null) {
         if (!existsSync(path)) {
-            return HttpResponse.new(
-                null,
+            return HttpResponse.newFromTextBody(
+                "File not found",
                 STATUS_404
             );
         }
@@ -52,14 +53,14 @@ export class GetStaticFileResponseCommand {
 
         if (!_stat.isFile()) {
             if (mime_type !== null || !_stat.isDirectory()) {
-                return HttpResponse.new(
-                    null,
+                return HttpResponse.newFromTextBody(
+                    "File not found",
                     STATUS_404
                 );
             }
 
             if (!request.url.pathname.endsWith("/")) {
-                return HttpResponse.newRedirect(
+                return HttpResponse.newFromRedirect(
                     `${request.url.origin}${request.url.pathname}/${request.url.search}`
                 );
             }
@@ -106,7 +107,8 @@ export class GetStaticFileResponseCommand {
                 },
                 ..._mime_type !== null ? {
                     [HEADER_CONTENT_TYPE]: _mime_type
-                } : {}
+                } : {},
+                ...headers ?? {}
             }
         );
     }

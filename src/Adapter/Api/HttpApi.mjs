@@ -75,14 +75,16 @@ export class HttpApi {
      * @param {string} path
      * @param {HttpRequest} request
      * @param {string | null} mime_type
+     * @param {{[key: string]: string | string[]} | null} headers
      * @returns {Promise<HttpResponse>}
      */
-    async getFilteredStaticFileResponse(root, path, request, mime_type = null) {
+    async getFilteredStaticFileResponse(root, path, request, mime_type = null, headers = null) {
         return (await this.#getServerService()).getFilteredStaticFileResponse(
             root,
             path,
             request,
-            mime_type
+            mime_type,
+            headers
         );
     }
 
@@ -110,13 +112,15 @@ export class HttpApi {
      * @param {string} path
      * @param {HttpRequest} request
      * @param {string | null} mime_type
+     * @param {{[key: string]: string | string[]} | null} headers
      * @returns {Promise<HttpResponse>}
      */
-    async getStaticFileResponse(path, request, mime_type = null) {
+    async getStaticFileResponse(path, request, mime_type = null, headers = null) {
         return (await this.#getServerService()).getStaticFileResponse(
             path,
             request,
-            mime_type
+            mime_type,
+            headers
         );
     }
 

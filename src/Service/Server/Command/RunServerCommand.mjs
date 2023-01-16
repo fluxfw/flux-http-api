@@ -170,8 +170,8 @@ export class RunServerCommand {
 
         if (request === null) {
             await this.#server_service.mapResponse(
-                HttpResponse.new(
-                    null,
+                HttpResponse.newFromTextBody(
+                    "Invalid request",
                     STATUS_400
                 ),
                 res
@@ -181,7 +181,7 @@ export class RunServerCommand {
 
         if (redirect_http_to_https && request.url.protocol !== "https:") {
             await this.#server_service.mapResponse(
-                HttpResponse.newRedirect(
+                HttpResponse.newFromRedirect(
                     `https://${request.url.hostname}${redirect_http_to_https_port !== SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS_PORT ? `:${redirect_http_to_https_port}` : ""}${request.url.pathname}${request.url.search}`,
                     redirect_http_to_https_status_code
                 ),
@@ -219,8 +219,8 @@ export class RunServerCommand {
             );
         } else {
             await this.#server_service.mapResponse(
-                HttpResponse.new(
-                    null,
+                HttpResponse.newFromTextBody(
+                    "Route not found",
                     STATUS_404
                 ),
                 res,
