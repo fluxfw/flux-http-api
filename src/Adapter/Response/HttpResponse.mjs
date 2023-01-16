@@ -33,7 +33,7 @@ export class HttpResponse {
      * @param {string | null} status_message
      * @returns {HttpResponse}
      */
-    static newHtmlBody(html, status_code = null, headers = null, cookies = null, status_message = null) {
+    static newFromHtmlBody(html, status_code = null, headers = null, cookies = null, status_message = null) {
         return this.new(
             Readable.from(html),
             status_code,
@@ -54,7 +54,7 @@ export class HttpResponse {
      * @param {string | null} status_message
      * @returns {HttpResponse}
      */
-    static newJsonBody(data, status_code = null, headers = null, cookies = null, status_message = null) {
+    static newFromJsonBody(data, status_code = null, headers = null, cookies = null, status_message = null) {
         return this.new(
             Readable.from(JSON.stringify(data)),
             status_code,
@@ -75,7 +75,7 @@ export class HttpResponse {
      * @param {string | null} status_message
      * @returns {HttpResponse}
      */
-    static newRedirect(url, status_code = null, headers = null, cookies = null, status_message = null) {
+    static newFromRedirect(url, status_code = null, headers = null, cookies = null, status_message = null) {
         return this.new(
             null,
             status_code ?? STATUS_302,
@@ -96,7 +96,7 @@ export class HttpResponse {
      * @param {string | null} status_message
      * @returns {HttpResponse}
      */
-    static newTextBody(text, status_code = null, headers = null, cookies = null, status_message = null) {
+    static newFromTextBody(text, status_code = null, headers = null, cookies = null, status_message = null) {
         return this.new(
             Readable.from(text),
             status_code,
@@ -117,7 +117,7 @@ export class HttpResponse {
      * @param {string | null} status_message
      * @returns {HttpResponse}
      */
-    static newWebBody(body = null, status_code = null, headers = null, cookies = null, status_message = null) {
+    static newFromWebBody(body = null, status_code = null, headers = null, cookies = null, status_message = null) {
         return this.new(
             body !== null ? Readable.fromWeb(body) : null,
             status_code,
@@ -131,8 +131,8 @@ export class HttpResponse {
      * @param {Response} response
      * @returns {HttpResponse}
      */
-    static newWebResponse(response) {
-        return this.newWebBody(
+    static newFromWebResponse(response) {
+        return this.newFromWebBody(
             response.body,
             response.status,
             Object.fromEntries(response.headers),

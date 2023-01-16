@@ -92,7 +92,7 @@ export class ProxyRequestCommand {
             response.body?.cancel();
         }
 
-        return HttpResponse.newWebBody(
+        return HttpResponse.newFromWebBody(
             response_body && proxy_request.request.method !== METHOD_HEAD ? response.body : null,
             response_status ? response.status : null,
             response_status ? response.statusText : null,
