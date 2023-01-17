@@ -60,7 +60,7 @@ export class ProxyRequestCommand {
         const response = await fetch(`${_url}`, {
             ...(Array.isArray(request_method) ? request_method.includes(proxy_request.request.method) : request_method) ? {
                 method: proxy_request.request.method
-            } : {},
+            } : null,
             ...Array.isArray(request_headers) ? {
                 headers: request_headers.reduce((headers, key) => {
                     if (!proxy_request.request.hasHeader(key)) {
@@ -73,13 +73,13 @@ export class ProxyRequestCommand {
                 }, {})
             } : request_headers ? {
                 headers: proxy_request.request.headers
-            } : {},
+            } : null,
             ...request_body ? {
                 body: proxy_request.request.web_body
-            } : {},
+            } : null,
             ...response_redirect ? {
                 redirect: "manual"
-            } : {}
+            } : null
         });
 
         if (!response_status && !response.ok) {
@@ -95,7 +95,6 @@ export class ProxyRequestCommand {
         return HttpResponse.newFromWebBody(
             response_body && proxy_request.request.method !== METHOD_HEAD ? response.body : null,
             response_status ? response.status : null,
-            response_status ? response.statusText : null,
             Array.isArray(response_headers) ? response_headers.reduce((headers, key) => {
                 if (!response.headers.has(key)) {
                     return headers;
@@ -104,7 +103,9 @@ export class ProxyRequestCommand {
                 headers[key] = response.headers.get(key);
 
                 return headers;
-            }, {}) : response_headers ? Object.fromEntries(response.headers) : null
+            }, {}) : response_headers ? Object.fromEntries(response.headers) : null,
+            null,
+            response_status ? response.statusText : null
         );
     }
 }

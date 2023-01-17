@@ -109,7 +109,7 @@ export class MapResponseCommand {
             key,
             "",
             {
-                ...options ?? {},
+                ...options,
                 [SET_COOKIE_OPTION_MAX_AGE]: -1,
                 [SET_COOKIE_OPTION_EXPIRES]: null
             }
@@ -132,7 +132,7 @@ export class MapResponseCommand {
                 [SET_COOKIE_OPTION_PATH]: "/",
                 [SET_COOKIE_OPTION_SAME_SITE]: SET_COOKIE_SAME_SITE_LAX,
                 [SET_COOKIE_OPTION_SECURE]: true,
-                ...options ?? {}
+                ...options
             }).reduce((_options, [
                 _key,
                 _value

@@ -95,7 +95,7 @@ export class GetStaticFileResponseCommand {
                 ...range !== null ? {
                     start: range.start,
                     end: range.end
-                } : {}
+                } : null
             }) : null,
             range !== null ? STATUS_206 : null,
             {
@@ -107,8 +107,8 @@ export class GetStaticFileResponseCommand {
                 },
                 ..._mime_type !== null ? {
                     [HEADER_CONTENT_TYPE]: _mime_type
-                } : {},
-                ...headers ?? {}
+                } : null,
+                ...headers
             }
         );
     }
