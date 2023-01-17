@@ -34,12 +34,12 @@ export class HttpResponse {
      * @returns {HttpResponse}
      */
     static newFromHtmlBody(html, status_code = null, headers = null, cookies = null, status_message = null) {
-        return this.new(
-            Readable.from(html),
+        return this.newFromTextBody(
+            html,
             status_code,
             {
                 [HEADER_CONTENT_TYPE]: CONTENT_TYPE_HTML,
-                ...headers ?? {}
+                ...headers
             },
             cookies,
             status_message
@@ -55,12 +55,12 @@ export class HttpResponse {
      * @returns {HttpResponse}
      */
     static newFromJsonBody(data, status_code = null, headers = null, cookies = null, status_message = null) {
-        return this.new(
-            Readable.from(JSON.stringify(data)),
+        return this.newFromTextBody(
+            JSON.stringify(data),
             status_code,
             {
                 [HEADER_CONTENT_TYPE]: CONTENT_TYPE_JSON,
-                ...headers ?? {}
+                ...headers
             },
             cookies,
             status_message
@@ -81,7 +81,7 @@ export class HttpResponse {
             status_code ?? STATUS_302,
             {
                 [HEADER_LOCATION]: url,
-                ...headers ?? {}
+                ...headers
             },
             cookies,
             status_message
@@ -102,7 +102,7 @@ export class HttpResponse {
             status_code,
             {
                 [HEADER_CONTENT_TYPE]: CONTENT_TYPE_TEXT,
-                ...headers ?? {}
+                ...headers
             },
             cookies,
             status_message
