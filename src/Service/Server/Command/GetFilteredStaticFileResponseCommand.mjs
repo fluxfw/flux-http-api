@@ -39,7 +39,7 @@ export class GetFilteredStaticFileResponseCommand {
      */
     async getFilteredStaticFileResponse(root, path, request, mime_type = null, headers = null) {
         if (path.includes("..") || path.includes("//") || path.includes("\\")) {
-            return HttpResponse.newFromTextBody(
+            return HttpResponse.newFromText(
                 "Invalid file",
                 STATUS_400
             );

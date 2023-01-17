@@ -1,4 +1,7 @@
+import { HEADER_CONTENT_TYPE } from "../Header/HEADER.mjs";
 import { Readable } from "node:stream";
+import { arrayBuffer as bodyToArrayBuffer, blob as bodyToBlob, buffer as bodyToBuffer, json as bodyToJson, text as bodyToString } from "node:stream/consumers";
+import { CONTENT_TYPE_FORM_DATA, CONTENT_TYPE_FORM_DATA_2, CONTENT_TYPE_HTML, CONTENT_TYPE_JSON, CONTENT_TYPE_TEXT } from "../ContentType/CONTENT_TYPE.mjs";
 
 /** @typedef {import("node:http").ServerResponse} ServerResponse */
 
@@ -78,6 +81,160 @@ export class HttpRequest {
      */
     get body() {
         return this.#body;
+    }
+
+    /**
+     * @returns {Promise<ArrayBuffer>}
+     */
+    async bodyAsArrayBuffer() {
+        if (this.#body === null) {
+            throw new Error("No body");
+        }
+
+        return bodyToArrayBuffer(this.#body);
+    }
+
+    /**
+     * @returns {Promise<Blob>}
+     */
+    async bodyAsBlob() {
+        if (this.#body === null) {
+            throw new Error("No body");
+        }
+
+        const blob = await bodyToBlob(this.#body);
+
+        const content_type = this.getHeader(
+            HEADER_CONTENT_TYPE
+        );
+
+        if (content_type === null) {
+            return blob;
+        }
+
+        return blob.slice(0, blob.size, content_type);
+    }
+
+    /**
+     * @returns {Promise<Buffer>}
+     */
+    async bodyAsBuffer() {
+        if (this.#body === null) {
+            throw new Error("No body");
+        }
+
+        return bodyToBuffer(this.#body);
+    }
+
+    /**
+     * @returns {Promise<FormData>}
+     */
+    async bodyAsFormData() {
+        if (this.#body === null) {
+            throw new Error("No body");
+        }
+
+        const content_type = this.getHeader(
+            HEADER_CONTENT_TYPE
+        );
+
+        if (content_type === null || !(content_type.includes(CONTENT_TYPE_FORM_DATA) || content_type.includes(CONTENT_TYPE_FORM_DATA_2))) {
+            throw new Error(`Header ${HEADER_CONTENT_TYPE} needs to be ${CONTENT_TYPE_FORM_DATA} or ${CONTENT_TYPE_FORM_DATA_2}, got ${content_type}`);
+        }
+
+        return this.bodyAsWebResponse().formData();
+    }
+
+    /**
+     * @returns {Promise<string>}
+     */
+    async bodyAsHtml() {
+        if (this.#body === null) {
+            throw new Error("No body");
+        }
+
+        const content_type = this.getHeader(
+            HEADER_CONTENT_TYPE
+        );
+
+        if (!(content_type?.includes(CONTENT_TYPE_HTML) ?? false)) {
+            throw new Error(`Header ${HEADER_CONTENT_TYPE} needs to be ${CONTENT_TYPE_HTML}, got ${content_type}`);
+        }
+
+        return this.bodyAsString();
+    }
+
+    /**
+     * @returns {Promise<*>}
+     */
+    async bodyAsJson() {
+        if (this.#body === null) {
+            throw new Error("No body");
+        }
+
+        const content_type = this.getHeader(
+            HEADER_CONTENT_TYPE
+        );
+
+        if (!(content_type?.includes(CONTENT_TYPE_JSON) ?? false)) {
+            throw new Error(`Header ${HEADER_CONTENT_TYPE} needs to be ${CONTENT_TYPE_JSON}, got ${content_type}`);
+        }
+
+        return bodyToJson(this.#body);
+    }
+
+    /**
+     * @returns {Promise<string>}
+     */
+    async bodyAsString() {
+        if (this.#body === null) {
+            throw new Error("No body");
+        }
+
+        return bodyToString(this.#body);
+    }
+
+    /**
+     * @returns {Promise<string>}
+     */
+    async bodyAsText() {
+        if (this.#body === null) {
+            throw new Error("No body");
+        }
+
+        const content_type = this.getHeader(
+            HEADER_CONTENT_TYPE
+        );
+
+        if (!(content_type?.includes(CONTENT_TYPE_TEXT) ?? false)) {
+            throw new Error(`Header ${HEADER_CONTENT_TYPE} needs to be ${CONTENT_TYPE_TEXT}, got ${content_type}`);
+        }
+
+        return this.bodyAsString();
+    }
+
+    /**
+     * @returns {Response}
+     */
+    bodyAsWebResponse() {
+        const content_type = this.getHeader(
+            HEADER_CONTENT_TYPE
+        );
+
+        return new Response(this.bodyAsWebStream(), {
+            headers: {
+                ...content_type !== null ? {
+                    [HEADER_CONTENT_TYPE]: content_type
+                } : null
+            }
+        });
+    }
+
+    /**
+     * @returns {ReadableStream | null}
+     */
+    bodyAsWebStream() {
+        return this.#body !== null ? Readable.toWeb(this.#body) : null;
     }
 
     /**
@@ -170,19 +327,5 @@ export class HttpRequest {
      */
     get url_path_parts() {
         return this.#url_path_parts;
-    }
-
-    /**
-     * @returns {ReadableStream | null}
-     */
-    get web_body() {
-        return this.#body !== null ? Readable.toWeb(this.#body) : null;
-    }
-
-    /**
-     * @returns {Response}
-     */
-    get web_body_parse() {
-        return new Response(this.web_body);
     }
 }

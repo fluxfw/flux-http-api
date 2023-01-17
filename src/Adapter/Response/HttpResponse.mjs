@@ -26,6 +26,65 @@ export class HttpResponse {
     #status_message;
 
     /**
+     * @param {ArrayBuffer} array_buffer
+     * @param {number | null} status_code
+     * @param {{[key: string]: string | string[]} | null} headers
+     * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null} | null}} cookies
+     * @param {string | null} status_message
+     * @returns {HttpResponse}
+     */
+    static newFromArrayBuffer(array_buffer, status_code = null, headers = null, cookies = null, status_message = null) {
+        return this.newFromBuffer(
+            Buffer.from(array_buffer),
+            status_code,
+            headers,
+            cookies,
+            status_message
+        );
+    }
+
+    /**
+     * @param {Blob} blob
+     * @param {number | null} status_code
+     * @param {{[key: string]: string | string[]} | null} headers
+     * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null} | null}} cookies
+     * @param {string | null} status_message
+     * @returns {Promise<HttpResponse>}
+     */
+    static async newFromBlob(blob, status_code = null, headers = null, cookies = null, status_message = null) {
+        return this.newFromArrayBuffer(
+            await blob.arrayBuffer(),
+            status_code,
+            {
+                ...blob.type !== "" ? {
+                    [HEADER_CONTENT_TYPE]: blob.type
+                } : null,
+                ...headers
+            },
+            cookies,
+            status_message
+        );
+    }
+
+    /**
+     * @param {Buffer} buffer
+     * @param {number | null} status_code
+     * @param {{[key: string]: string | string[]} | null} headers
+     * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null} | null}} cookies
+     * @param {string | null} status_message
+     * @returns {HttpResponse}
+     */
+    static newFromBuffer(buffer, status_code = null, headers = null, cookies = null, status_message = null) {
+        return this.new(
+            Readable.from(buffer),
+            status_code,
+            headers,
+            cookies,
+            status_message
+        );
+    }
+
+    /**
      * @param {string} html
      * @param {number | null} status_code
      * @param {{[key: string]: string | string[]} | null} headers
@@ -33,8 +92,8 @@ export class HttpResponse {
      * @param {string | null} status_message
      * @returns {HttpResponse}
      */
-    static newFromHtmlBody(html, status_code = null, headers = null, cookies = null, status_message = null) {
-        return this.newFromTextBody(
+    static newFromHtml(html, status_code = null, headers = null, cookies = null, status_message = null) {
+        return this.newFromString(
             html,
             status_code,
             {
@@ -54,8 +113,8 @@ export class HttpResponse {
      * @param {string | null} status_message
      * @returns {HttpResponse}
      */
-    static newFromJsonBody(data, status_code = null, headers = null, cookies = null, status_message = null) {
-        return this.newFromTextBody(
+    static newFromJson(data, status_code = null, headers = null, cookies = null, status_message = null) {
+        return this.newFromString(
             JSON.stringify(data),
             status_code,
             {
@@ -89,6 +148,24 @@ export class HttpResponse {
     }
 
     /**
+     * @param {string} string
+     * @param {number | null} status_code
+     * @param {{[key: string]: string | string[]} | null} headers
+     * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null} | null}} cookies
+     * @param {string | null} status_message
+     * @returns {HttpResponse}
+     */
+    static newFromString(string, status_code = null, headers = null, cookies = null, status_message = null) {
+        return this.newFromBuffer(
+            Buffer.from(string),
+            status_code,
+            headers,
+            cookies,
+            status_message
+        );
+    }
+
+    /**
      * @param {string} text
      * @param {number | null} status_code
      * @param {{[key: string]: string | string[]} | null} headers
@@ -96,9 +173,9 @@ export class HttpResponse {
      * @param {string | null} status_message
      * @returns {HttpResponse}
      */
-    static newFromTextBody(text, status_code = null, headers = null, cookies = null, status_message = null) {
-        return this.new(
-            Readable.from(text),
+    static newFromText(text, status_code = null, headers = null, cookies = null, status_message = null) {
+        return this.newFromString(
+            text,
             status_code,
             {
                 [HEADER_CONTENT_TYPE]: CONTENT_TYPE_TEXT,
@@ -110,6 +187,20 @@ export class HttpResponse {
     }
 
     /**
+     * @param {Response} response
+     * @returns {HttpResponse}
+     */
+    static newFromWebResponse(response) {
+        return this.newFromWebStream(
+            response.body,
+            response.status,
+            Object.fromEntries(response.headers),
+            null,
+            response.statusText
+        );
+    }
+
+    /**
      * @param {ReadableStream | null} body
      * @param {number | null} status_code
      * @param {{[key: string]: string | string[]} | null} headers
@@ -117,27 +208,13 @@ export class HttpResponse {
      * @param {string | null} status_message
      * @returns {HttpResponse}
      */
-    static newFromWebBody(body = null, status_code = null, headers = null, cookies = null, status_message = null) {
+    static newFromWebStream(body = null, status_code = null, headers = null, cookies = null, status_message = null) {
         return this.new(
             body !== null ? Readable.fromWeb(body) : null,
             status_code,
             headers,
             cookies,
             status_message
-        );
-    }
-
-    /**
-     * @param {Response} response
-     * @returns {HttpResponse}
-     */
-    static newFromWebResponse(response) {
-        return this.newFromWebBody(
-            response.body,
-            response.status,
-            Object.fromEntries(response.headers),
-            null,
-            response.statusText
         );
     }
 

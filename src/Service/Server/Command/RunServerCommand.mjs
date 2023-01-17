@@ -170,7 +170,7 @@ export class RunServerCommand {
 
         if (request === null) {
             await this.#server_service.mapResponse(
-                HttpResponse.newFromTextBody(
+                HttpResponse.newFromText(
                     "Invalid request",
                     STATUS_400
                 ),
@@ -219,7 +219,7 @@ export class RunServerCommand {
             );
         } else {
             await this.#server_service.mapResponse(
-                HttpResponse.newFromTextBody(
+                HttpResponse.newFromText(
                     "Route not found",
                     STATUS_404
                 ),

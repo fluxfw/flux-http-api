@@ -75,7 +75,7 @@ export class ProxyRequestCommand {
                 headers: proxy_request.request.headers
             } : null,
             ...request_body ? {
-                body: proxy_request.request.web_body
+                body: proxy_request.request.bodyAsWebStream()
             } : null,
             ...response_redirect ? {
                 redirect: "manual"
@@ -92,7 +92,7 @@ export class ProxyRequestCommand {
             response.body?.cancel();
         }
 
-        return HttpResponse.newFromWebBody(
+        return HttpResponse.newFromWebStream(
             response_body && proxy_request.request.method !== METHOD_HEAD ? response.body : null,
             response_status ? response.status : null,
             Array.isArray(response_headers) ? response_headers.reduce((headers, key) => {
