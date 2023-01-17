@@ -43,7 +43,7 @@ export class GetStaticFileResponseCommand {
      */
     async getStaticFileResponse(path, request, mime_type = null, headers = null) {
         if (!existsSync(path)) {
-            return HttpResponse.newFromTextBody(
+            return HttpResponse.newFromText(
                 "File not found",
                 STATUS_404
             );
@@ -53,7 +53,7 @@ export class GetStaticFileResponseCommand {
 
         if (!_stat.isFile()) {
             if (mime_type !== null || !_stat.isDirectory()) {
-                return HttpResponse.newFromTextBody(
+                return HttpResponse.newFromText(
                     "File not found",
                     STATUS_404
                 );
