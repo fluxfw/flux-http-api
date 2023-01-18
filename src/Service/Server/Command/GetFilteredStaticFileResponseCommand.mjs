@@ -33,13 +33,13 @@ export class GetFilteredStaticFileResponseCommand {
      * @param {string} root
      * @param {string} path
      * @param {HttpRequest} request
-     * @param {string | null} mime_type
+     * @param {string | null} content_type
      * @param {{[key: string]: string | string[]} | null} headers
      * @returns {Promise<HttpResponse>}
      */
-    async getFilteredStaticFileResponse(root, path, request, mime_type = null, headers = null) {
+    async getFilteredStaticFileResponse(root, path, request, content_type = null, headers = null) {
         if (path.includes("..") || path.includes("//") || path.includes("\\")) {
-            return HttpResponse.newFromText(
+            return HttpResponse.text(
                 "Invalid file",
                 STATUS_400
             );
@@ -48,7 +48,7 @@ export class GetFilteredStaticFileResponseCommand {
         return this.#server_service.getStaticFileResponse(
             join(root, path.startsWith("/") ? path.substring(1) : path),
             request,
-            mime_type,
+            content_type,
             headers
         );
     }

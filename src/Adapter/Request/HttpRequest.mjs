@@ -1,7 +1,7 @@
 import { HEADER_CONTENT_TYPE } from "../Header/HEADER.mjs";
 import { Readable } from "node:stream";
-import { arrayBuffer as bodyToArrayBuffer, blob as bodyToBlob, buffer as bodyToBuffer, json as bodyToJson, text as bodyToString } from "node:stream/consumers";
-import { CONTENT_TYPE_FORM_DATA, CONTENT_TYPE_FORM_DATA_2, CONTENT_TYPE_HTML, CONTENT_TYPE_JSON, CONTENT_TYPE_TEXT } from "../ContentType/CONTENT_TYPE.mjs";
+import { arrayBuffer as bodyAsArrayBuffer, blob as bodyAsBlob, buffer as bodyAsBuffer, json as bodyAsJson, text as bodyAsString } from "node:stream/consumers";
+import { CONTENT_TYPE_FORM_DATA_MULTIPART, CONTENT_TYPE_FORM_DATA_URL_ENCODED, CONTENT_TYPE_HTML, CONTENT_TYPE_JSON, CONTENT_TYPE_TEXT } from "../ContentType/CONTENT_TYPE.mjs";
 
 /** @typedef {import("node:http").ServerResponse} ServerResponse */
 
@@ -38,7 +38,7 @@ export class HttpRequest {
     /**
      * @param {string} method
      * @param {URL} url
-     * @param {[string, string[]][] | null} headers
+     * @param {{[key: string]: string | string[]} | null} headers
      * @param {[string, string][] | null} cookies
      * @param {Readable | null} body
      * @param {ServerResponse | null} _res
@@ -49,7 +49,15 @@ export class HttpRequest {
             method,
             url,
             url.pathname.substring(1).split("/"),
-            headers ?? [],
+            Object.entries(headers ?? {}).map(([
+                key,
+                values
+            ]) => [
+                    key,
+                    Array.isArray(values) ? values : [
+                        values
+                    ]
+                ]),
             cookies ?? [],
             body,
             _res
@@ -77,34 +85,27 @@ export class HttpRequest {
     }
 
     /**
-     * @returns {Readable | null}
-     */
-    get body() {
-        return this.#body;
-    }
-
-    /**
      * @returns {Promise<ArrayBuffer>}
      */
-    async bodyAsArrayBuffer() {
+    async arrayBuffer() {
         if (this.#body === null) {
             throw new Error("No body");
         }
 
-        return bodyToArrayBuffer(this.#body);
+        return bodyAsArrayBuffer(this.#body);
     }
 
     /**
      * @returns {Promise<Blob>}
      */
-    async bodyAsBlob() {
+    async blob() {
         if (this.#body === null) {
             throw new Error("No body");
         }
 
-        const blob = await bodyToBlob(this.#body);
+        const blob = await bodyAsBlob(this.#body);
 
-        const content_type = this.getHeader(
+        const content_type = this.header(
             HEADER_CONTENT_TYPE
         );
 
@@ -116,125 +117,21 @@ export class HttpRequest {
     }
 
     /**
+     * @returns {Readable | null}
+     */
+    get body() {
+        return this.#body;
+    }
+
+    /**
      * @returns {Promise<Buffer>}
      */
-    async bodyAsBuffer() {
+    async buffer() {
         if (this.#body === null) {
             throw new Error("No body");
         }
 
-        return bodyToBuffer(this.#body);
-    }
-
-    /**
-     * @returns {Promise<FormData>}
-     */
-    async bodyAsFormData() {
-        if (this.#body === null) {
-            throw new Error("No body");
-        }
-
-        const content_type = this.getHeader(
-            HEADER_CONTENT_TYPE
-        );
-
-        if (content_type === null || !(content_type.includes(CONTENT_TYPE_FORM_DATA) || content_type.includes(CONTENT_TYPE_FORM_DATA_2))) {
-            throw new Error(`Header ${HEADER_CONTENT_TYPE} needs to be ${CONTENT_TYPE_FORM_DATA} or ${CONTENT_TYPE_FORM_DATA_2}, got ${content_type}`);
-        }
-
-        return this.bodyAsWebResponse().formData();
-    }
-
-    /**
-     * @returns {Promise<string>}
-     */
-    async bodyAsHtml() {
-        if (this.#body === null) {
-            throw new Error("No body");
-        }
-
-        const content_type = this.getHeader(
-            HEADER_CONTENT_TYPE
-        );
-
-        if (!(content_type?.includes(CONTENT_TYPE_HTML) ?? false)) {
-            throw new Error(`Header ${HEADER_CONTENT_TYPE} needs to be ${CONTENT_TYPE_HTML}, got ${content_type}`);
-        }
-
-        return this.bodyAsString();
-    }
-
-    /**
-     * @returns {Promise<*>}
-     */
-    async bodyAsJson() {
-        if (this.#body === null) {
-            throw new Error("No body");
-        }
-
-        const content_type = this.getHeader(
-            HEADER_CONTENT_TYPE
-        );
-
-        if (!(content_type?.includes(CONTENT_TYPE_JSON) ?? false)) {
-            throw new Error(`Header ${HEADER_CONTENT_TYPE} needs to be ${CONTENT_TYPE_JSON}, got ${content_type}`);
-        }
-
-        return bodyToJson(this.#body);
-    }
-
-    /**
-     * @returns {Promise<string>}
-     */
-    async bodyAsString() {
-        if (this.#body === null) {
-            throw new Error("No body");
-        }
-
-        return bodyToString(this.#body);
-    }
-
-    /**
-     * @returns {Promise<string>}
-     */
-    async bodyAsText() {
-        if (this.#body === null) {
-            throw new Error("No body");
-        }
-
-        const content_type = this.getHeader(
-            HEADER_CONTENT_TYPE
-        );
-
-        if (!(content_type?.includes(CONTENT_TYPE_TEXT) ?? false)) {
-            throw new Error(`Header ${HEADER_CONTENT_TYPE} needs to be ${CONTENT_TYPE_TEXT}, got ${content_type}`);
-        }
-
-        return this.bodyAsString();
-    }
-
-    /**
-     * @returns {Response}
-     */
-    bodyAsWebResponse() {
-        const content_type = this.getHeader(
-            HEADER_CONTENT_TYPE
-        );
-
-        return new Response(this.bodyAsWebStream(), {
-            headers: {
-                ...content_type !== null ? {
-                    [HEADER_CONTENT_TYPE]: content_type
-                } : null
-            }
-        });
-    }
-
-    /**
-     * @returns {ReadableStream | null}
-     */
-    bodyAsWebStream() {
-        return this.#body !== null ? Readable.toWeb(this.#body) : null;
+        return bodyAsBuffer(this.#body);
     }
 
     /**
@@ -248,18 +145,44 @@ export class HttpRequest {
      * @param {string} key
      * @returns {string | null}
      */
-    getCookie(key) {
+    cookie(key) {
         return this.#cookies.find(([
             _key
         ]) => _key === key)?.[1] ?? null;
     }
 
     /**
+     * @returns {Promise<FormData>}
+     */
+    async formData() {
+        if (this.#body === null) {
+            throw new Error("No body");
+        }
+
+        const content_type = this.header(
+            HEADER_CONTENT_TYPE
+        );
+
+        if (content_type === null || !(content_type.includes(CONTENT_TYPE_FORM_DATA_MULTIPART) || content_type.includes(CONTENT_TYPE_FORM_DATA_URL_ENCODED))) {
+            throw new Error(`Header ${HEADER_CONTENT_TYPE} needs to be ${CONTENT_TYPE_FORM_DATA_MULTIPART} or ${CONTENT_TYPE_FORM_DATA_URL_ENCODED}, got ${content_type}`);
+        }
+
+        return this.webResponse().formData();
+    }
+
+    /**
+     * @returns {{[key: string]: string[]}}
+     */
+    get headers() {
+        return structuredClone(Object.fromEntries(this.#headers));
+    }
+
+    /**
      * @param {string} key
      * @returns {string | null}
      */
-    getHeader(key) {
-        return this.getHeaderAll(
+    header(key) {
+        return this.headerAll(
             key
         )[0] ?? null;
     }
@@ -268,37 +191,48 @@ export class HttpRequest {
      * @param {string} key
      * @returns {string[]}
      */
-    getHeaderAll(key) {
+    headerAll(key) {
         return this.#headers.find(([
             _key
         ]) => _key.toLowerCase() === key.toLowerCase())?.[1] ?? [];
     }
 
     /**
-     * @param {string} key
-     * @returns {boolean}
+     * @returns {Promise<string>}
      */
-    hasCookie(key) {
-        return this.#cookies.some(([
-            _key
-        ]) => _key === key);
+    async html() {
+        if (this.#body === null) {
+            throw new Error("No body");
+        }
+
+        const content_type = this.header(
+            HEADER_CONTENT_TYPE
+        );
+
+        if (!(content_type?.includes(CONTENT_TYPE_HTML) ?? false)) {
+            throw new Error(`Header ${HEADER_CONTENT_TYPE} needs to be ${CONTENT_TYPE_HTML}, got ${content_type}`);
+        }
+
+        return this.string();
     }
 
     /**
-     * @param {string} key
-     * @returns {boolean}
+     * @returns {Promise<*>}
      */
-    hasHeader(key) {
-        return this.#headers.some(([
-            _key
-        ]) => _key.toLowerCase() === key.toLowerCase());
-    }
+    async json() {
+        if (this.#body === null) {
+            throw new Error("No body");
+        }
 
-    /**
-     * @returns {{[key: string]: string[]}}
-     */
-    get headers() {
-        return structuredClone(Object.fromEntries(this.#headers));
+        const content_type = this.header(
+            HEADER_CONTENT_TYPE
+        );
+
+        if (!(content_type?.includes(CONTENT_TYPE_JSON) ?? false)) {
+            throw new Error(`Header ${HEADER_CONTENT_TYPE} needs to be ${CONTENT_TYPE_JSON}, got ${content_type}`);
+        }
+
+        return bodyAsJson(this.#body);
     }
 
     /**
@@ -316,6 +250,36 @@ export class HttpRequest {
     }
 
     /**
+     * @returns {Promise<string>}
+     */
+    async string() {
+        if (this.#body === null) {
+            throw new Error("No body");
+        }
+
+        return bodyAsString(this.#body);
+    }
+
+    /**
+     * @returns {Promise<string>}
+     */
+    async text() {
+        if (this.#body === null) {
+            throw new Error("No body");
+        }
+
+        const content_type = this.header(
+            HEADER_CONTENT_TYPE
+        );
+
+        if (!(content_type?.includes(CONTENT_TYPE_TEXT) ?? false)) {
+            throw new Error(`Header ${HEADER_CONTENT_TYPE} needs to be ${CONTENT_TYPE_TEXT}, got ${content_type}`);
+        }
+
+        return this.string();
+    }
+
+    /**
      * @returns {URL}
      */
     get url() {
@@ -327,5 +291,29 @@ export class HttpRequest {
      */
     get url_path_parts() {
         return this.#url_path_parts;
+    }
+
+    /**
+     * @returns {Response}
+     */
+    webResponse() {
+        const content_type = this.header(
+            HEADER_CONTENT_TYPE
+        );
+
+        return new Response(this.webStream(), {
+            headers: {
+                ...content_type !== null ? {
+                    [HEADER_CONTENT_TYPE]: content_type
+                } : null
+            }
+        });
+    }
+
+    /**
+     * @returns {ReadableStream | null}
+     */
+    webStream() {
+        return this.#body !== null ? Readable.toWeb(this.#body) : null;
     }
 }

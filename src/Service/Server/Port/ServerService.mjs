@@ -38,11 +38,11 @@ export class ServerService {
      * @param {string} root
      * @param {string} path
      * @param {HttpRequest} request
-     * @param {string | null} mime_type
+     * @param {string | null} content_type
      * @param {{[key: string]: string | string[]} | null} headers
      * @returns {Promise<HttpResponse>}
      */
-    async getFilteredStaticFileResponse(root, path, request, mime_type = null, headers = null) {
+    async getFilteredStaticFileResponse(root, path, request, content_type = null, headers = null) {
         return (await import("../Command/GetFilteredStaticFileResponseCommand.mjs")).GetFilteredStaticFileResponseCommand.new(
             this
         )
@@ -50,7 +50,7 @@ export class ServerService {
                 root,
                 path,
                 request,
-                mime_type,
+                content_type,
                 headers
             );
     }
@@ -82,18 +82,18 @@ export class ServerService {
     /**
      * @param {string} path
      * @param {HttpRequest} request
-     * @param {string | null} mime_type
+     * @param {string | null} content_type
      * @param {{[key: string]: string | string[]} | null} headers
      * @returns {Promise<HttpResponse>}
      */
-    async getStaticFileResponse(path, request, mime_type = null, headers = null) {
+    async getStaticFileResponse(path, request, content_type = null, headers = null) {
         return (await import("../Command/GetStaticFileResponseCommand.mjs")).GetStaticFileResponseCommand.new(
             this
         )
             .getStaticFileResponse(
                 path,
                 request,
-                mime_type,
+                content_type,
                 headers
             );
     }

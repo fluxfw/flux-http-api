@@ -1,11 +1,10 @@
+import { existsSync } from "node:fs";
 import { HttpResponse } from "../../../Adapter/Response/HttpResponse.mjs";
 import { join } from "node:path/posix";
 import { METHOD_HEAD } from "../../../Adapter/Method/METHOD.mjs";
 import { RANGE_UNIT_BYTES } from "../../../Adapter/Range/RANGE_UNIT.mjs";
 import { stat } from "node:fs/promises";
-import { createReadStream, existsSync } from "node:fs";
-import { HEADER_CONTENT_LENGTH, HEADER_CONTENT_RANGE, HEADER_CONTENT_TYPE } from "../../../Adapter/Header/HEADER.mjs";
-import { STATUS_206, STATUS_404 } from "../../../Adapter/Status/STATUS.mjs";
+import { STATUS_404 } from "../../../Adapter/Status/STATUS.mjs";
 
 /** @typedef {import("../../../Adapter/Request/HttpRequest.mjs").HttpRequest} HttpRequest */
 /** @typedef {import("../Port/ServerService.mjs").ServerService} ServerService */
@@ -37,13 +36,13 @@ export class GetStaticFileResponseCommand {
     /**
      * @param {string} path
      * @param {HttpRequest} request
-     * @param {string | null} mime_type
+     * @param {string | null} content_type
      * @param {{[key: string]: string | string[]} | null} headers
      * @returns {Promise<HttpResponse>}
      */
-    async getStaticFileResponse(path, request, mime_type = null, headers = null) {
+    async getStaticFileResponse(path, request, content_type = null, headers = null) {
         if (!existsSync(path)) {
-            return HttpResponse.newFromText(
+            return HttpResponse.text(
                 "File not found",
                 STATUS_404
             );
@@ -52,15 +51,15 @@ export class GetStaticFileResponseCommand {
         const _stat = await stat(path);
 
         if (!_stat.isFile()) {
-            if (mime_type !== null || !_stat.isDirectory()) {
-                return HttpResponse.newFromText(
+            if (content_type !== null || !_stat.isDirectory()) {
+                return HttpResponse.text(
                     "File not found",
                     STATUS_404
                 );
             }
 
             if (!request.url.pathname.endsWith("/")) {
-                return HttpResponse.newFromRedirect(
+                return HttpResponse.redirect(
                     `${request.url.origin}${request.url.pathname}/${request.url.search}`
                 );
             }
@@ -68,7 +67,7 @@ export class GetStaticFileResponseCommand {
             return this.getStaticFileResponse(
                 join(path, "index.html"),
                 request,
-                mime_type
+                content_type
             );
         }
 
@@ -86,30 +85,15 @@ export class GetStaticFileResponseCommand {
             return range;
         }
 
-        const _mime_type = mime_type ?? await this.#server_service.getMimeTypeByPath(
-            path
-        );
-
-        return HttpResponse.new(
-            request.method !== METHOD_HEAD ? createReadStream(path, {
-                ...range !== null ? {
-                    start: range.start,
-                    end: range.end
-                } : null
-            }) : null,
-            range !== null ? STATUS_206 : null,
-            {
-                ...range !== null ? {
-                    [HEADER_CONTENT_LENGTH]: range.length,
-                    [HEADER_CONTENT_RANGE]: range.range
-                } : {
-                    [HEADER_CONTENT_LENGTH]: _stat.size
-                },
-                ..._mime_type !== null ? {
-                    [HEADER_CONTENT_TYPE]: _mime_type
-                } : null,
-                ...headers
-            }
+        return HttpResponse.staticFile(
+            request.method !== METHOD_HEAD ? path : null,
+            content_type ?? await this.#server_service.getMimeTypeByPath(
+                path
+            ),
+            _stat.size,
+            range,
+            null,
+            headers
         );
     }
 }
