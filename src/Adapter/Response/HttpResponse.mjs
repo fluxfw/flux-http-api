@@ -1,7 +1,10 @@
+import { createReadStream } from "node:fs";
 import { Readable } from "node:stream";
 import { CONTENT_TYPE_HTML, CONTENT_TYPE_JSON, CONTENT_TYPE_TEXT } from "../ContentType/CONTENT_TYPE.mjs";
-import { HEADER_CONTENT_TYPE, HEADER_LOCATION } from "../Header/HEADER.mjs";
-import { STATUS_200, STATUS_302 } from "../Status/STATUS.mjs";
+import { HEADER_CONTENT_LENGTH, HEADER_CONTENT_RANGE, HEADER_CONTENT_TYPE, HEADER_LOCATION } from "../Header/HEADER.mjs";
+import { STATUS_200, STATUS_206, STATUS_302 } from "../Status/STATUS.mjs";
+
+/** @typedef {import("../Range/RangeValue.mjs").RangeValue} RangeValue */
 
 export class HttpResponse {
     /**
@@ -33,8 +36,8 @@ export class HttpResponse {
      * @param {string | null} status_message
      * @returns {HttpResponse}
      */
-    static newFromArrayBuffer(array_buffer, status_code = null, headers = null, cookies = null, status_message = null) {
-        return this.newFromBuffer(
+    static arrayBuffer(array_buffer, status_code = null, headers = null, cookies = null, status_message = null) {
+        return this.buffer(
             Buffer.from(array_buffer),
             status_code,
             headers,
@@ -49,11 +52,11 @@ export class HttpResponse {
      * @param {{[key: string]: string | string[]} | null} headers
      * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null} | null}} cookies
      * @param {string | null} status_message
-     * @returns {Promise<HttpResponse>}
+     * @returns {HttpResponse}
      */
-    static async newFromBlob(blob, status_code = null, headers = null, cookies = null, status_message = null) {
-        return this.newFromArrayBuffer(
-            await blob.arrayBuffer(),
+    static blob(blob, status_code = null, headers = null, cookies = null, status_message = null) {
+        return this.webStream(
+            blob.stream,
             status_code,
             {
                 ...blob.type !== "" ? {
@@ -74,7 +77,7 @@ export class HttpResponse {
      * @param {string | null} status_message
      * @returns {HttpResponse}
      */
-    static newFromBuffer(buffer, status_code = null, headers = null, cookies = null, status_message = null) {
+    static buffer(buffer, status_code = null, headers = null, cookies = null, status_message = null) {
         return this.new(
             Readable.from(buffer),
             status_code,
@@ -92,8 +95,8 @@ export class HttpResponse {
      * @param {string | null} status_message
      * @returns {HttpResponse}
      */
-    static newFromHtml(html, status_code = null, headers = null, cookies = null, status_message = null) {
-        return this.newFromString(
+    static html(html, status_code = null, headers = null, cookies = null, status_message = null) {
+        return this.string(
             html,
             status_code,
             {
@@ -106,16 +109,16 @@ export class HttpResponse {
     }
 
     /**
-     * @param {*} data
+     * @param {*} json
      * @param {number | null} status_code
      * @param {{[key: string]: string | string[]} | null} headers
      * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null} | null}} cookies
      * @param {string | null} status_message
      * @returns {HttpResponse}
      */
-    static newFromJson(data, status_code = null, headers = null, cookies = null, status_message = null) {
-        return this.newFromString(
-            JSON.stringify(data),
+    static json(json, status_code = null, headers = null, cookies = null, status_message = null) {
+        return this.string(
+            JSON.stringify(json),
             status_code,
             {
                 [HEADER_CONTENT_TYPE]: CONTENT_TYPE_JSON,
@@ -127,19 +130,56 @@ export class HttpResponse {
     }
 
     /**
-     * @param {string} url
+     * @param {string} location
      * @param {number | null} status_code
      * @param {{[key: string]: string | string[]} | null} headers
      * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null} | null}} cookies
      * @param {string | null} status_message
      * @returns {HttpResponse}
      */
-    static newFromRedirect(url, status_code = null, headers = null, cookies = null, status_message = null) {
+    static redirect(location, status_code = null, headers = null, cookies = null, status_message = null) {
         return this.new(
             null,
             status_code ?? STATUS_302,
             {
-                [HEADER_LOCATION]: url,
+                [HEADER_LOCATION]: location,
+                ...headers
+            },
+            cookies,
+            status_message
+        );
+    }
+
+    /**
+     * @param {string | null} path
+     * @param {string | null} content_type
+     * @param {number | null} length
+     * @param {RangeValue | null} range
+     * @param {number | null} status_code
+     * @param {{[key: string]: string | string[]} | null} headers
+     * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null} | null}} cookies
+     * @param {string | null} status_message
+     * @returns {HttpResponse}
+     */
+    static staticFile(path = null, content_type = null, length = null, range = null, status_code = null, headers = null, cookies = null, status_message = null) {
+        return this.new(
+            path !== null ? createReadStream(path, {
+                ...range !== null ? {
+                    start: range.start,
+                    end: range.end
+                } : null
+            }) : null,
+            status_code ?? (range !== null ? STATUS_206 : null),
+            {
+                ...range !== null ? {
+                    [HEADER_CONTENT_LENGTH]: range.length,
+                    [HEADER_CONTENT_RANGE]: range.range
+                } : length !== null ? {
+                    [HEADER_CONTENT_LENGTH]: length
+                } : {},
+                ...content_type !== null ? {
+                    [HEADER_CONTENT_TYPE]: content_type
+                } : null,
                 ...headers
             },
             cookies,
@@ -155,8 +195,8 @@ export class HttpResponse {
      * @param {string | null} status_message
      * @returns {HttpResponse}
      */
-    static newFromString(string, status_code = null, headers = null, cookies = null, status_message = null) {
-        return this.newFromBuffer(
+    static string(string, status_code = null, headers = null, cookies = null, status_message = null) {
+        return this.buffer(
             Buffer.from(string),
             status_code,
             headers,
@@ -173,8 +213,8 @@ export class HttpResponse {
      * @param {string | null} status_message
      * @returns {HttpResponse}
      */
-    static newFromText(text, status_code = null, headers = null, cookies = null, status_message = null) {
-        return this.newFromString(
+    static text(text, status_code = null, headers = null, cookies = null, status_message = null) {
+        return this.string(
             text,
             status_code,
             {
@@ -190,8 +230,8 @@ export class HttpResponse {
      * @param {Response} response
      * @returns {HttpResponse}
      */
-    static newFromWebResponse(response) {
-        return this.newFromWebStream(
+    static webResponse(response) {
+        return this.webStream(
             response.body,
             response.status,
             Object.fromEntries(response.headers),
@@ -208,7 +248,7 @@ export class HttpResponse {
      * @param {string | null} status_message
      * @returns {HttpResponse}
      */
-    static newFromWebStream(body = null, status_code = null, headers = null, cookies = null, status_message = null) {
+    static webStream(body = null, status_code = null, headers = null, cookies = null, status_message = null) {
         return this.new(
             body !== null ? Readable.fromWeb(body) : null,
             status_code,

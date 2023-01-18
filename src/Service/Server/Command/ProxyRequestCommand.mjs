@@ -63,11 +63,13 @@ export class ProxyRequestCommand {
             } : null,
             ...Array.isArray(request_headers) ? {
                 headers: request_headers.reduce((headers, key) => {
-                    if (!proxy_request.request.hasHeader(key)) {
+                    const value = proxy_request.request.header(key);
+
+                    if (value === null) {
                         return headers;
                     }
 
-                    headers[key] = proxy_request.request.getHeader(key);
+                    headers[key] = value;
 
                     return headers;
                 }, {})
@@ -75,7 +77,7 @@ export class ProxyRequestCommand {
                 headers: proxy_request.request.headers
             } : null,
             ...request_body ? {
-                body: proxy_request.request.bodyAsWebStream()
+                body: proxy_request.request.webStream()
             } : null,
             ...response_redirect ? {
                 redirect: "manual"
@@ -92,7 +94,7 @@ export class ProxyRequestCommand {
             response.body?.cancel();
         }
 
-        return HttpResponse.newFromWebStream(
+        return HttpResponse.webStream(
             response_body && proxy_request.request.method !== METHOD_HEAD ? response.body : null,
             response_status ? response.status : null,
             Array.isArray(response_headers) ? response_headers.reduce((headers, key) => {

@@ -29,7 +29,7 @@ export class ValidateRangesCommand {
     async validateRanges(request, units) {
         request._res?.setHeader(HEADER_ACCEPT_RANGES, units.map(_unit => _unit.name).join(", "));
 
-        const range_header = request.getHeader(
+        const range_header = request.header(
             HEADER_RANGE
         );
 

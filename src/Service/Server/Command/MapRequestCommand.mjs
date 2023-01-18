@@ -31,15 +31,7 @@ export class MapRequestCommand {
             return HttpRequest.new(
                 req.method,
                 new URL(req.url, `${req.socket.encrypted ? "https" : "http"}://${req.headers[HEADER_HOST.toLowerCase()] ?? "host"}`),
-                Object.entries(req.headers).map(([
-                    key,
-                    values
-                ]) => [
-                        key,
-                        Array.isArray(values) ? values : [
-                            values
-                        ]
-                    ]),
+                req.headers,
                 Object.entries(req.headers[HEADER_COOKIE.toLowerCase()]?.split(";")?.reduce((cookies, cookie) => {
                     const [
                         key,
