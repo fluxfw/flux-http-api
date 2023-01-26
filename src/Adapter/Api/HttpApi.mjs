@@ -1,10 +1,9 @@
-/** @typedef {import("../Fetch/Fetch.mjs").Fetch} Fetch */
-/** @typedef {import("../Fetch/fetchAuthenticate.mjs").fetchAuthenticate} fetchAuthenticate */
-/** @typedef {import("../../Service/Fetch/Port/FetchService.mjs").FetchService} FetchService */
-/** @typedef {import("../Fetch/fetchShowError.mjs").fetchShowError} fetchShowError */
+/** @typedef {import("../../Service/Client/Port/ClientService.mjs").ClientService} ClientService */
 /** @typedef {import("../Server/handleRequest.mjs").handleRequest} handleRequest */
-/** @typedef {import("../Request/HttpRequest.mjs").HttpRequest} HttpRequest */
-/** @typedef {import("../Response/HttpResponse.mjs").HttpResponse} HttpResponse */
+/** @typedef {import("../Client/HttpClientRequest.mjs").HttpClientRequest} HttpClientRequest */
+/** @typedef {import("../Client/HttpClientResponse.mjs").HttpClientResponse} HttpClientResponse */
+/** @typedef {import("../Server/HttpServerRequest.mjs").HttpServerRequest} HttpServerRequest */
+/** @typedef {import("../Server/HttpServerResponse.mjs").HttpServerResponse} HttpServerResponse */
 /** @typedef {import("../Proxy/ProxyRequest.mjs").ProxyRequest} ProxyRequest */
 /** @typedef {import("../Range/RangeUnit.mjs").RangeUnit} RangeUnit */
 /** @typedef {import("../Range/RangeValue.mjs").RangeValue} RangeValue */
@@ -14,17 +13,9 @@
 
 export class HttpApi {
     /**
-     * @type {fetchAuthenticate | null}
+     * @type {ClientService | null}
      */
-    #fetch_authenticate;
-    /**
-     * @type {FetchService | null}
-     */
-    #fetch_service = null;
-    /**
-     * @type {fetchShowError | null}
-     */
-    #fetch_show_error;
+    #client_service = null;
     /**
      * @type {ServerService | null}
      */
@@ -36,47 +27,39 @@ export class HttpApi {
 
     /**
      * @param {ShutdownHandler | null} shutdown_handler
-     * @param {fetchAuthenticate | null} fetch_authenticate
-     * @param {fetchShowError | null} fetch_show_error
      * @returns {HttpApi}
      */
-    static new(shutdown_handler = null, fetch_authenticate = null, fetch_show_error = null) {
+    static new(shutdown_handler = null) {
         return new this(
-            shutdown_handler,
-            fetch_authenticate,
-            fetch_show_error
+            shutdown_handler
         );
     }
 
     /**
      * @param {ShutdownHandler | null} shutdown_handler
-     * @param {fetchAuthenticate | null} fetch_authenticate
-     * @param {fetchShowError | null} fetch_show_error
      * @private
      */
-    constructor(shutdown_handler, fetch_authenticate, fetch_show_error) {
+    constructor(shutdown_handler) {
         this.#shutdown_handler = shutdown_handler;
-        this.#fetch_authenticate = fetch_authenticate;
-        this.#fetch_show_error = fetch_show_error;
     }
 
     /**
-     * @param {Fetch} _fetch
-     * @returns {Promise<*>}
+     * @param {HttpClientRequest} request
+     * @returns {Promise<HttpClientResponse>}
      */
-    async fetch(_fetch) {
-        return (await this.#getFetchService()).fetch(
-            _fetch
+    async fetch(request) {
+        return (await this.#getClientService()).fetch(
+            request
         );
     }
 
     /**
      * @param {string} root
      * @param {string} path
-     * @param {HttpRequest} request
+     * @param {HttpServerRequest} request
      * @param {string | null} content_type
      * @param {{[key: string]: string | string[]} | null} headers
-     * @returns {Promise<HttpResponse>}
+     * @returns {Promise<HttpServerResponse>}
      */
     async getFilteredStaticFileResponse(root, path, request, content_type = null, headers = null) {
         return (await this.#getServerService()).getFilteredStaticFileResponse(
@@ -110,10 +93,10 @@ export class HttpApi {
 
     /**
      * @param {string} path
-     * @param {HttpRequest} request
+     * @param {HttpServerRequest} request
      * @param {string | null} content_type
      * @param {{[key: string]: string | string[]} | null} headers
-     * @returns {Promise<HttpResponse>}
+     * @returns {Promise<HttpServerResponse>}
      */
     async getStaticFileResponse(path, request, content_type = null, headers = null) {
         return (await this.#getServerService()).getStaticFileResponse(
@@ -126,7 +109,7 @@ export class HttpApi {
 
     /**
      * @param {ProxyRequest} proxy_request
-     * @returns {Promise<HttpResponse>}
+     * @returns {Promise<HttpServerResponse>}
      */
     async proxyRequest(proxy_request) {
         return (await this.#getServerService()).proxyRequest(
@@ -147,9 +130,9 @@ export class HttpApi {
     }
 
     /**
-     * @param {HttpRequest} request
+     * @param {HttpServerRequest} request
      * @param {string[]} methods
-     * @returns {Promise<HttpResponse | null>}
+     * @returns {Promise<HttpServerResponse | null>}
      */
     async validateMethods(request, methods) {
         return (await this.#getServerService()).validateMethods(
@@ -159,9 +142,9 @@ export class HttpApi {
     }
 
     /**
-     * @param {HttpRequest} request
+     * @param {HttpServerRequest} request
      * @param {RangeUnit[]} units
-     * @returns {Promise<RangeValue | HttpResponse | null>}
+     * @returns {Promise<RangeValue | HttpServerResponse | null>}
      */
     async validateRanges(request, units) {
         return (await this.#getServerService()).validateRanges(
@@ -171,15 +154,12 @@ export class HttpApi {
     }
 
     /**
-     * @returns {Promise<FetchService>}
+     * @returns {Promise<ClientService>}
      */
-    async #getFetchService() {
-        this.#fetch_service ??= (await import("../../Service/Fetch/Port/FetchService.mjs")).FetchService.new(
-            this.#fetch_authenticate,
-            this.#fetch_show_error
-        );
+    async #getClientService() {
+        this.#client_service ??= (await import("../../Service/Client/Port/ClientService.mjs")).ClientService.new();
 
-        return this.#fetch_service;
+        return this.#client_service;
     }
 
     /**
@@ -187,6 +167,7 @@ export class HttpApi {
      */
     async #getServerService() {
         this.#server_service ??= (await import("../../Service/Server/Port/ServerService.mjs")).ServerService.new(
+            await this.#getClientService(),
             this.#shutdown_handler
         );
 

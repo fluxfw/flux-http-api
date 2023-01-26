@@ -1,26 +1,37 @@
-import { HttpResponse } from "../../../Adapter/Response/HttpResponse.mjs";
-import { METHOD_HEAD } from "../../../Adapter/Method/METHOD.mjs";
+import { HttpClientRequest } from "../../../Adapter/Client/HttpClientRequest.mjs";
+import { HttpServerResponse } from "../../../Adapter/Server/HttpServerResponse.mjs";
+import { METHOD_GET, METHOD_HEAD } from "../../../Adapter/Method/METHOD.mjs";
 
+/** @typedef {import("../../Client/Port/ClientService.mjs").ClientService} ClientService */
 /** @typedef {import("../../../Adapter/Proxy/ProxyRequest.mjs").ProxyRequest} ProxyRequest */
 
 export class ProxyRequestCommand {
     /**
+     * @type {ClientService}
+     */
+    #client_service;
+
+    /**
+     * @param {ClientService} client_service
      * @returns {ProxyRequestCommand}
      */
-    static new() {
-        return new this();
+    static new(client_service) {
+        return new this(
+            client_service
+        );
     }
 
     /**
+     * @param {ClientService} client_service
      * @private
      */
-    constructor() {
-
+    constructor(client_service) {
+        this.#client_service = client_service;
     }
 
     /**
      * @param {ProxyRequest} proxy_request
-     * @returns {Promise<HttpResponse>}
+     * @returns {Promise<HttpServerResponse>}
      */
     async proxyRequest(proxy_request) {
         const request_method = proxy_request.request_method ?? false;
@@ -57,57 +68,49 @@ export class ProxyRequestCommand {
             }
         }
 
-        const response = await fetch(`${_url}`, {
-            ...(Array.isArray(request_method) ? request_method.includes(proxy_request.request.method) : request_method) ? {
-                method: proxy_request.request.method
-            } : null,
-            ...Array.isArray(request_headers) ? {
-                headers: request_headers.reduce((headers, key) => {
-                    const value = proxy_request.request.header(key);
+        const response = await this.#client_service.fetch(
+            HttpClientRequest.webStream(
+                `${_url}`,
+                request_body && proxy_request.request.method !== METHOD_HEAD && proxy_request.request.method !== METHOD_GET ? await proxy_request.request.body.webStream() : null,
+                ...(Array.isArray(request_method) ? request_method.includes(proxy_request.request.method) : request_method) ? {
+                    method: proxy_request.request.method
+                } : null,
+                Array.isArray(request_headers) ? {
+                    headers: request_headers.reduce((headers, key) => {
+                        const value = proxy_request.request.header(key);
 
-                    if (value === null) {
+                        if (value === null) {
+                            return headers;
+                        }
+
+                        headers[key] = value;
+
                         return headers;
-                    }
+                    }, {})
+                } : request_headers ? {
+                    headers: proxy_request.request.headers
+                } : null,
+                !response_redirect,
+                !response_status
+            )
+        );
 
-                    headers[key] = value;
-
-                    return headers;
-                }, {})
-            } : request_headers ? {
-                headers: proxy_request.request.headers
-            } : null,
-            ...request_body ? {
-                body: proxy_request.request.webStream()
-            } : null,
-            ...response_redirect ? {
-                redirect: "manual"
-            } : null
-        });
-
-        if (!response_status && !response.ok) {
-            response.body?.cancel();
-
-            return Promise.reject(response);
-        }
-
-        if (!response_body || proxy_request.request.method === METHOD_HEAD) {
-            response.body?.cancel();
-        }
-
-        return HttpResponse.webStream(
-            response_body && proxy_request.request.method !== METHOD_HEAD ? response.body : null,
-            response_status ? response.status : null,
+        return HttpServerResponse.stream(
+            response_body && proxy_request.request.method !== METHOD_HEAD ? await response.body.webStream() : null,
+            response_status ? response.status_code : null,
             Array.isArray(response_headers) ? response_headers.reduce((headers, key) => {
-                if (!response.headers.has(key)) {
+                const value = response.header(key);
+
+                if (value === null) {
                     return headers;
                 }
 
-                headers[key] = response.headers.get(key);
+                headers[key] = value;
 
                 return headers;
-            }, {}) : response_headers ? Object.fromEntries(response.headers) : null,
+            }, {}) : response_headers ? response.headers : null,
             null,
-            response_status ? response.statusText : null
+            response_status ? response.status_message : null
         );
     }
 }

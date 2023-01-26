@@ -1,8 +1,8 @@
-import { HttpRequest } from "../../../Adapter/Request/HttpRequest.mjs";
-import { HEADER_COOKIE, HEADER_HOST } from "../../../Adapter/Header/HEADER.mjs";
+import { HttpServerRequest } from "../../../Adapter/Server/HttpServerRequest.mjs";
+import { NodeBodyImplementation } from "../../../Adapter/BodyImplementation/NodeBodyImplementation.mjs";
+import { HEADER_CONTENT_TYPE, HEADER_COOKIE, HEADER_HOST } from "../../../Adapter/Header/HEADER.mjs";
 import { METHOD_GET, METHOD_HEAD } from "../../../Adapter/Method/METHOD.mjs";
 
-/** @typedef {import("node:http")} http */
 /** @typedef {import("node:http").IncomingMessage} IncomingMessage */
 /** @typedef {import("node:http").ServerResponse} ServerResponse */
 
@@ -24,31 +24,37 @@ export class MapRequestCommand {
     /**
      * @param {IncomingMessage} req
      * @param {ServerResponse | null} _res
-     * @returns {Promise<HttpRequest | null>}
+     * @returns {Promise<HttpServerRequest>}
      */
     async mapRequest(req, _res = null) {
-        try {
-            return HttpRequest.new(
-                req.method,
-                new URL(req.url, `${req.socket.encrypted ? "https" : "http"}://${req.headers[HEADER_HOST.toLowerCase()] ?? "host"}`),
-                req.headers,
-                Object.entries(req.headers[HEADER_COOKIE.toLowerCase()]?.split(";")?.reduce((cookies, cookie) => {
-                    const [
-                        key,
-                        ...value
-                    ] = cookie.trim().split("=");
+        return HttpServerRequest.new(
+            req.method,
+            new URL(req.url, `${req.socket.encrypted ? "https" : "http"}://${req.headers[HEADER_HOST.toLowerCase()] ?? "host"}`),
+            null,
+            Object.entries(req.headers).map(([
+                key,
+                values
+            ]) => [
+                    key,
+                    Array.isArray(values) ? values : [
+                        values
+                    ]
+                ]),
+            Object.entries(req.headers[HEADER_COOKIE.toLowerCase()]?.split(";")?.reduce((cookies, cookie) => {
+                const [
+                    key,
+                    ...value
+                ] = cookie.trim().split("=");
 
-                    cookies[key] = value.join("=");
+                cookies[key] = value.join("=");
 
-                    return cookies;
-                }, {}) ?? {}),
-                req.method !== METHOD_GET && req.method !== METHOD_HEAD ? req : null,
-                _res
-            );
-        } catch (error) {
-            console.error(error);
-
-            return null;
-        }
+                return cookies;
+            }, {}) ?? {}),
+            req.method !== METHOD_GET && req.method !== METHOD_HEAD ? NodeBodyImplementation.new(
+                req,
+                req.headers[HEADER_CONTENT_TYPE.toLowerCase()] ?? null
+            ) : null,
+            _res
+        );
     }
 }

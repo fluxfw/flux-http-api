@@ -1,13 +1,12 @@
 import { createServer as createServerHttp } from "node:http";
 import { createServer as createServerHttps } from "node:https";
 import { HEADER_REFERRER_POLICY } from "../../../Adapter/Header/HEADER.mjs";
-import { HttpResponse } from "../../../Adapter/Response/HttpResponse.mjs";
+import { HttpServerResponse } from "../../../Adapter/Server/HttpServerResponse.mjs";
 import { REFERRER_POLICY_NO_REFERRER } from "../../../Adapter/Referrer/REFERRER_POLICY.mjs";
 import { SERVER_DEFAULT_LISTEN_HTTP_PORT, SERVER_DEFAULT_LISTEN_HTTPS_PORT, SERVER_DEFAULT_NO_DATE, SERVER_DEFAULT_NO_REFERRER, SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS, SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS_PORT, SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS_STATUS_CODE, SERVER_LISTEN_HTTP_PORT_DISABLED, SERVER_LISTEN_HTTPS_PORT_DISABLED } from "../../../Adapter/Server/SERVER.mjs";
 import { STATUS_400, STATUS_404, STATUS_500 } from "../../../Adapter/Status/STATUS.mjs";
 
 /** @typedef {import("../../../Adapter/Server/handleRequest.mjs").handleRequest} handleRequest */
-/** @typedef {import("node:http")} http */
 /** @typedef {import("node:http").IncomingMessage} IncomingMessage */
 /** @typedef {import("../../../Adapter/Server/_Server.mjs").Server} Server */
 /** @typedef {import("node:http").ServerResponse} ServerResponse */
@@ -110,7 +109,7 @@ export class RunServerCommand {
     }
 
     /**
-     * @param {(req: http.IncomingMessage, res: http.ServerResponse) => Promise<void>} handle_request
+     * @param {(req: IncomingMessage, res: ServerResponse) => Promise<void>} handle_request
      * @param {createServerHttp | createServerHttps} create_server
      * @param {number} port
      * @param {string | null} server_listen_interface
@@ -163,25 +162,29 @@ export class RunServerCommand {
             res.setHeader(HEADER_REFERRER_POLICY, REFERRER_POLICY_NO_REFERRER);
         }
 
-        const request = await this.#server_service.mapRequest(
-            req,
-            res
-        );
+        let request;
+        try {
+            request = await this.#server_service.mapRequest(
+                req,
+                res
+            );
+        } catch (error) {
+            console.error(error);
 
-        if (request === null) {
             await this.#server_service.mapResponse(
-                HttpResponse.text(
+                HttpServerResponse.text(
                     "Invalid request",
                     STATUS_400
                 ),
                 res
             );
+
             return;
         }
 
         if (redirect_http_to_https && request.url.protocol !== "https:") {
             await this.#server_service.mapResponse(
-                HttpResponse.redirect(
+                HttpServerResponse.redirect(
                     `https://${request.url.hostname}${redirect_http_to_https_port !== SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS_PORT ? `:${redirect_http_to_https_port}` : ""}${request.url.pathname}${request.url.search}`,
                     redirect_http_to_https_status_code
                 ),
@@ -200,7 +203,7 @@ export class RunServerCommand {
             console.error(error);
 
             await this.#server_service.mapResponse(
-                HttpResponse.new(
+                HttpServerResponse.new(
                     null,
                     STATUS_500
                 ),
@@ -219,7 +222,7 @@ export class RunServerCommand {
             );
         } else {
             await this.#server_service.mapResponse(
-                HttpResponse.text(
+                HttpServerResponse.text(
                     "Route not found",
                     STATUS_404
                 ),

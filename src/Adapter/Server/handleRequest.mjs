@@ -1,6 +1,6 @@
-/** @typedef {import("../Request/HttpRequest.mjs").HttpRequest} HttpRequest */
-/** @typedef {import("../Response/HttpResponse.mjs").HttpResponse} HttpResponse */
+/** @typedef {import("../Server/HttpServerRequest.mjs").HttpServerRequest} HttpServerRequest */
+/** @typedef {import("../Server/HttpServerResponse.mjs").HttpServerResponse} HttpServerResponse */
 
 /**
- * @typedef {(request: HttpRequest) => Promise<HttpResponse | null>} handleRequest
+ * @typedef {(request: HttpServerRequest) => Promise<HttpServerResponse | null>} handleRequest
  */
