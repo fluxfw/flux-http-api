@@ -1,8 +1,8 @@
-import { HttpResponse } from "../../../Adapter/Response/HttpResponse.mjs";
+import { HttpServerResponse } from "../../../Adapter/Server/HttpServerResponse.mjs";
 import { STATUS_416 } from "../../../Adapter/Status/STATUS.mjs";
 import { HEADER_ACCEPT_RANGES, HEADER_CONTENT_RANGE, HEADER_RANGE } from "../../../Adapter/Header/HEADER.mjs";
 
-/** @typedef {import("../../../Adapter/Request/HttpRequest.mjs").HttpRequest} HttpRequest */
+/** @typedef {import("../../../Adapter/Server/HttpServerRequest.mjs").HttpServerRequest} HttpServerRequest */
 /** @typedef {import("../../../Adapter/Range/RangeUnit.mjs").RangeUnit} RangeUnit */
 /** @typedef {import("../../../Adapter/Range/RangeValue.mjs").RangeValue} RangeValue */
 
@@ -22,9 +22,9 @@ export class ValidateRangesCommand {
     }
 
     /**
-     * @param {HttpRequest} request
+     * @param {HttpServerRequest} request
      * @param {RangeUnit[]} units
-     * @returns {Promise<RangeValue | HttpResponse | null>}
+     * @returns {Promise<RangeValue | HttpServerResponse | null>}
      */
     async validateRanges(request, units) {
         request._res?.setHeader(HEADER_ACCEPT_RANGES, units.map(_unit => _unit.name).join(", "));
@@ -112,10 +112,10 @@ export class ValidateRangesCommand {
 
     /**
      * @param {RangeUnit | null} unit
-     * @returns {HttpResponse}
+     * @returns {HttpServerResponse}
      */
     #response416(unit = null) {
-        return HttpResponse.new(
+        return HttpServerResponse.new(
             null,
             STATUS_416,
             {

@@ -5,8 +5,8 @@ import { SET_COOKIE_SAME_SITE_LAX } from "../../../Adapter/Cookie/SET_COOKIE_SAM
 import { STATUS_500 } from "../../../Adapter/Status/STATUS.mjs";
 import { SET_COOKIE_OPTION_EXPIRES, SET_COOKIE_OPTION_HTTP_ONLY, SET_COOKIE_OPTION_MAX_AGE, SET_COOKIE_OPTION_PATH, SET_COOKIE_OPTION_SAME_SITE, SET_COOKIE_OPTION_SECURE } from "../../../Adapter/Cookie/SET_COOKIE_OPTION.mjs";
 
-/** @typedef {import("../../../Adapter/Request/HttpRequest.mjs").HttpRequest} HttpRequest */
-/** @typedef {import("../../../Adapter/Response/HttpResponse.mjs").HttpResponse} HttpResponse */
+/** @typedef {import("../../../Adapter/Server/HttpServerRequest.mjs").HttpServerRequest} HttpServerRequest */
+/** @typedef {import("../../../Adapter/Server/HttpServerResponse.mjs").HttpServerResponse} HttpServerResponse */
 /** @typedef {import("node:http").ServerResponse} ServerResponse */
 
 export class MapResponseCommand {
@@ -25,9 +25,9 @@ export class MapResponseCommand {
     }
 
     /**
-     * @param {HttpResponse} response
+     * @param {HttpServerResponse} response
      * @param {ServerResponse} res
-     * @param {HttpRequest | null} request
+     * @param {HttpServerRequest | null} request
      * @returns {Promise<void>}
      */
     async mapResponse(response, res, request = null) {
@@ -81,9 +81,17 @@ export class MapResponseCommand {
                 }
             }
 
-            if (request?.method !== METHOD_HEAD && response.body !== null) {
-                await pipeline(response.body, res);
+            if (request?.method === METHOD_HEAD) {
+                return;
             }
+
+            const node_stream = await response.body.nodeStream();
+
+            if (node_stream === null) {
+                return;
+            }
+
+            await pipeline(node_stream, res);
         } catch (error) {
             console.error(error);
 
@@ -93,7 +101,6 @@ export class MapResponseCommand {
             }
         } finally {
             res.end();
-            response.body?.destroy();
         }
     }
 

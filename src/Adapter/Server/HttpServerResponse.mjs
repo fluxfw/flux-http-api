@@ -1,16 +1,17 @@
 import { createReadStream } from "node:fs";
-import { Readable } from "node:stream";
-import { CONTENT_TYPE_HTML, CONTENT_TYPE_JSON, CONTENT_TYPE_TEXT } from "../ContentType/CONTENT_TYPE.mjs";
+import { NodeBodyImplementation } from "../BodyImplementation/NodeBodyImplementation.mjs";
 import { HEADER_CONTENT_LENGTH, HEADER_CONTENT_RANGE, HEADER_CONTENT_TYPE, HEADER_LOCATION } from "../Header/HEADER.mjs";
 import { STATUS_200, STATUS_206, STATUS_302 } from "../Status/STATUS.mjs";
 
+/** @typedef {import("../BodyImplementation/BodyImplementation.mjs").BodyImplementation} BodyImplementation */
 /** @typedef {import("../Range/RangeValue.mjs").RangeValue} RangeValue */
+/** @typedef {import("node:stream").Readable} Readable */
 
-export class HttpResponse {
+export class HttpServerResponse {
     /**
-     * @type {Readable | null}
+     * @type {BodyImplementation}
      */
-    #body;
+    #body_implementation;
     /**
      * @type {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null}}}
      */
@@ -34,11 +35,14 @@ export class HttpResponse {
      * @param {{[key: string]: string | string[]} | null} headers
      * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null} | null}} cookies
      * @param {string | null} status_message
-     * @returns {HttpResponse}
+     * @returns {HttpServerResponse}
      */
     static arrayBuffer(array_buffer, status_code = null, headers = null, cookies = null, status_message = null) {
-        return this.buffer(
-            Buffer.from(array_buffer),
+        return this.new(
+            NodeBodyImplementation.arrayBuffer(
+                array_buffer,
+                headers?.[HEADER_CONTENT_TYPE] ?? null
+            ),
             status_code,
             headers,
             cookies,
@@ -52,18 +56,16 @@ export class HttpResponse {
      * @param {{[key: string]: string | string[]} | null} headers
      * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null} | null}} cookies
      * @param {string | null} status_message
-     * @returns {HttpResponse}
+     * @returns {HttpServerResponse}
      */
     static blob(blob, status_code = null, headers = null, cookies = null, status_message = null) {
-        return this.webStream(
-            blob.stream,
+        return this.new(
+            NodeBodyImplementation.blob(
+                blob,
+                headers?.[HEADER_CONTENT_TYPE] ?? null
+            ),
             status_code,
-            {
-                ...blob.type !== "" ? {
-                    [HEADER_CONTENT_TYPE]: blob.type
-                } : null,
-                ...headers
-            },
+            headers,
             cookies,
             status_message
         );
@@ -75,11 +77,56 @@ export class HttpResponse {
      * @param {{[key: string]: string | string[]} | null} headers
      * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null} | null}} cookies
      * @param {string | null} status_message
-     * @returns {HttpResponse}
+     * @returns {HttpServerResponse}
      */
     static buffer(buffer, status_code = null, headers = null, cookies = null, status_message = null) {
         return this.new(
-            Readable.from(buffer),
+            NodeBodyImplementation.buffer(
+                buffer,
+                headers?.[HEADER_CONTENT_TYPE] ?? null
+            ),
+            status_code,
+            headers,
+            cookies,
+            status_message
+        );
+    }
+
+    /**
+     * @param {string} css
+     * @param {number | null} status_code
+     * @param {{[key: string]: string | string[]} | null} headers
+     * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null} | null}} cookies
+     * @param {string | null} status_message
+     * @returns {HttpServerResponse}
+     */
+    static css(css, status_code = null, headers = null, cookies = null, status_message = null) {
+        return this.new(
+            NodeBodyImplementation.css(
+                css,
+                headers?.[HEADER_CONTENT_TYPE] ?? null
+            ),
+            status_code,
+            headers,
+            cookies,
+            status_message
+        );
+    }
+
+    /**
+     * @param {FormData} form_data
+     * @param {number | null} status_code
+     * @param {{[key: string]: string | string[]} | null} headers
+     * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null} | null}} cookies
+     * @param {string | null} status_message
+     * @returns {HttpServerResponse}
+     */
+    static formData(form_data, status_code = null, headers = null, cookies = null, status_message = null) {
+        return this.new(
+            NodeBodyImplementation.formData(
+                form_data,
+                headers?.[HEADER_CONTENT_TYPE] ?? null
+            ),
             status_code,
             headers,
             cookies,
@@ -93,16 +140,16 @@ export class HttpResponse {
      * @param {{[key: string]: string | string[]} | null} headers
      * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null} | null}} cookies
      * @param {string | null} status_message
-     * @returns {HttpResponse}
+     * @returns {HttpServerResponse}
      */
     static html(html, status_code = null, headers = null, cookies = null, status_message = null) {
-        return this.string(
-            html,
+        return this.new(
+            NodeBodyImplementation.html(
+                html,
+                headers?.[HEADER_CONTENT_TYPE] ?? null
+            ),
             status_code,
-            {
-                [HEADER_CONTENT_TYPE]: CONTENT_TYPE_HTML,
-                ...headers
-            },
+            headers,
             cookies,
             status_message
         );
@@ -114,16 +161,16 @@ export class HttpResponse {
      * @param {{[key: string]: string | string[]} | null} headers
      * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null} | null}} cookies
      * @param {string | null} status_message
-     * @returns {HttpResponse}
+     * @returns {HttpServerResponse}
      */
     static json(json, status_code = null, headers = null, cookies = null, status_message = null) {
-        return this.string(
-            JSON.stringify(json),
+        return this.new(
+            NodeBodyImplementation.json(
+                json,
+                headers?.[HEADER_CONTENT_TYPE] ?? null
+            ),
             status_code,
-            {
-                [HEADER_CONTENT_TYPE]: CONTENT_TYPE_JSON,
-                ...headers
-            },
+            headers,
             cookies,
             status_message
         );
@@ -135,7 +182,7 @@ export class HttpResponse {
      * @param {{[key: string]: string | string[]} | null} headers
      * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null} | null}} cookies
      * @param {string | null} status_message
-     * @returns {HttpResponse}
+     * @returns {HttpServerResponse}
      */
     static redirect(location, status_code = null, headers = null, cookies = null, status_message = null) {
         return this.new(
@@ -159,10 +206,10 @@ export class HttpResponse {
      * @param {{[key: string]: string | string[]} | null} headers
      * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null} | null}} cookies
      * @param {string | null} status_message
-     * @returns {HttpResponse}
+     * @returns {HttpServerResponse}
      */
     static staticFile(path = null, content_type = null, length = null, range = null, status_code = null, headers = null, cookies = null, status_message = null) {
-        return this.new(
+        return this.stream(
             path !== null ? createReadStream(path, {
                 ...range !== null ? {
                     start: range.start,
@@ -188,16 +235,40 @@ export class HttpResponse {
     }
 
     /**
+     * @param {Readable | ReadableStream | null} stream
+     * @param {number | null} status_code
+     * @param {{[key: string]: string | string[]} | null} headers
+     * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null} | null}} cookies
+     * @param {string | null} status_message
+     * @returns {HttpServerResponse}
+     */
+    static stream(stream = null, status_code = null, headers = null, cookies = null, status_message = null) {
+        return this.new(
+            NodeBodyImplementation.new(
+                stream,
+                headers?.[HEADER_CONTENT_TYPE] ?? null
+            ),
+            status_code,
+            headers,
+            cookies,
+            status_message
+        );
+    }
+
+    /**
      * @param {string} string
      * @param {number | null} status_code
      * @param {{[key: string]: string | string[]} | null} headers
      * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null} | null}} cookies
      * @param {string | null} status_message
-     * @returns {HttpResponse}
+     * @returns {HttpServerResponse}
      */
     static string(string, status_code = null, headers = null, cookies = null, status_message = null) {
-        return this.buffer(
-            Buffer.from(string),
+        return this.new(
+            NodeBodyImplementation.string(
+                string,
+                headers?.[HEADER_CONTENT_TYPE] ?? null
+            ),
             status_code,
             headers,
             cookies,
@@ -211,46 +282,14 @@ export class HttpResponse {
      * @param {{[key: string]: string | string[]} | null} headers
      * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null} | null}} cookies
      * @param {string | null} status_message
-     * @returns {HttpResponse}
+     * @returns {HttpServerResponse}
      */
     static text(text, status_code = null, headers = null, cookies = null, status_message = null) {
-        return this.string(
-            text,
-            status_code,
-            {
-                [HEADER_CONTENT_TYPE]: CONTENT_TYPE_TEXT,
-                ...headers
-            },
-            cookies,
-            status_message
-        );
-    }
-
-    /**
-     * @param {Response} response
-     * @returns {HttpResponse}
-     */
-    static webResponse(response) {
-        return this.webStream(
-            response.body,
-            response.status,
-            Object.fromEntries(response.headers),
-            null,
-            response.statusText
-        );
-    }
-
-    /**
-     * @param {ReadableStream | null} body
-     * @param {number | null} status_code
-     * @param {{[key: string]: string | string[]} | null} headers
-     * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null} | null}} cookies
-     * @param {string | null} status_message
-     * @returns {HttpResponse}
-     */
-    static webStream(body = null, status_code = null, headers = null, cookies = null, status_message = null) {
         return this.new(
-            body !== null ? Readable.fromWeb(body) : null,
+            NodeBodyImplementation.text(
+                text,
+                headers?.[HEADER_CONTENT_TYPE] ?? null
+            ),
             status_code,
             headers,
             cookies,
@@ -259,16 +298,40 @@ export class HttpResponse {
     }
 
     /**
-     * @param {Readable | null} body
+     * @param {Response} web_response
      * @param {number | null} status_code
      * @param {{[key: string]: string | string[]} | null} headers
      * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null} | null}} cookies
      * @param {string | null} status_message
-     * @returns {HttpResponse}
+     * @returns {HttpServerResponse}
      */
-    static new(body = null, status_code = null, headers = null, cookies = null, status_message = null) {
+    static webResponse(web_response, status_code = null, headers = null, cookies = null, status_message = null) {
+        return this.new(
+            NodeBodyImplementation.webResponse(
+                web_response,
+                headers?.[HEADER_CONTENT_TYPE] ?? null
+            ),
+            status_code ?? web_response.status,
+            {
+                ...Object.fromEntries(web_response.headers),
+                ...headers
+            },
+            cookies,
+            status_message ?? web_response.statusText
+        );
+    }
+
+    /**
+     * @param {BodyImplementation | null} body_implementation
+     * @param {number | null} status_code
+     * @param {{[key: string]: string | string[]} | null} headers
+     * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null} | null}} cookies
+     * @param {string | null} status_message
+     * @returns {HttpServerResponse}
+     */
+    static new(body_implementation = null, status_code = null, headers = null, cookies = null, status_message = null) {
         return new this(
-            body,
+            body_implementation ?? NodeBodyImplementation.new(),
             status_code ?? STATUS_200,
             headers ?? [],
             cookies ?? [],
@@ -277,15 +340,15 @@ export class HttpResponse {
     }
 
     /**
-     * @param {Readable | null} body
+     * @param {BodyImplementation} body_implementation
      * @param {number} status_code
      * @param {{[key: string]: string | string[]}} headers
      * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null}}} cookies
      * @param {string | null} status_message
      * @private
      */
-    constructor(body, status_code, headers, cookies, status_message) {
-        this.#body = body;
+    constructor(body_implementation, status_code, headers, cookies, status_message) {
+        this.#body_implementation = body_implementation;
         this.#status_code = status_code;
         this.#headers = headers;
         this.#cookies = cookies;
@@ -293,10 +356,10 @@ export class HttpResponse {
     }
 
     /**
-     * @returns {Readable | null}
+     * @returns {BodyImplementation}
      */
     get body() {
-        return this.#body;
+        return this.#body_implementation;
     }
 
     /**
@@ -310,7 +373,14 @@ export class HttpResponse {
      * @returns {{[key: string]: string | string[]}}
      */
     get headers() {
-        return this.#headers;
+        const content_type = this.#body_implementation.contentType();
+
+        return {
+            ...content_type !== null ? {
+                [HEADER_CONTENT_TYPE]: content_type
+            } : null,
+            ...this.#headers
+        };
     }
 
     /**

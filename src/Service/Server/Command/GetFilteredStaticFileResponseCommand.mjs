@@ -1,8 +1,8 @@
-import { HttpResponse } from "../../../Adapter/Response/HttpResponse.mjs";
+import { HttpServerResponse } from "../../../Adapter/Server/HttpServerResponse.mjs";
 import { join } from "node:path/posix";
 import { STATUS_400 } from "../../../Adapter/Status/STATUS.mjs";
 
-/** @typedef {import("../../../Adapter/Request/HttpRequest.mjs").HttpRequest} HttpRequest */
+/** @typedef {import("../../../Adapter/Server/HttpServerRequest.mjs").HttpServerRequest} HttpServerRequest */
 /** @typedef {import("../Port/ServerService.mjs").ServerService} ServerService */
 
 export class GetFilteredStaticFileResponseCommand {
@@ -32,14 +32,14 @@ export class GetFilteredStaticFileResponseCommand {
     /**
      * @param {string} root
      * @param {string} path
-     * @param {HttpRequest} request
+     * @param {HttpServerRequest} request
      * @param {string | null} content_type
      * @param {{[key: string]: string | string[]} | null} headers
-     * @returns {Promise<HttpResponse>}
+     * @returns {Promise<HttpServerResponse>}
      */
     async getFilteredStaticFileResponse(root, path, request, content_type = null, headers = null) {
         if (path.includes("..") || path.includes("//") || path.includes("\\")) {
-            return HttpResponse.text(
+            return HttpServerResponse.text(
                 "Invalid path",
                 STATUS_400
             );

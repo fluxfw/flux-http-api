@@ -1,12 +1,12 @@
 import { existsSync } from "node:fs";
-import { HttpResponse } from "../../../Adapter/Response/HttpResponse.mjs";
+import { HttpServerResponse } from "../../../Adapter/Server/HttpServerResponse.mjs";
 import { join } from "node:path/posix";
 import { METHOD_HEAD } from "../../../Adapter/Method/METHOD.mjs";
 import { RANGE_UNIT_BYTES } from "../../../Adapter/Range/RANGE_UNIT.mjs";
 import { stat } from "node:fs/promises";
 import { STATUS_404 } from "../../../Adapter/Status/STATUS.mjs";
 
-/** @typedef {import("../../../Adapter/Request/HttpRequest.mjs").HttpRequest} HttpRequest */
+/** @typedef {import("../../../Adapter/Server/HttpServerRequest.mjs").HttpServerRequest} HttpServerRequest */
 /** @typedef {import("../Port/ServerService.mjs").ServerService} ServerService */
 
 export class GetStaticFileResponseCommand {
@@ -35,14 +35,14 @@ export class GetStaticFileResponseCommand {
 
     /**
      * @param {string} path
-     * @param {HttpRequest} request
+     * @param {HttpServerRequest} request
      * @param {string | null} content_type
      * @param {{[key: string]: string | string[]} | null} headers
-     * @returns {Promise<HttpResponse>}
+     * @returns {Promise<HttpServerResponse>}
      */
     async getStaticFileResponse(path, request, content_type = null, headers = null) {
         if (!existsSync(path)) {
-            return HttpResponse.text(
+            return HttpServerResponse.text(
                 "File not found",
                 STATUS_404
             );
@@ -52,14 +52,14 @@ export class GetStaticFileResponseCommand {
 
         if (!_stat.isFile()) {
             if (content_type !== null || !_stat.isDirectory()) {
-                return HttpResponse.text(
+                return HttpServerResponse.text(
                     "File not found",
                     STATUS_404
                 );
             }
 
             if (!request.url.pathname.endsWith("/")) {
-                return HttpResponse.redirect(
+                return HttpServerResponse.redirect(
                     `${request.url.origin}${request.url.pathname}/${request.url.search}`
                 );
             }
@@ -81,11 +81,11 @@ export class GetStaticFileResponseCommand {
             ]
         );
 
-        if (range instanceof HttpResponse) {
+        if (range instanceof HttpServerResponse) {
             return range;
         }
 
-        return HttpResponse.staticFile(
+        return HttpServerResponse.staticFile(
             request.method !== METHOD_HEAD ? path : null,
             content_type ?? await this.#server_service.getMimeTypeByPath(
                 path
