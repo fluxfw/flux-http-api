@@ -30,7 +30,7 @@ export class FetchCommand {
                 body = await request.body.blob();
             } catch (error) {
                 if ((error?.message ?? null) !== "No stream") {
-                    throw error;
+                    return Promise.reject(error);
                 }
             }
         }
