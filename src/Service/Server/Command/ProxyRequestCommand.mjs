@@ -72,24 +72,18 @@ export class ProxyRequestCommand {
             HttpClientRequest.webStream(
                 `${_url}`,
                 request_body && proxy_request.request.method !== METHOD_HEAD && proxy_request.request.method !== METHOD_GET ? await proxy_request.request.body.webStream() : null,
-                (Array.isArray(request_method) ? request_method.includes(proxy_request.request.method) : request_method) ? {
-                    method: proxy_request.request.method
-                } : null,
-                Array.isArray(request_headers) ? {
-                    headers: request_headers.reduce((headers, key) => {
-                        const value = proxy_request.request.header(key);
+                (Array.isArray(request_method) ? request_method.includes(proxy_request.request.method) : request_method) ? proxy_request.request.method : null,
+                Array.isArray(request_headers) ? request_headers.reduce((headers, key) => {
+                    const value = proxy_request.request.header(key);
 
-                        if (value === null) {
-                            return headers;
-                        }
-
-                        headers[key] = value;
-
+                    if (value === null) {
                         return headers;
-                    }, {})
-                } : request_headers ? {
-                    headers: proxy_request.request.headers
-                } : null,
+                    }
+
+                    headers[key] = value;
+
+                    return headers;
+                }, {}) : request_headers ? proxy_request.request.headers : null,
                 !response_redirect,
                 !response_status
             )
