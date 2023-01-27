@@ -5,9 +5,9 @@ import { STATUS_CODE_300, STATUS_CODE_400 } from "../../../Adapter/Status/STATUS
 
 /** @typedef {import("../../../Adapter/Client/HttpClientRequest.mjs").HttpClientRequest} HttpClientRequest */
 
-export class FetchCommand {
+export class RequestCommand {
     /**
-     * @returns {FetchCommand}
+     * @returns {RequestCommand}
      */
     static new() {
         return new this();
@@ -24,7 +24,7 @@ export class FetchCommand {
      * @param {HttpClientRequest} request
      * @returns {Promise<HttpClientResponse>}
      */
-    async fetch(request) {
+    async request(request) {
         const web_response = await fetch(request.url, {
             method: request.method,
             headers: request.headers,

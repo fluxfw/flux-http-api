@@ -20,9 +20,9 @@ export class ClientService {
      * @param {HttpClientRequest} request
      * @returns {Promise<HttpClientResponse>}
      */
-    async fetch(request) {
-        return (await import("../Command/FetchCommand.mjs")).FetchCommand.new()
-            .fetch(
+    async request(request) {
+        return (await import("../Command/RequestCommand.mjs")).RequestCommand.new()
+            .request(
                 request
             );
     }

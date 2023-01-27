@@ -68,7 +68,7 @@ export class ProxyRequestCommand {
             }
         }
 
-        const response = await this.#client_service.fetch(
+        const response = await this.#client_service.request(
             HttpClientRequest.webStream(
                 `${url}`,
                 request_body && proxy_request.request.method !== METHOD_HEAD && proxy_request.request.method !== METHOD_GET ? await proxy_request.request.body.webStream() : null,

@@ -44,16 +44,6 @@ export class HttpApi {
     }
 
     /**
-     * @param {HttpClientRequest} request
-     * @returns {Promise<HttpClientResponse>}
-     */
-    async fetch(request) {
-        return (await this.#getClientService()).fetch(
-            request
-        );
-    }
-
-    /**
      * @param {string} root
      * @param {string} path
      * @param {HttpServerRequest} request
@@ -114,6 +104,16 @@ export class HttpApi {
     async proxyRequest(proxy_request) {
         return (await this.#getServerService()).proxyRequest(
             proxy_request
+        );
+    }
+
+    /**
+     * @param {HttpClientRequest} request
+     * @returns {Promise<HttpClientResponse>}
+     */
+    async request(request) {
+        return (await this.#getClientService()).request(
+            request
         );
     }
 
