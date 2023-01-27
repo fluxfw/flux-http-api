@@ -28,9 +28,12 @@ export class MapRequestCommand {
      */
     async mapRequest(req, _res = null) {
         return HttpServerRequest.new(
-            req.method,
             new URL(req.url, `${req.socket.encrypted ? "https" : "http"}://${req.headers[HEADER_HOST.toLowerCase()] ?? "host"}`),
-            null,
+            req.method !== METHOD_GET && req.method !== METHOD_HEAD ? NodeBodyImplementation.new(
+                req,
+                req.headers[HEADER_CONTENT_TYPE.toLowerCase()] ?? null
+            ) : null,
+            req.method,
             Object.entries(req.headers).map(([
                 key,
                 values
@@ -50,10 +53,7 @@ export class MapRequestCommand {
 
                 return cookies;
             }, {}) ?? {}),
-            req.method !== METHOD_GET && req.method !== METHOD_HEAD ? NodeBodyImplementation.new(
-                req,
-                req.headers[HEADER_CONTENT_TYPE.toLowerCase()] ?? null
-            ) : null,
+            null,
             _res
         );
     }

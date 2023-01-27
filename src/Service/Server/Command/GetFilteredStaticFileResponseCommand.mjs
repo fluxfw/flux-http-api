@@ -1,6 +1,6 @@
 import { HttpServerResponse } from "../../../Adapter/Server/HttpServerResponse.mjs";
 import { join } from "node:path/posix";
-import { STATUS_400 } from "../../../Adapter/Status/STATUS.mjs";
+import { STATUS_CODE_400 } from "../../../Adapter/Status/STATUS_CODE.mjs";
 
 /** @typedef {import("../../../Adapter/Server/HttpServerRequest.mjs").HttpServerRequest} HttpServerRequest */
 /** @typedef {import("../Port/ServerService.mjs").ServerService} ServerService */
@@ -41,7 +41,7 @@ export class GetFilteredStaticFileResponseCommand {
         if (path.includes("..") || path.includes("//") || path.includes("\\")) {
             return HttpServerResponse.text(
                 "Invalid path",
-                STATUS_400
+                STATUS_CODE_400
             );
         }
 

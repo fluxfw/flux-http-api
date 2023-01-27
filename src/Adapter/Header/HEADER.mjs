@@ -170,4 +170,6 @@ export const CUSTOM_HEADER_PREFIX = "X-";
 
 export const HEADER_X_CONTENT_TYPE_OPTIONS = `${CUSTOM_HEADER_PREFIX}Content-Type-Options`;
 
+export const HEADER_X_FLUX_AUTHENTICATION_FRONTEND_URL = `${CUSTOM_HEADER_PREFIX}Flux-Authentication-Frontend-Url`;
+
 export const HEADER_X_FRAME_OPTIONS = `${CUSTOM_HEADER_PREFIX}Frame-Options`;

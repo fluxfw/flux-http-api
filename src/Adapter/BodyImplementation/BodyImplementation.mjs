@@ -59,7 +59,7 @@ export class BodyImplementation {
     nodeStream() { }
 
     /**
-     * @returns {Promise<Readable | ReadableStream | null>}
+     * @returns {Readable | ReadableStream | null}
      * @abstract
      */
     stream() { }

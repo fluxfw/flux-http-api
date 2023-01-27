@@ -2,7 +2,7 @@ import { HEADER_SET_COOKIE } from "../../../Adapter/Header/HEADER.mjs";
 import { METHOD_HEAD } from "../../../Adapter/Method/METHOD.mjs";
 import { pipeline } from "node:stream/promises";
 import { SET_COOKIE_SAME_SITE_LAX } from "../../../Adapter/Cookie/SET_COOKIE_SAME_SITE.mjs";
-import { STATUS_500 } from "../../../Adapter/Status/STATUS.mjs";
+import { STATUS_CODE_500 } from "../../../Adapter/Status/STATUS_CODE.mjs";
 import { SET_COOKIE_OPTION_EXPIRES, SET_COOKIE_OPTION_HTTP_ONLY, SET_COOKIE_OPTION_MAX_AGE, SET_COOKIE_OPTION_PATH, SET_COOKIE_OPTION_SAME_SITE, SET_COOKIE_OPTION_SECURE } from "../../../Adapter/Cookie/SET_COOKIE_OPTION.mjs";
 
 /** @typedef {import("../../../Adapter/Server/HttpServerRequest.mjs").HttpServerRequest} HttpServerRequest */
@@ -85,18 +85,18 @@ export class MapResponseCommand {
                 return;
             }
 
-            const node_stream = await response.body.nodeStream();
+            const stream = response.body.stream();
 
-            if (node_stream === null) {
+            if (stream === null) {
                 return;
             }
 
-            await pipeline(node_stream, res);
+            await pipeline(stream, res);
         } catch (error) {
             console.error(error);
 
             if (!res.headersSent) {
-                res.statusCode = STATUS_500;
+                res.statusCode = STATUS_CODE_500;
                 res.statusMessage = "";
             }
         } finally {

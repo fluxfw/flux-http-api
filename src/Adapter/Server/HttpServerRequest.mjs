@@ -1,3 +1,4 @@
+import { METHOD_GET } from "../Method/METHOD.mjs";
 import { NodeBodyImplementation } from "../BodyImplementation/NodeBodyImplementation.mjs";
 
 /** @typedef {import("../BodyImplementation/BodyImplementation.mjs").BodyImplementation} BodyImplementation */
@@ -34,44 +35,44 @@ export class HttpServerRequest {
     #url_path_parts;
 
     /**
-     * @param {string} method
      * @param {URL} url
-     * @param {string[] | null} url_path_parts
+     * @param {BodyImplementation | null} body_implementation
+     * @param {string | null} method
      * @param {[string, string[]][] | null} headers
      * @param {[string, string][] | null} cookies
-     * @param {BodyImplementation | null} body_implementation
+     * @param {string[] | null} url_path_parts
      * @param {ServerResponse | null} _res
      * @returns {HttpServerRequest}
      */
-    static new(method, url, url_path_parts = null, headers = null, cookies = null, body_implementation = null, _res = null) {
+    static new(url, body_implementation = null, method = null, headers = null, cookies = null, url_path_parts = null, _res = null) {
         return new this(
-            method,
             url,
-            url_path_parts ?? url.pathname.substring(1).split("/"),
+            body_implementation ?? NodeBodyImplementation.new(),
+            method ?? METHOD_GET,
             headers ?? [],
             cookies ?? [],
-            body_implementation ?? NodeBodyImplementation.new(),
+            url_path_parts ?? url.pathname.substring(1).split("/"),
             _res
         );
     }
 
     /**
-     * @param {string} method
      * @param {URL} url
-     * @param {string[]} url_path_parts
+     * @param {BodyImplementation} body_implementation
+     * @param {string} method
      * @param {[string, string[]][]} headers
      * @param {[string, string][]} cookies
-     * @param {BodyImplementation} body_implementation
+     * @param {string[]} url_path_parts
      * @param {ServerResponse | null} _res
      * @private
      */
-    constructor(method, url, url_path_parts, headers, cookies, body_implementation, _res) {
-        this.#method = method;
+    constructor(url, body_implementation, method, headers, cookies, url_path_parts, _res) {
         this.#url = url;
-        this.#url_path_parts = url_path_parts;
+        this.#body_implementation = body_implementation;
+        this.#method = method;
         this.#headers = headers;
         this.#cookies = cookies;
-        this.#body_implementation = body_implementation;
+        this.#url_path_parts = url_path_parts;
         this.#_res = _res;
     }
 

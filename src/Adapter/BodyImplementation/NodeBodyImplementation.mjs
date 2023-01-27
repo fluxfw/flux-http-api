@@ -272,9 +272,9 @@ export class NodeBodyImplementation extends BodyImplementation {
     }
 
     /**
-     * @returns {Promise<Readable | ReadableStream | null>}
+     * @returns {Readable | ReadableStream | null}
      */
-    async stream() {
+    stream() {
         return this.#stream;
     }
 
