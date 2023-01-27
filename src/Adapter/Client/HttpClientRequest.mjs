@@ -324,7 +324,7 @@ export class HttpClientRequest {
             url,
             body_implementation ?? WebBodyImplementation.webStream(),
             method ?? METHOD_GET,
-            headers ?? [],
+            headers ?? {},
             follow_redirects ?? true,
             assert_status_code_is_ok ?? true
         );

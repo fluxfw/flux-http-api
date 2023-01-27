@@ -1,7 +1,8 @@
 import { createReadStream } from "node:fs";
 import { NodeBodyImplementation } from "../BodyImplementation/NodeBodyImplementation.mjs";
+import { STATUS_CODE_MESSAGE } from "../Status/STATUS_CODE_MESSAGE.mjs";
 import { HEADER_CONTENT_LENGTH, HEADER_CONTENT_RANGE, HEADER_CONTENT_TYPE, HEADER_LOCATION } from "../Header/HEADER.mjs";
-import { STATUS_200, STATUS_206, STATUS_302 } from "../Status/STATUS.mjs";
+import { STATUS_CODE_200, STATUS_CODE_206, STATUS_CODE_302 } from "../Status/STATUS_CODE.mjs";
 
 /** @typedef {import("../BodyImplementation/BodyImplementation.mjs").BodyImplementation} BodyImplementation */
 /** @typedef {import("../Range/RangeValue.mjs").RangeValue} RangeValue */
@@ -25,7 +26,7 @@ export class HttpServerResponse {
      */
     #status_code;
     /**
-     * @type {string | null}
+     * @type {string}
      */
     #status_message;
 
@@ -187,7 +188,7 @@ export class HttpServerResponse {
     static redirect(location, status_code = null, headers = null, cookies = null, status_message = null) {
         return this.new(
             null,
-            status_code ?? STATUS_302,
+            status_code ?? STATUS_CODE_302,
             {
                 [HEADER_LOCATION]: location,
                 ...headers
@@ -216,7 +217,7 @@ export class HttpServerResponse {
                     end: range.end
                 } : null
             }) : null,
-            status_code ?? (range !== null ? STATUS_206 : null),
+            status_code ?? (range !== null ? STATUS_CODE_206 : null),
             {
                 ...range !== null ? {
                     [HEADER_CONTENT_LENGTH]: range.length,
@@ -330,12 +331,14 @@ export class HttpServerResponse {
      * @returns {HttpServerResponse}
      */
     static new(body_implementation = null, status_code = null, headers = null, cookies = null, status_message = null) {
+        const _status_code = status_code ?? STATUS_CODE_200;
+
         return new this(
             body_implementation ?? NodeBodyImplementation.new(),
-            status_code ?? STATUS_200,
-            headers ?? [],
-            cookies ?? [],
-            status_message
+            _status_code,
+            headers ?? {},
+            cookies ?? {},
+            status_message ?? STATUS_CODE_MESSAGE[_status_code] ?? ""
         );
     }
 
@@ -344,7 +347,7 @@ export class HttpServerResponse {
      * @param {number} status_code
      * @param {{[key: string]: string | string[]}} headers
      * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null}}} cookies
-     * @param {string | null} status_message
+     * @param {string} status_message
      * @private
      */
     constructor(body_implementation, status_code, headers, cookies, status_message) {
@@ -391,7 +394,7 @@ export class HttpServerResponse {
     }
 
     /**
-     * @returns {string | null}
+     * @returns {string}
      */
     get status_message() {
         return this.#status_message;

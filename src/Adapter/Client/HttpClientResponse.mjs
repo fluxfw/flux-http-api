@@ -1,4 +1,6 @@
+import { STATUS_CODE_MESSAGE } from "../Status/STATUS_CODE_MESSAGE.mjs";
 import { WebBodyImplementation } from "../BodyImplementation/WebBodyImplementation.mjs";
+import { STATUS_CODE_200, STATUS_CODE_300 } from "../Status/STATUS_CODE.mjs";
 
 /** @typedef {import("../BodyImplementation/BodyImplementation.mjs").BodyImplementation} BodyImplementation */
 
@@ -25,37 +27,39 @@ export class HttpClientResponse {
     #status_message;
 
     /**
-     * @param {number} status_code
-     * @param {boolean} status_code_is_ok
-     * @param {string} status_message
-     * @param {[string, string[]][] | null} headers
      * @param {BodyImplementation | null} body_implementation
+     * @param {number | null} status_code
+     * @param {[string, string[]][] | null} headers
+     * @param {string | null} status_message
+     * @param {boolean | null} status_code_is_ok
      * @returns {HttpClientResponse}
      */
-    static new(status_code, status_code_is_ok, status_message, headers = null, body_implementation = null) {
+    static new(body_implementation = null, status_code = null, headers = null, status_message = null, status_code_is_ok = null) {
+        const _status_code = status_code ?? STATUS_CODE_200;
+
         return new this(
-            status_code,
-            status_code_is_ok,
-            status_message,
+            body_implementation ?? WebBodyImplementation.webStream(),
+            _status_code,
             headers ?? [],
-            body_implementation ?? WebBodyImplementation.webStream()
+            status_message ?? STATUS_CODE_MESSAGE[_status_code] ?? "",
+            status_code_is_ok ?? (_status_code >= STATUS_CODE_200 && _status_code < STATUS_CODE_300)
         );
     }
 
     /**
-     * @param {number} status_code
-     * @param {boolean} status_code_is_ok
-     * @param {string} status_message
-     * @param {[string, string[]][]} headers
      * @param {BodyImplementation} body_implementation
+     * @param {number} status_code
+     * @param {[string, string[]][]} headers
+     * @param {string} status_message
+     * @param {boolean} status_code_is_ok
      * @private
      */
-    constructor(status_code, status_code_is_ok, status_message, headers, body_implementation) {
-        this.#status_code = status_code;
-        this.#status_code_is_ok = status_code_is_ok;
-        this.#status_message = status_message;
-        this.#headers = headers;
+    constructor(body_implementation, status_code, headers, status_message, status_code_is_ok) {
         this.#body_implementation = body_implementation;
+        this.#status_code = status_code;
+        this.#headers = headers;
+        this.#status_message = status_message;
+        this.#status_code_is_ok = status_code_is_ok;
     }
 
     /**

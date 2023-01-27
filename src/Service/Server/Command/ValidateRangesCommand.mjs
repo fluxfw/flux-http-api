@@ -1,5 +1,5 @@
 import { HttpServerResponse } from "../../../Adapter/Server/HttpServerResponse.mjs";
-import { STATUS_416 } from "../../../Adapter/Status/STATUS.mjs";
+import { STATUS_CODE_416 } from "../../../Adapter/Status/STATUS_CODE.mjs";
 import { HEADER_ACCEPT_RANGES, HEADER_CONTENT_RANGE, HEADER_RANGE } from "../../../Adapter/Header/HEADER.mjs";
 
 /** @typedef {import("../../../Adapter/Server/HttpServerRequest.mjs").HttpServerRequest} HttpServerRequest */
@@ -117,7 +117,7 @@ export class ValidateRangesCommand {
     #response416(unit = null) {
         return HttpServerResponse.new(
             null,
-            STATUS_416,
+            STATUS_CODE_416,
             {
                 [HEADER_CONTENT_RANGE]: this.#range(
                     unit

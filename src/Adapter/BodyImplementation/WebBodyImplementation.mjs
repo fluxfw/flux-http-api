@@ -320,10 +320,10 @@ export class WebBodyImplementation extends BodyImplementation {
     }
 
     /**
-     * @returns {Promise<Readable | ReadableStream | null>}
+     * @returns {Readable | ReadableStream | null}
      */
-    async stream() {
-        return this.webStream();
+    stream() {
+        return this.#web_response.body;
     }
 
     /**
@@ -363,6 +363,6 @@ export class WebBodyImplementation extends BodyImplementation {
      * @returns {Promise<ReadableStream | null>}
      */
     async webStream() {
-        return this.#web_response.body;
+        return this.stream();
     }
 }

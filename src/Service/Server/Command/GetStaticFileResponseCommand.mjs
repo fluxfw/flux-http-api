@@ -4,7 +4,7 @@ import { join } from "node:path/posix";
 import { METHOD_HEAD } from "../../../Adapter/Method/METHOD.mjs";
 import { RANGE_UNIT_BYTES } from "../../../Adapter/Range/RANGE_UNIT.mjs";
 import { stat } from "node:fs/promises";
-import { STATUS_404 } from "../../../Adapter/Status/STATUS.mjs";
+import { STATUS_CODE_404 } from "../../../Adapter/Status/STATUS_CODE.mjs";
 
 /** @typedef {import("../../../Adapter/Server/HttpServerRequest.mjs").HttpServerRequest} HttpServerRequest */
 /** @typedef {import("../Port/ServerService.mjs").ServerService} ServerService */
@@ -44,7 +44,7 @@ export class GetStaticFileResponseCommand {
         if (!existsSync(path)) {
             return HttpServerResponse.text(
                 "File not found",
-                STATUS_404
+                STATUS_CODE_404
             );
         }
 
@@ -54,7 +54,7 @@ export class GetStaticFileResponseCommand {
             if (content_type !== null || !_stat.isDirectory()) {
                 return HttpServerResponse.text(
                     "File not found",
-                    STATUS_404
+                    STATUS_CODE_404
                 );
             }
 
