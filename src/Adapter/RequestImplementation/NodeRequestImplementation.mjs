@@ -64,15 +64,17 @@ export class NodeRequestImplementation extends RequestImplementation {
                     return;
                 }
 
+                const url = new URL(location, request.url.origin);
+
                 resolve_promise(this.request(
                     HttpClientRequest.new(
-                        new URL(location, request.url.origin),
+                        url,
                         null,
                         request.method,
                         request.headers,
                         request.follow_redirects,
                         request.assert_status_code_is_ok,
-                        request.server_certificate
+                        url.hostname === request.url.hostname ? request.server_certificate : null
                     )
                 ));
 

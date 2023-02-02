@@ -42,6 +42,7 @@ export class ProxyRequestCommand {
         const response_status = proxy_request.response_status ?? true;
         const response_headers = proxy_request.response_headers ?? false;
         const response_body = proxy_request.response_body ?? true;
+        const server_certificate = proxy_request.server_certificate ?? null;
 
         const url = new URL(proxy_request.url);
 
@@ -85,7 +86,8 @@ export class ProxyRequestCommand {
                     return headers;
                 }, {}) : request_headers ? proxy_request.request.headers : null,
                 !response_redirect,
-                !response_status
+                !response_status,
+                server_certificate
             )
         );
 
