@@ -2,6 +2,7 @@ import { createServer as createServerHttp } from "node:http";
 import { createServer as createServerHttps } from "node:https";
 import { HEADER_REFERRER_POLICY } from "../../../Adapter/Header/HEADER.mjs";
 import { HttpServerResponse } from "../../../Adapter/Server/HttpServerResponse.mjs";
+import { PROTOCOL_HTTPS } from "../../../Adapter/Protocol/PROTOCOL.mjs";
 import { REFERRER_POLICY_NO_REFERRER } from "../../../Adapter/Referrer/REFERRER_POLICY.mjs";
 import { SERVER_DEFAULT_LISTEN_HTTP_PORT, SERVER_DEFAULT_LISTEN_HTTPS_PORT, SERVER_DEFAULT_NO_DATE, SERVER_DEFAULT_NO_REFERRER, SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS, SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS_PORT, SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS_STATUS_CODE, SERVER_LISTEN_HTTP_PORT_DISABLED, SERVER_LISTEN_HTTPS_PORT_DISABLED } from "../../../Adapter/Server/SERVER.mjs";
 import { STATUS_CODE_400, STATUS_CODE_404, STATUS_CODE_500 } from "../../../Adapter/Status/STATUS_CODE.mjs";
@@ -182,10 +183,10 @@ export class RunServerCommand {
             return;
         }
 
-        if (redirect_http_to_https && request.url.protocol !== "https:") {
+        if (redirect_http_to_https && request.url.protocol !== `${PROTOCOL_HTTPS}:`) {
             await this.#server_service.mapResponse(
                 HttpServerResponse.redirect(
-                    `https://${request.url.hostname}${redirect_http_to_https_port !== SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS_PORT ? `:${redirect_http_to_https_port}` : ""}${request.url.pathname}${request.url.search}`,
+                    `${PROTOCOL_HTTPS}://${request.url.hostname}${redirect_http_to_https_port !== SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS_PORT ? `:${redirect_http_to_https_port}` : ""}${request.url.pathname}${request.url.search}`,
                     redirect_http_to_https_status_code
                 ),
                 res,

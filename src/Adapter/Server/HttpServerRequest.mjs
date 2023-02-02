@@ -10,11 +10,11 @@ export class HttpServerRequest {
      */
     #body_implementation;
     /**
-     * @type {[string, string][]}
+     * @type {{[key: string]: string}}
      */
     #cookies;
     /**
-     * @type {[string, string[]][]}
+     * @type {{[key: string]: string | string[]}}
      */
     #headers;
     /**
@@ -38,8 +38,8 @@ export class HttpServerRequest {
      * @param {URL} url
      * @param {BodyImplementation | null} body_implementation
      * @param {string | null} method
-     * @param {[string, string[]][] | null} headers
-     * @param {[string, string][] | null} cookies
+     * @param {{[key: string]: string | string[]} | null} headers
+     * @param {{[key: string]: string} | null} cookies
      * @param {string[] | null} url_path_parts
      * @param {ServerResponse | null} _res
      * @returns {HttpServerRequest}
@@ -49,8 +49,8 @@ export class HttpServerRequest {
             url,
             body_implementation ?? NodeBodyImplementation.new(),
             method ?? METHOD_GET,
-            headers ?? [],
-            cookies ?? [],
+            headers ?? {},
+            cookies ?? {},
             url_path_parts ?? url.pathname.substring(1).split("/"),
             _res
         );
@@ -60,8 +60,8 @@ export class HttpServerRequest {
      * @param {URL} url
      * @param {BodyImplementation} body_implementation
      * @param {string} method
-     * @param {[string, string[]][]} headers
-     * @param {[string, string][]} cookies
+     * @param {{[key: string]: string | string[]}} headers
+     * @param {{[key: string]: string}} cookies
      * @param {string[]} url_path_parts
      * @param {ServerResponse | null} _res
      * @private
@@ -87,7 +87,7 @@ export class HttpServerRequest {
      * @returns {{[key: string]: string}}
      */
     get cookies() {
-        return structuredClone(Object.fromEntries(this.#cookies));
+        return structuredClone(this.#cookies);
     }
 
     /**
@@ -95,16 +95,16 @@ export class HttpServerRequest {
      * @returns {string | null}
      */
     cookie(key) {
-        return this.#cookies.find(([
+        return Object.entries(this.#cookies).find(([
             _key
         ]) => _key === key)?.[1] ?? null;
     }
 
     /**
-     * @returns {{[key: string]: string[]}}
+     * @returns {{[key: string]: string | string[]}}
      */
     get headers() {
-        return structuredClone(Object.fromEntries(this.#headers));
+        return structuredClone(this.#headers);
     }
 
     /**
@@ -122,9 +122,17 @@ export class HttpServerRequest {
      * @returns {string[]}
      */
     headerAll(key) {
-        return this.#headers.find(([
+        const value = Object.entries(this.#headers).find(([
             _key
         ]) => _key.toLowerCase() === key.toLowerCase())?.[1] ?? [];
+
+        if (!Array.isArray(value)) {
+            return [
+                value
+            ];
+        }
+
+        return value;
     }
 
     /**

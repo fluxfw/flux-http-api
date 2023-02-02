@@ -10,7 +10,7 @@ export class HttpClientResponse {
      */
     #body_implementation;
     /**
-     * @type {[string, string[]][]}
+     * @type {{[key: string]: string | string[]}}
      */
     #headers;
     /**
@@ -29,7 +29,7 @@ export class HttpClientResponse {
     /**
      * @param {BodyImplementation | null} body_implementation
      * @param {number | null} status_code
-     * @param {[string, string[]][] | null} headers
+     * @param {{[key: string]: string | string[]} | null} headers
      * @param {string | null} status_message
      * @param {boolean | null} status_code_is_ok
      * @returns {HttpClientResponse}
@@ -40,7 +40,7 @@ export class HttpClientResponse {
         return new this(
             body_implementation ?? WebBodyImplementation.webStream(),
             _status_code,
-            headers ?? [],
+            headers ?? {},
             status_message ?? STATUS_CODE_MESSAGE[_status_code] ?? "",
             status_code_is_ok ?? (_status_code >= STATUS_CODE_200 && _status_code < STATUS_CODE_300)
         );
@@ -49,7 +49,7 @@ export class HttpClientResponse {
     /**
      * @param {BodyImplementation} body_implementation
      * @param {number} status_code
-     * @param {[string, string[]][]} headers
+     * @param {{[key: string]: string | string[]}} headers
      * @param {string} status_message
      * @param {boolean} status_code_is_ok
      * @private
@@ -70,10 +70,10 @@ export class HttpClientResponse {
     }
 
     /**
-     * @returns {{[key: string]: string[]}}
+     * @returns {{[key: string]: string | string[]}}
      */
     get headers() {
-        return structuredClone(Object.fromEntries(this.#headers));
+        return structuredClone(this.#headers);
     }
 
     /**
@@ -91,9 +91,17 @@ export class HttpClientResponse {
      * @returns {string[]}
      */
     headerAll(key) {
-        return this.#headers.find(([
+        const value = Object.entries(this.#headers).find(([
             _key
         ]) => _key.toLowerCase() === key.toLowerCase())?.[1] ?? [];
+
+        if (!Array.isArray(value)) {
+            return [
+                value
+            ];
+        }
+
+        return value;
     }
 
     /**
