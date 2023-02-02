@@ -382,7 +382,7 @@ export class HttpServerResponse {
             ...content_type !== null ? {
                 [HEADER_CONTENT_TYPE]: content_type
             } : null,
-            ...this.#headers
+            ...structuredClone(this.#headers)
         };
     }
 

@@ -7,6 +7,7 @@
 /** @typedef {import("../Proxy/ProxyRequest.mjs").ProxyRequest} ProxyRequest */
 /** @typedef {import("../Range/RangeUnit.mjs").RangeUnit} RangeUnit */
 /** @typedef {import("../Range/RangeValue.mjs").RangeValue} RangeValue */
+/** @typedef {import("../RequestImplementation/RequestImplementation.mjs").RequestImplementation} RequestImplementation */
 /** @typedef {import("../Server/_Server.mjs").Server} Server */
 /** @typedef {import("../../Service/Server/Port/ServerService.mjs").ServerService} ServerService */
 /** @typedef {import("../../../../flux-shutdown-handler-api/src/Adapter/ShutdownHandler/ShutdownHandler.mjs").ShutdownHandler} ShutdownHandler */
@@ -16,6 +17,10 @@ export class HttpApi {
      * @type {ClientService | null}
      */
     #client_service = null;
+    /**
+     * @type {RequestImplementation | null}
+     */
+    #request_implementation = null;
     /**
      * @type {ServerService | null}
      */
@@ -157,9 +162,20 @@ export class HttpApi {
      * @returns {Promise<ClientService>}
      */
     async #getClientService() {
-        this.#client_service ??= (await import("../../Service/Client/Port/ClientService.mjs")).ClientService.new();
+        this.#client_service ??= (await import("../../Service/Client/Port/ClientService.mjs")).ClientService.new(
+            await this.#getRequestImplementation()
+        );
 
         return this.#client_service;
+    }
+
+    /**
+     * @returns {Promise<RequestImplementation>}
+     */
+    async #getRequestImplementation() {
+        this.#request_implementation ??= typeof process !== "undefined" ? (await import("../RequestImplementation/NodeRequestImplementation.mjs")).NodeRequestImplementation.new() : (await import("../RequestImplementation/WebRequestImplementation.mjs")).WebRequestImplementation.new();
+
+        return this.#request_implementation;
     }
 
     /**
