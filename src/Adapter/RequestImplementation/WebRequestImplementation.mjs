@@ -39,18 +39,19 @@ export class WebRequestImplementation extends RequestImplementation {
             } : null
         });
 
-        if (request.assert_status_code_is_ok && !web_response.ok && (!request.follow_redirects ? web_response.status < STATUS_CODE_300 && web_response.status >= STATUS_CODE_400 : true)) {
-            return Promise.reject(web_response);
-        }
-
-        return HttpClientResponse.new(
+        const response = HttpClientResponse.new(
             request.method !== METHOD_HEAD ? WebBodyImplementation.new(
                 web_response
             ) : null,
             web_response.status,
             Object.fromEntries(web_response.headers),
-            web_response.statusText,
-            web_response.ok
+            web_response.statusText
         );
+
+        if (request.assert_status_code_is_ok && !response.ok && (!request.follow_redirects ? response.status_code < STATUS_CODE_300 && response.status_code >= STATUS_CODE_400 : true)) {
+            return Promise.reject(response);
+        }
+
+        return response;
     }
 }

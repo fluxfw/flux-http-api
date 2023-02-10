@@ -6,6 +6,13 @@ Changes:
 
 \-
 
+## v2023-02-10-1
+
+Changes:
+
+- Optimize `HttpClientRequest.nodeStream`
+- Reject `HttpClientResponse`
+
 ## v2023-02-09-1
 
 Changes:

@@ -223,7 +223,7 @@ export class HttpClientRequest {
     static async nodeStream(url, node_stream = null, method = null, headers = null, follow_redirects = null, assert_status_code_is_ok = null, server_certificate = null) {
         return this.new(
             url,
-            await WebBodyImplementation.nodeStream(
+            (await import("../BodyImplementation/NodeBodyImplementation.mjs")).NodeBodyImplementation.new(
                 node_stream,
                 headers?.[HEADER_CONTENT_TYPE] ?? null
             ),

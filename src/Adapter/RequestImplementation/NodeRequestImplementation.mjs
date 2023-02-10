@@ -8,7 +8,7 @@ import { request as requestHttps } from "node:https";
 import { RequestImplementation } from "./RequestImplementation.mjs";
 import { HEADER_CONTENT_TYPE, HEADER_LOCATION } from "../Header/HEADER.mjs";
 import { METHOD_GET, METHOD_HEAD } from "../Method/METHOD.mjs";
-import { STATUS_CODE_200, STATUS_CODE_300, STATUS_CODE_301, STATUS_CODE_302, STATUS_CODE_307, STATUS_CODE_308, STATUS_CODE_400 } from "../Status/STATUS_CODE.mjs";
+import { STATUS_CODE_300, STATUS_CODE_301, STATUS_CODE_302, STATUS_CODE_307, STATUS_CODE_308, STATUS_CODE_400 } from "../Status/STATUS_CODE.mjs";
 
 export class NodeRequestImplementation extends RequestImplementation {
     /**
@@ -81,23 +81,22 @@ export class NodeRequestImplementation extends RequestImplementation {
                 return;
             }
 
-            const ok = res.statusCode >= STATUS_CODE_200 && res.statusCode < STATUS_CODE_300;
-
-            if (request.assert_status_code_is_ok && !ok && (!request.follow_redirects ? !is_redirect_status_code : true)) {
-                reject_promise(res);
-                return;
-            }
-
-            resolve_promise(HttpClientResponse.new(
+            const response = HttpClientResponse.new(
                 request.method !== METHOD_HEAD ? NodeBodyImplementation.new(
                     res,
                     res.headers[HEADER_CONTENT_TYPE.toLowerCase()] ?? null
                 ) : null,
                 res.statusCode,
                 res.headers,
-                res.statusMessage,
-                ok
-            ));
+                res.statusMessage
+            );
+
+            if (request.assert_status_code_is_ok && !response.ok && (!request.follow_redirects ? !is_redirect_status_code : true)) {
+                reject_promise(response);
+                return;
+            }
+
+            resolve_promise(response);
         });
 
         try {
