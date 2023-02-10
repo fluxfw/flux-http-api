@@ -6,6 +6,12 @@ Changes:
 
 \-
 
+## v2023-02-10-2
+
+Changes:
+
+- Fix reject `HttpClientResponse`
+
 ## v2023-02-10-1
 
 Changes:

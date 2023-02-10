@@ -91,7 +91,7 @@ export class NodeRequestImplementation extends RequestImplementation {
                 res.statusMessage
             );
 
-            if (request.assert_status_code_is_ok && !response.ok && (!request.follow_redirects ? !is_redirect_status_code : true)) {
+            if (request.assert_status_code_is_ok && !response.status_code_is_ok && (!request.follow_redirects ? !is_redirect_status_code : true)) {
                 reject_promise(response);
                 return;
             }

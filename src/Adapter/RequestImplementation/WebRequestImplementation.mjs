@@ -48,7 +48,7 @@ export class WebRequestImplementation extends RequestImplementation {
             web_response.statusText
         );
 
-        if (request.assert_status_code_is_ok && !response.ok && (!request.follow_redirects ? response.status_code < STATUS_CODE_300 && response.status_code >= STATUS_CODE_400 : true)) {
+        if (request.assert_status_code_is_ok && !response.status_code_is_ok && (!request.follow_redirects ? response.status_code < STATUS_CODE_300 && response.status_code >= STATUS_CODE_400 : true)) {
             return Promise.reject(response);
         }
 
