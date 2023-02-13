@@ -6,6 +6,12 @@ Changes:
 
 \-
 
+## v2023-02-13-1
+
+Changes:
+
+- `HttpClientRequest` `response_body`
+
 ## v2023-02-10-2
 
 Changes:

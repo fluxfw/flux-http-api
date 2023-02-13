@@ -27,6 +27,10 @@ export class HttpClientRequest {
      */
     #method;
     /**
+     * @type {boolean}
+     */
+    #response_body;
+    /**
      * @type {string | null}
      */
     #server_certificate;
@@ -41,11 +45,12 @@ export class HttpClientRequest {
      * @param {string | null} method
      * @param {{[key: string]: string | string[]} | null} headers
      * @param {boolean | null} follow_redirects
+     * @param {boolean | null} response_body
      * @param {boolean | null} assert_status_code_is_ok
      * @param {string | null} server_certificate
      * @returns {HttpClientRequest}
      */
-    static arrayBuffer(url, array_buffer, method = null, headers = null, follow_redirects = null, assert_status_code_is_ok = null, server_certificate = null) {
+    static arrayBuffer(url, array_buffer, method = null, headers = null, follow_redirects = null, response_body = null, assert_status_code_is_ok = null, server_certificate = null) {
         return this.new(
             url,
             WebBodyImplementation.arrayBuffer(
@@ -55,6 +60,7 @@ export class HttpClientRequest {
             method,
             headers,
             follow_redirects,
+            response_body,
             assert_status_code_is_ok,
             server_certificate
         );
@@ -66,11 +72,12 @@ export class HttpClientRequest {
      * @param {string | null} method
      * @param {{[key: string]: string | string[]} | null} headers
      * @param {boolean | null} follow_redirects
+     * @param {boolean | null} response_body
      * @param {boolean | null} assert_status_code_is_ok
      * @param {string | null} server_certificate
      * @returns {HttpClientRequest}
      */
-    static blob(url, blob, method = null, headers = null, follow_redirects = null, assert_status_code_is_ok = null, server_certificate = null) {
+    static blob(url, blob, method = null, headers = null, follow_redirects = null, response_body = null, assert_status_code_is_ok = null, server_certificate = null) {
         return this.new(
             url,
             WebBodyImplementation.blob(
@@ -80,6 +87,7 @@ export class HttpClientRequest {
             method,
             headers,
             follow_redirects,
+            response_body,
             assert_status_code_is_ok,
             server_certificate
         );
@@ -91,11 +99,12 @@ export class HttpClientRequest {
      * @param {string | null} method
      * @param {{[key: string]: string | string[]} | null} headers
      * @param {boolean | null} follow_redirects
+     * @param {boolean | null} response_body
      * @param {boolean | null} assert_status_code_is_ok
      * @param {string | null} server_certificate
      * @returns {HttpClientRequest}
      */
-    static buffer(url, buffer, method = null, headers = null, follow_redirects = null, assert_status_code_is_ok = null, server_certificate = null) {
+    static buffer(url, buffer, method = null, headers = null, follow_redirects = null, response_body = null, assert_status_code_is_ok = null, server_certificate = null) {
         return this.new(
             url,
             WebBodyImplementation.buffer(
@@ -105,6 +114,7 @@ export class HttpClientRequest {
             method,
             headers,
             follow_redirects,
+            response_body,
             assert_status_code_is_ok,
             server_certificate
         );
@@ -116,11 +126,12 @@ export class HttpClientRequest {
      * @param {string | null} method
      * @param {{[key: string]: string | string[]} | null} headers
      * @param {boolean | null} follow_redirects
+     * @param {boolean | null} response_body
      * @param {boolean | null} assert_status_code_is_ok
      * @param {string | null} server_certificate
      * @returns {HttpClientRequest}
      */
-    static css(url, css, method = null, headers = null, follow_redirects = null, assert_status_code_is_ok = null, server_certificate = null) {
+    static css(url, css, method = null, headers = null, follow_redirects = null, response_body = null, assert_status_code_is_ok = null, server_certificate = null) {
         return this.new(
             url,
             WebBodyImplementation.css(
@@ -130,6 +141,7 @@ export class HttpClientRequest {
             method,
             headers,
             follow_redirects,
+            response_body,
             assert_status_code_is_ok,
             server_certificate
         );
@@ -141,11 +153,12 @@ export class HttpClientRequest {
      * @param {string | null} method
      * @param {{[key: string]: string | string[]} | null} headers
      * @param {boolean | null} follow_redirects
+     * @param {boolean | null} response_body
      * @param {boolean | null} assert_status_code_is_ok
      * @param {string | null} server_certificate
      * @returns {HttpClientRequest}
      */
-    static formData(url, form_data, method = null, headers = null, follow_redirects = null, assert_status_code_is_ok = null, server_certificate = null) {
+    static formData(url, form_data, method = null, headers = null, follow_redirects = null, response_body = null, assert_status_code_is_ok = null, server_certificate = null) {
         return this.new(
             url,
             WebBodyImplementation.formData(
@@ -155,6 +168,7 @@ export class HttpClientRequest {
             method,
             headers,
             follow_redirects,
+            response_body,
             assert_status_code_is_ok,
             server_certificate
         );
@@ -166,11 +180,12 @@ export class HttpClientRequest {
      * @param {string | null} method
      * @param {{[key: string]: string | string[]} | null} headers
      * @param {boolean | null} follow_redirects
+     * @param {boolean | null} response_body
      * @param {boolean | null} assert_status_code_is_ok
      * @param {string | null} server_certificate
      * @returns {HttpClientRequest}
      */
-    static html(url, html, method = null, headers = null, follow_redirects = null, assert_status_code_is_ok = null, server_certificate = null) {
+    static html(url, html, method = null, headers = null, follow_redirects = null, response_body = null, assert_status_code_is_ok = null, server_certificate = null) {
         return this.new(
             url,
             WebBodyImplementation.html(
@@ -180,6 +195,7 @@ export class HttpClientRequest {
             method,
             headers,
             follow_redirects,
+            response_body,
             assert_status_code_is_ok,
             server_certificate
         );
@@ -191,11 +207,12 @@ export class HttpClientRequest {
      * @param {string | null} method
      * @param {{[key: string]: string | string[]} | null} headers
      * @param {boolean | null} follow_redirects
+     * @param {boolean | null} response_body
      * @param {boolean | null} assert_status_code_is_ok
      * @param {string | null} server_certificate
      * @returns {HttpClientRequest}
      */
-    static json(url, json, method = null, headers = null, follow_redirects = null, assert_status_code_is_ok = null, server_certificate = null) {
+    static json(url, json, method = null, headers = null, follow_redirects = null, response_body = null, assert_status_code_is_ok = null, server_certificate = null) {
         return this.new(
             url,
             WebBodyImplementation.json(
@@ -205,6 +222,7 @@ export class HttpClientRequest {
             method,
             headers,
             follow_redirects,
+            response_body,
             assert_status_code_is_ok,
             server_certificate
         );
@@ -212,24 +230,26 @@ export class HttpClientRequest {
 
     /**
      * @param {URL} url
-     * @param {Readable | null} node_stream
+     * @param {Readable | ReadableStream | null} stream
      * @param {string | null} method
      * @param {{[key: string]: string | string[]} | null} headers
      * @param {boolean | null} follow_redirects
+     * @param {boolean | null} response_body
      * @param {boolean | null} assert_status_code_is_ok
      * @param {string | null} server_certificate
      * @returns {Promise<HttpClientRequest>}
      */
-    static async nodeStream(url, node_stream = null, method = null, headers = null, follow_redirects = null, assert_status_code_is_ok = null, server_certificate = null) {
+    static async nodeStream(url, stream = null, method = null, headers = null, follow_redirects = null, response_body = null, assert_status_code_is_ok = null, server_certificate = null) {
         return this.new(
             url,
             (await import("../BodyImplementation/NodeBodyImplementation.mjs")).NodeBodyImplementation.new(
-                node_stream,
+                stream,
                 headers?.[HEADER_CONTENT_TYPE] ?? null
             ),
             method,
             headers,
             follow_redirects,
+            response_body,
             assert_status_code_is_ok,
             server_certificate
         );
@@ -241,11 +261,12 @@ export class HttpClientRequest {
      * @param {string | null} method
      * @param {{[key: string]: string | string[]} | null} headers
      * @param {boolean | null} follow_redirects
+     * @param {boolean | null} response_body
      * @param {boolean | null} assert_status_code_is_ok
      * @param {string | null} server_certificate
      * @returns {HttpClientRequest}
      */
-    static string(url, string, method = null, headers = null, follow_redirects = null, assert_status_code_is_ok = null, server_certificate = null) {
+    static string(url, string, method = null, headers = null, follow_redirects = null, response_body = null, assert_status_code_is_ok = null, server_certificate = null) {
         return this.new(
             url,
             WebBodyImplementation.string(
@@ -255,6 +276,7 @@ export class HttpClientRequest {
             method,
             headers,
             follow_redirects,
+            response_body,
             assert_status_code_is_ok,
             server_certificate
         );
@@ -266,11 +288,12 @@ export class HttpClientRequest {
      * @param {string | null} method
      * @param {{[key: string]: string | string[]} | null} headers
      * @param {boolean | null} follow_redirects
+     * @param {boolean | null} response_body
      * @param {boolean | null} assert_status_code_is_ok
      * @param {string | null} server_certificate
      * @returns {HttpClientRequest}
      */
-    static text(url, text, method = null, headers = null, follow_redirects = null, assert_status_code_is_ok = null, server_certificate = null) {
+    static text(url, text, method = null, headers = null, follow_redirects = null, response_body = null, assert_status_code_is_ok = null, server_certificate = null) {
         return this.new(
             url,
             WebBodyImplementation.text(
@@ -280,6 +303,7 @@ export class HttpClientRequest {
             method,
             headers,
             follow_redirects,
+            response_body,
             assert_status_code_is_ok,
             server_certificate
         );
@@ -291,11 +315,12 @@ export class HttpClientRequest {
      * @param {string | null} method
      * @param {{[key: string]: string | string[]} | null} headers
      * @param {boolean | null} follow_redirects
+     * @param {boolean | null} response_body
      * @param {boolean | null} assert_status_code_is_ok
      * @param {string | null} server_certificate
      * @returns {HttpClientRequest}
      */
-    static webResponse(url, web_response, method = null, headers = null, follow_redirects = null, assert_status_code_is_ok = null, server_certificate = null) {
+    static webResponse(url, web_response, method = null, headers = null, follow_redirects = null, response_body = null, assert_status_code_is_ok = null, server_certificate = null) {
         return this.new(
             url,
             WebBodyImplementation.new(
@@ -308,6 +333,7 @@ export class HttpClientRequest {
                 ...headers
             },
             follow_redirects,
+            response_body,
             assert_status_code_is_ok,
             server_certificate
         );
@@ -319,11 +345,12 @@ export class HttpClientRequest {
      * @param {string | null} method
      * @param {{[key: string]: string | string[]} | null} headers
      * @param {boolean | null} follow_redirects
+     * @param {boolean | null} response_body
      * @param {boolean | null} assert_status_code_is_ok
      * @param {string | null} server_certificate
      * @returns {HttpClientRequest}
      */
-    static webStream(url, web_stream = null, method = null, headers = null, follow_redirects = null, assert_status_code_is_ok = null, server_certificate = null) {
+    static webStream(url, web_stream = null, method = null, headers = null, follow_redirects = null, response_body = null, assert_status_code_is_ok = null, server_certificate = null) {
         return this.new(
             url,
             WebBodyImplementation.webStream(
@@ -333,6 +360,7 @@ export class HttpClientRequest {
             method,
             headers,
             follow_redirects,
+            response_body,
             assert_status_code_is_ok,
             server_certificate
         );
@@ -344,17 +372,19 @@ export class HttpClientRequest {
      * @param {string | null} method
      * @param {{[key: string]: string | string[]} | null} headers
      * @param {boolean | null} follow_redirects
+     * @param {boolean | null} response_body
      * @param {boolean | null} assert_status_code_is_ok
      * @param {string | null} server_certificate
      * @returns {HttpClientRequest}
      */
-    static new(url, body_implementation = null, method = null, headers = null, follow_redirects = null, assert_status_code_is_ok = null, server_certificate = null) {
+    static new(url, body_implementation = null, method = null, headers = null, follow_redirects = null, response_body = null, assert_status_code_is_ok = null, server_certificate = null) {
         return new this(
             url,
             body_implementation ?? WebBodyImplementation.webStream(),
             method ?? METHOD_GET,
             headers ?? {},
             follow_redirects ?? true,
+            response_body ?? true,
             assert_status_code_is_ok ?? true,
             server_certificate
         );
@@ -366,16 +396,18 @@ export class HttpClientRequest {
      * @param {string} method
      * @param {{[key: string]: string | string[]}} headers
      * @param {boolean} follow_redirects
+     * @param {boolean} response_body
      * @param {boolean} assert_status_code_is_ok
      * @param {string | null} server_certificate
      * @private
      */
-    constructor(url, body_implementation, method, headers, follow_redirects, assert_status_code_is_ok, server_certificate) {
+    constructor(url, body_implementation, method, headers, follow_redirects, response_body, assert_status_code_is_ok, server_certificate) {
         this.#url = url;
         this.#body_implementation = body_implementation;
         this.#method = method;
         this.#headers = headers;
         this.#follow_redirects = follow_redirects;
+        this.#response_body = response_body;
         this.#assert_status_code_is_ok = assert_status_code_is_ok;
         this.#server_certificate = server_certificate;
     }
@@ -420,6 +452,13 @@ export class HttpClientRequest {
      */
     get method() {
         return this.#method;
+    }
+
+    /**
+     * @returns {boolean}
+     */
+    get response_body() {
+        return this.#response_body;
     }
 
     /**

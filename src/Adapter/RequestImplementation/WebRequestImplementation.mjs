@@ -40,13 +40,17 @@ export class WebRequestImplementation extends RequestImplementation {
         });
 
         const response = HttpClientResponse.new(
-            request.method !== METHOD_HEAD ? WebBodyImplementation.new(
+            request.response_body && request.method !== METHOD_HEAD ? WebBodyImplementation.new(
                 web_response
             ) : null,
             web_response.status,
             Object.fromEntries(web_response.headers),
             web_response.statusText
         );
+
+        if (!request.response_body) {
+            await web_response.body?.cancel();
+        }
 
         if (request.assert_status_code_is_ok && !response.status_code_is_ok && (!request.follow_redirects ? response.status_code < STATUS_CODE_300 && response.status_code >= STATUS_CODE_400 : true)) {
             return Promise.reject(response);

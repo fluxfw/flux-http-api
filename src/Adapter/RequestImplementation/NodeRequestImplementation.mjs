@@ -47,6 +47,8 @@ export class NodeRequestImplementation extends RequestImplementation {
             const is_redirect_status_code = res.statusCode >= STATUS_CODE_300 && res.statusCode < STATUS_CODE_400;
 
             if (request.follow_redirects && is_redirect_status_code) {
+                res.destroy();
+
                 if (request.method !== METHOD_GET && request.method !== METHOD_HEAD) {
                     reject_promise(new Error(`Method needs to be ${METHOD_GET} or ${METHOD_HEAD}, got ${request.method}`));
                     return;
@@ -73,6 +75,7 @@ export class NodeRequestImplementation extends RequestImplementation {
                         request.method,
                         request.headers,
                         request.follow_redirects,
+                        request.response_body,
                         request.assert_status_code_is_ok,
                         url.hostname === request.url.hostname ? request.server_certificate : null
                     )
@@ -82,7 +85,7 @@ export class NodeRequestImplementation extends RequestImplementation {
             }
 
             const response = HttpClientResponse.new(
-                request.method !== METHOD_HEAD ? NodeBodyImplementation.new(
+                request.response_body && request.method !== METHOD_HEAD ? NodeBodyImplementation.new(
                     res,
                     res.headers[HEADER_CONTENT_TYPE.toLowerCase()] ?? null
                 ) : null,
@@ -90,6 +93,10 @@ export class NodeRequestImplementation extends RequestImplementation {
                 res.headers,
                 res.statusMessage
             );
+
+            if (!request.response_body) {
+                res.destroy();
+            }
 
             if (request.assert_status_code_is_ok && !response.status_code_is_ok && (!request.follow_redirects ? !is_redirect_status_code : true)) {
                 reject_promise(response);

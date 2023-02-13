@@ -70,9 +70,9 @@ export class ProxyRequestCommand {
         }
 
         const response = await this.#client_service.request(
-            HttpClientRequest.webStream(
+            await HttpClientRequest.nodeStream(
                 url,
-                request_body && proxy_request.request.method !== METHOD_HEAD && proxy_request.request.method !== METHOD_GET ? await proxy_request.request.body.webStream() : null,
+                request_body && proxy_request.request.method !== METHOD_HEAD && proxy_request.request.method !== METHOD_GET ? proxy_request.request.body.stream() : null,
                 (Array.isArray(request_method) ? request_method.includes(proxy_request.request.method) : request_method) ? proxy_request.request.method : null,
                 Array.isArray(request_headers) ? request_headers.reduce((headers, key) => {
                     const value = proxy_request.request.header(key);
@@ -86,6 +86,7 @@ export class ProxyRequestCommand {
                     return headers;
                 }, {}) : request_headers ? proxy_request.request.headers : null,
                 !response_redirect,
+                response_body,
                 !response_status,
                 server_certificate
             )
