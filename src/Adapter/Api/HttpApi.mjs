@@ -49,6 +49,20 @@ export class HttpApi {
     }
 
     /**
+     * @param {HttpServerRequest} request
+     * @param {string} schema
+     * @param {string | null} parameters
+     * @returns {Promise<string | HttpServerResponse>}
+     */
+    async getAuthorizationParameters(request, schema, parameters = null) {
+        return (await this.#getServerService()).getAuthorizationParameters(
+            request,
+            schema,
+            parameters
+        );
+    }
+
+    /**
      * @param {string} root
      * @param {string} path
      * @param {HttpServerRequest} request

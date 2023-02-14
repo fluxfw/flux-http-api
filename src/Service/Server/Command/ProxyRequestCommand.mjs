@@ -75,7 +75,9 @@ export class ProxyRequestCommand {
                 request_body && proxy_request.request.method !== METHOD_HEAD && proxy_request.request.method !== METHOD_GET ? proxy_request.request.body.stream() : null,
                 (Array.isArray(request_method) ? request_method.includes(proxy_request.request.method) : request_method) ? proxy_request.request.method : null,
                 Array.isArray(request_headers) ? request_headers.reduce((headers, key) => {
-                    const value = proxy_request.request.header(key);
+                    const value = proxy_request.request.header(
+                        key
+                    );
 
                     if (value === null) {
                         return headers;
@@ -96,7 +98,9 @@ export class ProxyRequestCommand {
             response_body && proxy_request.request.method !== METHOD_HEAD ? response.body.stream() : null,
             response_status ? response.status_code : null,
             Array.isArray(response_headers) ? response_headers.reduce((headers, key) => {
-                const value = response.header(key);
+                const value = response.header(
+                    key
+                );
 
                 if (value === null) {
                     return headers;

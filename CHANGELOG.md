@@ -6,6 +6,12 @@ Changes:
 
 \-
 
+## v2023-02-14-1
+
+Changes:
+
+- `getAuthorizationParameters`
+
 ## v2023-02-13-1
 
 Changes:
