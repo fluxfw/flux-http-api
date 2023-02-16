@@ -38,11 +38,11 @@ export class MapRequestCommand {
             req.headers,
             req.headers[HEADER_COOKIE.toLowerCase()]?.split(";")?.reduce((cookies, cookie) => {
                 const [
-                    key,
+                    name,
                     ...value
                 ] = cookie.trim().split("=");
 
-                cookies[key] = value.join("=");
+                cookies[name] = value.join("=");
 
                 return cookies;
             }, {}) ?? null,

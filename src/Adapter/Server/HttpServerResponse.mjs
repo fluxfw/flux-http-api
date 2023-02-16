@@ -14,7 +14,7 @@ export class HttpServerResponse {
      */
     #body_implementation;
     /**
-     * @type {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null}}}
+     * @type {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null} | null}}
      */
     #cookies;
     /**
@@ -34,7 +34,7 @@ export class HttpServerResponse {
      * @param {ArrayBuffer} array_buffer
      * @param {number | null} status_code
      * @param {{[key: string]: string | string[]} | null} headers
-     * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null} | null}} cookies
+     * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null} | null} | null} cookies
      * @param {string | null} status_message
      * @returns {HttpServerResponse}
      */
@@ -55,7 +55,7 @@ export class HttpServerResponse {
      * @param {Blob} blob
      * @param {number | null} status_code
      * @param {{[key: string]: string | string[]} | null} headers
-     * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null} | null}} cookies
+     * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null} | null} | null} cookies
      * @param {string | null} status_message
      * @returns {HttpServerResponse}
      */
@@ -76,7 +76,7 @@ export class HttpServerResponse {
      * @param {Buffer} buffer
      * @param {number | null} status_code
      * @param {{[key: string]: string | string[]} | null} headers
-     * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null} | null}} cookies
+     * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null} | null} | null} cookies
      * @param {string | null} status_message
      * @returns {HttpServerResponse}
      */
@@ -97,7 +97,7 @@ export class HttpServerResponse {
      * @param {string} css
      * @param {number | null} status_code
      * @param {{[key: string]: string | string[]} | null} headers
-     * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null} | null}} cookies
+     * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null} | null} | null} cookies
      * @param {string | null} status_message
      * @returns {HttpServerResponse}
      */
@@ -118,7 +118,7 @@ export class HttpServerResponse {
      * @param {FormData} form_data
      * @param {number | null} status_code
      * @param {{[key: string]: string | string[]} | null} headers
-     * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null} | null}} cookies
+     * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null} | null} | null} cookies
      * @param {string | null} status_message
      * @returns {HttpServerResponse}
      */
@@ -139,7 +139,7 @@ export class HttpServerResponse {
      * @param {string} html
      * @param {number | null} status_code
      * @param {{[key: string]: string | string[]} | null} headers
-     * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null} | null}} cookies
+     * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null} | null} | null} cookies
      * @param {string | null} status_message
      * @returns {HttpServerResponse}
      */
@@ -160,7 +160,7 @@ export class HttpServerResponse {
      * @param {*} json
      * @param {number | null} status_code
      * @param {{[key: string]: string | string[]} | null} headers
-     * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null} | null}} cookies
+     * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null} | null} | null} cookies
      * @param {string | null} status_message
      * @returns {HttpServerResponse}
      */
@@ -181,7 +181,7 @@ export class HttpServerResponse {
      * @param {string} location
      * @param {number | null} status_code
      * @param {{[key: string]: string | string[]} | null} headers
-     * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null} | null}} cookies
+     * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null} | null} | null} cookies
      * @param {string | null} status_message
      * @returns {HttpServerResponse}
      */
@@ -205,7 +205,7 @@ export class HttpServerResponse {
      * @param {RangeValue | null} range
      * @param {number | null} status_code
      * @param {{[key: string]: string | string[]} | null} headers
-     * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null} | null}} cookies
+     * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null} | null} | null} cookies
      * @param {string | null} status_message
      * @returns {HttpServerResponse}
      */
@@ -239,7 +239,7 @@ export class HttpServerResponse {
      * @param {Readable | ReadableStream | null} stream
      * @param {number | null} status_code
      * @param {{[key: string]: string | string[]} | null} headers
-     * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null} | null}} cookies
+     * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null} | null} | null} cookies
      * @param {string | null} status_message
      * @returns {HttpServerResponse}
      */
@@ -260,7 +260,7 @@ export class HttpServerResponse {
      * @param {string} string
      * @param {number | null} status_code
      * @param {{[key: string]: string | string[]} | null} headers
-     * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null} | null}} cookies
+     * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null} | null} | null} cookies
      * @param {string | null} status_message
      * @returns {HttpServerResponse}
      */
@@ -281,7 +281,7 @@ export class HttpServerResponse {
      * @param {string} text
      * @param {number | null} status_code
      * @param {{[key: string]: string | string[]} | null} headers
-     * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null} | null}} cookies
+     * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null} | null} | null} cookies
      * @param {string | null} status_message
      * @returns {HttpServerResponse}
      */
@@ -302,7 +302,7 @@ export class HttpServerResponse {
      * @param {Response} web_response
      * @param {number | null} status_code
      * @param {{[key: string]: string | string[]} | null} headers
-     * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null} | null}} cookies
+     * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null} | null} | null} cookies
      * @param {string | null} status_message
      * @returns {HttpServerResponse}
      */
@@ -326,7 +326,7 @@ export class HttpServerResponse {
      * @param {BodyImplementation | null} body_implementation
      * @param {number | null} status_code
      * @param {{[key: string]: string | string[]} | null} headers
-     * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null} | null}} cookies
+     * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null} | null} | null} cookies
      * @param {string | null} status_message
      * @returns {HttpServerResponse}
      */
@@ -346,7 +346,7 @@ export class HttpServerResponse {
      * @param {BodyImplementation} body_implementation
      * @param {number} status_code
      * @param {{[key: string]: string | string[]}} headers
-     * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null}}} cookies
+     * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null} | null}} cookies
      * @param {string} status_message
      * @private
      */
@@ -366,7 +366,7 @@ export class HttpServerResponse {
     }
 
     /**
-     * @returns {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null}}}
+     * @returns {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null} | null}}
      */
     get cookies() {
         return this.#cookies;

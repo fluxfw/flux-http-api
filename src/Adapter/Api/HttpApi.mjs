@@ -9,6 +9,7 @@
 /** @typedef {import("../Range/RangeValue.mjs").RangeValue} RangeValue */
 /** @typedef {import("../RequestImplementation/RequestImplementation.mjs").RequestImplementation} RequestImplementation */
 /** @typedef {import("../Server/_Server.mjs").Server} Server */
+/** @typedef {import("node:http").ServerResponse} ServerResponse */
 /** @typedef {import("../../Service/Server/Port/ServerService.mjs").ServerService} ServerService */
 /** @typedef {import("../../../../flux-shutdown-handler-api/src/Adapter/ShutdownHandler/ShutdownHandler.mjs").ShutdownHandler} ShutdownHandler */
 
@@ -145,6 +146,18 @@ export class HttpApi {
         await (await this.#getServerService()).runServer(
             handle_request,
             server
+        );
+    }
+
+    /**
+     * @param {ServerResponse} _res
+     * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null} | null}} cookies
+     * @returns {Promise<void>}
+     */
+    async _setCookies(_res, cookies) {
+        await (await this.#getServerService())._setCookies(
+            _res,
+            cookies
         );
     }
 

@@ -58,13 +58,13 @@ export class RunServerCommand {
         const redirect_http_to_https = server?.redirect_http_to_https ?? SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS;
         const redirect_http_to_https_port = server?.redirect_http_to_https_port ?? SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS_PORT;
         const redirect_http_to_https_status_code = server?.redirect_http_to_https_status_code ?? SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS_STATUS_CODE;
-        const https_cert = server?.https_cert ?? null;
+        const https_certificate = server?.https_certificate ?? null;
         const https_key = server?.https_key ?? null;
         const https_dhparam = server?.https_dhparam ?? null;
         const no_date = server?.no_date ?? SERVER_DEFAULT_NO_DATE;
         const no_referrer = server?.no_referrer ?? SERVER_DEFAULT_NO_REFERRER;
 
-        const https = listen_https_port !== SERVER_LISTEN_HTTPS_PORT_DISABLED && https_cert !== null && https_key !== null;
+        const https = listen_https_port !== SERVER_LISTEN_HTTPS_PORT_DISABLED && https_certificate !== null && https_key !== null;
         const http = listen_http_port !== SERVER_LISTEN_HTTP_PORT_DISABLED;
 
         /**
@@ -92,7 +92,7 @@ export class RunServerCommand {
                 listen_https_port,
                 listen_interface,
                 {
-                    cert: https_cert,
+                    cert: https_certificate,
                     key: https_key,
                     dhparam: https_dhparam
                 }

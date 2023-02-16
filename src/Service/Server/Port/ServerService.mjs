@@ -183,6 +183,19 @@ export class ServerService {
     }
 
     /**
+     * @param {ServerResponse} _res
+     * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null} | null}} cookies
+     * @returns {Promise<void>}
+     */
+    async _setCookies(_res, cookies) {
+        await (await import("../Command/MapResponseCommand.mjs")).MapResponseCommand.new()
+            ._setCookies(
+                _res,
+                cookies
+            );
+    }
+
+    /**
      * @param {HttpServerRequest} request
      * @param {string[]} methods
      * @returns {Promise<HttpServerResponse | null>}

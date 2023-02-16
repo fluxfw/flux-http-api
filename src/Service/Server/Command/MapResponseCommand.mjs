@@ -1,9 +1,8 @@
 import { HEADER_SET_COOKIE } from "../../../Adapter/Header/HEADER.mjs";
 import { METHOD_HEAD } from "../../../Adapter/Method/METHOD.mjs";
 import { pipeline } from "node:stream/promises";
-import { SET_COOKIE_SAME_SITE_LAX } from "../../../Adapter/Cookie/SET_COOKIE_SAME_SITE.mjs";
 import { STATUS_CODE_500 } from "../../../Adapter/Status/STATUS_CODE.mjs";
-import { SET_COOKIE_OPTION_EXPIRES, SET_COOKIE_OPTION_HTTP_ONLY, SET_COOKIE_OPTION_MAX_AGE, SET_COOKIE_OPTION_PATH, SET_COOKIE_OPTION_SAME_SITE, SET_COOKIE_OPTION_SECURE } from "../../../Adapter/Cookie/SET_COOKIE_OPTION.mjs";
+import { SET_COOKIE_OPTION_DEFAULT_HTTP_ONLY, SET_COOKIE_OPTION_DEFAULT_MAX_AGE, SET_COOKIE_OPTION_DEFAULT_PATH, SET_COOKIE_OPTION_DEFAULT_PRIORITY, SET_COOKIE_OPTION_DEFAULT_SAME_SITE, SET_COOKIE_OPTION_DEFAULT_SECURE, SET_COOKIE_OPTION_EXPIRES, SET_COOKIE_OPTION_HTTP_ONLY, SET_COOKIE_OPTION_MAX_AGE, SET_COOKIE_OPTION_MAX_AGE_SESSION, SET_COOKIE_OPTION_PATH, SET_COOKIE_OPTION_PRIORITY, SET_COOKIE_OPTION_SAME_SITE, SET_COOKIE_OPTION_SECURE } from "../../../Adapter/Cookie/SET_COOKIE_OPTION.mjs";
 
 /** @typedef {import("../../../Adapter/Server/HttpServerRequest.mjs").HttpServerRequest} HttpServerRequest */
 /** @typedef {import("../../../Adapter/Server/HttpServerResponse.mjs").HttpServerResponse} HttpServerResponse */
@@ -46,40 +45,10 @@ export class MapResponseCommand {
                 );
             }
 
-            for (const [
-                key,
-                value
-            ] of Object.entries(response.cookies)) {
-                if (value === null) {
-                    this.#deleteCookie(
-                        res,
-                        key
-                    );
-                } else {
-                    if (typeof value === "object") {
-                        if (value.value === null) {
-                            this.#deleteCookie(
-                                res,
-                                key,
-                                value.options
-                            );
-                        } else {
-                            this.#setCookie(
-                                res,
-                                key,
-                                value.value,
-                                value.options
-                            );
-                        }
-                    } else {
-                        this.#setCookie(
-                            res,
-                            key,
-                            value
-                        );
-                    }
-                }
-            }
+            this.#setCookies(
+                res,
+                response.cookies
+            );
 
             if (request?.method === METHOD_HEAD) {
                 return;
@@ -105,15 +74,27 @@ export class MapResponseCommand {
     }
 
     /**
+     * @param {ServerResponse} _res
+     * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null} | null}} cookies
+     * @returns {Promise<void>}
+     */
+    async _setCookies(_res, cookies) {
+        this.#setCookies(
+            _res,
+            cookies
+        );
+    }
+
+    /**
      * @param {ServerResponse} res
-     * @param {string} key
+     * @param {string} name
      * @param {{[key: string]: *} | null} options
      * @returns {void}
      */
-    #deleteCookie(res, key, options = null) {
+    #deleteCookie(res, name, options = null) {
         this.#setCookie(
             res,
-            key,
+            name,
             "",
             {
                 ...options,
@@ -125,23 +106,67 @@ export class MapResponseCommand {
 
     /**
      * @param {ServerResponse} res
-     * @param {string} key
+     * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null} | null}} cookies
+     * @returns {void}
+     */
+    #setCookies(res, cookies) {
+        for (const [
+            name,
+            value
+        ] of Object.entries(cookies)) {
+            if (value === null) {
+                this.#deleteCookie(
+                    res,
+                    name
+                );
+            } else {
+                if (typeof value === "object") {
+                    if (value.value === null) {
+                        this.#deleteCookie(
+                            res,
+                            name,
+                            value.options
+                        );
+                    } else {
+                        this.#setCookie(
+                            res,
+                            name,
+                            value.value,
+                            value.options
+                        );
+                    }
+                } else {
+                    this.#setCookie(
+                        res,
+                        name,
+                        value
+                    );
+                }
+            }
+        }
+    }
+
+    /**
+     * @param {ServerResponse} res
+     * @param {string} name
      * @param {*} value
      * @param {{[key: string]: *} | null} options
      * @returns {void}
      */
-    #setCookie(res, key, value, options = null) {
+    #setCookie(res, name, value, options = null) {
         this.#setHeader(
             res,
             HEADER_SET_COOKIE,
-            `${key}=${value}${Object.entries({
-                [SET_COOKIE_OPTION_HTTP_ONLY]: true,
-                [SET_COOKIE_OPTION_PATH]: "/",
-                [SET_COOKIE_OPTION_SAME_SITE]: SET_COOKIE_SAME_SITE_LAX,
-                [SET_COOKIE_OPTION_SECURE]: true,
+            `${name}=${value}${Object.entries({
+                [SET_COOKIE_OPTION_HTTP_ONLY]: SET_COOKIE_OPTION_DEFAULT_HTTP_ONLY,
+                [SET_COOKIE_OPTION_MAX_AGE]: SET_COOKIE_OPTION_DEFAULT_MAX_AGE,
+                [SET_COOKIE_OPTION_PATH]: SET_COOKIE_OPTION_DEFAULT_PATH,
+                [SET_COOKIE_OPTION_PRIORITY]: SET_COOKIE_OPTION_DEFAULT_PRIORITY,
+                [SET_COOKIE_OPTION_SAME_SITE]: SET_COOKIE_OPTION_DEFAULT_SAME_SITE,
+                [SET_COOKIE_OPTION_SECURE]: SET_COOKIE_OPTION_DEFAULT_SECURE,
                 ...options
             }).reduce((_options, [
-                _key,
+                key,
                 _value
             ]) => {
                 if ((_value ?? null) === null) {
@@ -149,10 +174,14 @@ export class MapResponseCommand {
                 }
 
                 if (typeof _value === "boolean") {
-                    return _value ? `${_options}; ${_key}` : _options;
+                    return _value ? `${_options}; ${key}` : _options;
                 }
 
-                return `${_options}; ${_key}=${_value instanceof Date ? _value.toUTCString() : _value}`;
+                if (key === SET_COOKIE_OPTION_MAX_AGE && _value === SET_COOKIE_OPTION_MAX_AGE_SESSION) {
+                    return _options;
+                }
+
+                return `${_options}; ${key}=${_value instanceof Date ? _value.toUTCString() : _value}`;
             }, "")}`
         );
     }

@@ -91,13 +91,13 @@ export class HttpServerRequest {
     }
 
     /**
-     * @param {string} key
+     * @param {string} name
      * @returns {string | null}
      */
-    cookie(key) {
+    cookie(name) {
         return Object.entries(this.#cookies).find(([
-            _key
-        ]) => _key === key)?.[1] ?? null;
+            _name
+        ]) => _name === name)?.[1] ?? null;
     }
 
     /**
