@@ -124,13 +124,15 @@ export class ServerService {
     /**
      * @param {IncomingMessage} req
      * @param {ServerResponse | null} _res
+     * @param {boolean | null} forwarded_headers
      * @returns {Promise<HttpServerRequest>}
      */
-    async mapRequest(req, _res = null) {
+    async mapRequest(req, _res = null, forwarded_headers = null) {
         return (await import("../Command/MapRequestCommand.mjs")).MapRequestCommand.new()
             .mapRequest(
                 req,
-                _res
+                _res,
+                forwarded_headers
             );
     }
 

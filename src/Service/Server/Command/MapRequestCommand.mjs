@@ -1,6 +1,7 @@
 import { HttpServerRequest } from "../../../Adapter/Server/HttpServerRequest.mjs";
 import { NodeBodyImplementation } from "../../../Adapter/BodyImplementation/NodeBodyImplementation.mjs";
-import { HEADER_CONTENT_TYPE, HEADER_COOKIE, HEADER_HOST } from "../../../Adapter/Header/HEADER.mjs";
+import { SERVER_DEFAULT_FORWARDED_HEADERS } from "../../../Adapter/Server/SERVER.mjs";
+import { HEADER_CONTENT_TYPE, HEADER_COOKIE, HEADER_HOST, HEADER_X_FORWARDED_HOST, HEADER_X_FORWARDED_PROTO } from "../../../Adapter/Header/HEADER.mjs";
 import { METHOD_GET, METHOD_HEAD } from "../../../Adapter/Method/METHOD.mjs";
 import { PROTOCOL_HTTP, PROTOCOL_HTTPS } from "../../../Adapter/Protocol/PROTOCOL.mjs";
 
@@ -25,11 +26,14 @@ export class MapRequestCommand {
     /**
      * @param {IncomingMessage} req
      * @param {ServerResponse | null} _res
+     * @param {boolean | null} forwarded_headers
      * @returns {Promise<HttpServerRequest>}
      */
-    async mapRequest(req, _res = null) {
+    async mapRequest(req, _res = null, forwarded_headers = null) {
+        const _forwarded_headers = forwarded_headers ?? SERVER_DEFAULT_FORWARDED_HEADERS;
+
         return HttpServerRequest.new(
-            new URL(req.url, `${req.socket.encrypted ? PROTOCOL_HTTPS : PROTOCOL_HTTP}://${req.headers[HEADER_HOST.toLowerCase()] ?? "host"}`),
+            new URL(req.url, `${(_forwarded_headers ? req.headers[HEADER_X_FORWARDED_PROTO.toLowerCase()] : null) ?? (req.socket.encrypted ? PROTOCOL_HTTPS : PROTOCOL_HTTP)}://${(_forwarded_headers ? req.headers[HEADER_X_FORWARDED_HOST.toLowerCase()] : null) ?? req.headers[HEADER_HOST.toLowerCase()] ?? "host"}`),
             req.method !== METHOD_GET && req.method !== METHOD_HEAD ? NodeBodyImplementation.new(
                 req,
                 req.headers[HEADER_CONTENT_TYPE.toLowerCase()] ?? null

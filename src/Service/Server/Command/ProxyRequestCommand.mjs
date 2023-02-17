@@ -1,5 +1,6 @@
 import { HttpClientRequest } from "../../../Adapter/Client/HttpClientRequest.mjs";
 import { HttpServerResponse } from "../../../Adapter/Server/HttpServerResponse.mjs";
+import { HEADER_X_FORWARDED_HOST, HEADER_X_FORWARDED_PROTO } from "../../../Adapter/Header/HEADER.mjs";
 import { METHOD_GET, METHOD_HEAD } from "../../../Adapter/Method/METHOD.mjs";
 
 /** @typedef {import("../../Client/Port/ClientService.mjs").ClientService} ClientService */
@@ -37,6 +38,7 @@ export class ProxyRequestCommand {
         const request_method = proxy_request.request_method ?? false;
         const request_query_params = proxy_request.request_query_params ?? false;
         const request_headers = proxy_request.request_headers ?? false;
+        const request_forwarded_headers = proxy_request.request_forwarded_headers ?? false;
         const request_body = proxy_request.request_body ?? false;
         const response_redirect = proxy_request.response_redirect ?? false;
         const response_status = proxy_request.response_status ?? true;
@@ -74,19 +76,25 @@ export class ProxyRequestCommand {
                 url,
                 request_body && proxy_request.request.method !== METHOD_HEAD && proxy_request.request.method !== METHOD_GET ? proxy_request.request.body.stream() : null,
                 (Array.isArray(request_method) ? request_method.includes(proxy_request.request.method) : request_method) ? proxy_request.request.method : null,
-                Array.isArray(request_headers) ? request_headers.reduce((headers, key) => {
-                    const value = proxy_request.request.header(
-                        key
-                    );
+                {
+                    ...Array.isArray(request_headers) ? request_headers.reduce((headers, key) => {
+                        const value = proxy_request.request.header(
+                            key
+                        );
 
-                    if (value === null) {
+                        if (value === null) {
+                            return headers;
+                        }
+
+                        headers[key] = value;
+
                         return headers;
-                    }
-
-                    headers[key] = value;
-
-                    return headers;
-                }, {}) : request_headers ? proxy_request.request.headers : null,
+                    }, {}) : request_headers ? proxy_request.request.headers : null,
+                    ...request_forwarded_headers ? {
+                        [HEADER_X_FORWARDED_HOST]: proxy_request.request.url.host,
+                        [HEADER_X_FORWARDED_PROTO]: proxy_request.request.url.protocol.slice(0, -1)
+                    } : null
+                },
                 !response_redirect,
                 response_body,
                 !response_status,

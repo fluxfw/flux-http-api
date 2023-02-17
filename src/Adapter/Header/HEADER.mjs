@@ -172,4 +172,8 @@ export const HEADER_X_CONTENT_TYPE_OPTIONS = `${CUSTOM_HEADER_PREFIX}Content-Typ
 
 export const HEADER_X_FLUX_AUTHENTICATION_FRONTEND_URL = `${CUSTOM_HEADER_PREFIX}Flux-Authentication-Frontend-Url`;
 
+export const HEADER_X_FORWARDED_HOST = `${CUSTOM_HEADER_PREFIX}Forwarded-Host`;
+
+export const HEADER_X_FORWARDED_PROTO = `${CUSTOM_HEADER_PREFIX}Forwarded-Proto`;
+
 export const HEADER_X_FRAME_OPTIONS = `${CUSTOM_HEADER_PREFIX}Frame-Options`;
