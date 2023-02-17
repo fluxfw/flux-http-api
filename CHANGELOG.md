@@ -6,6 +6,12 @@ Changes:
 
 \-
 
+## v2023-02-17-2
+
+Changes:
+
+- Default cookie path to `/api`
+
 ## v2023-02-17-1
 
 Changes:
