@@ -6,6 +6,12 @@ Changes:
 
 \-
 
+## v2023-03-01-1
+
+Changes:
+
+- Disable `assert_status_code_is_ok` and `follow_redirects`
+
 ## v2023-02-17-2
 
 Changes:

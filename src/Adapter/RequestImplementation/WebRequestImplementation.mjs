@@ -2,7 +2,6 @@ import { HttpClientResponse } from "../Client/HttpClientResponse.mjs";
 import { RequestImplementation } from "./RequestImplementation.mjs";
 import { WebBodyImplementation } from "../BodyImplementation/WebBodyImplementation.mjs";
 import { METHOD_GET, METHOD_HEAD } from "../Method/METHOD.mjs";
-import { STATUS_CODE_300, STATUS_CODE_400 } from "../Status/STATUS_CODE.mjs";
 
 /** @typedef {import("../Client/HttpClientRequest.mjs").HttpClientRequest} HttpClientRequest */
 
@@ -52,7 +51,7 @@ export class WebRequestImplementation extends RequestImplementation {
             await web_response.body?.cancel();
         }
 
-        if (request.assert_status_code_is_ok && !response.status_code_is_ok && (!request.follow_redirects ? response.status_code < STATUS_CODE_300 && response.status_code >= STATUS_CODE_400 : true)) {
+        if (request.assert_status_code_is_ok && !response.status_code_is_ok) {
             return Promise.reject(response);
         }
 

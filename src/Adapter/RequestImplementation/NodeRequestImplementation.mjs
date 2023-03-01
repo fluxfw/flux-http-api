@@ -44,9 +44,7 @@ export class NodeRequestImplementation extends RequestImplementation {
                 request.server_certificate
             ] : null
         }, res => {
-            const is_redirect_status_code = res.statusCode >= STATUS_CODE_300 && res.statusCode < STATUS_CODE_400;
-
-            if (request.follow_redirects && is_redirect_status_code) {
+            if (request.follow_redirects && res.statusCode >= STATUS_CODE_300 && res.statusCode < STATUS_CODE_400) {
                 res.destroy();
 
                 if (request.method !== METHOD_GET && request.method !== METHOD_HEAD) {
@@ -74,9 +72,9 @@ export class NodeRequestImplementation extends RequestImplementation {
                         null,
                         request.method,
                         request.headers,
-                        request.follow_redirects,
-                        request.response_body,
                         request.assert_status_code_is_ok,
+                        request.response_body,
+                        request.follow_redirects,
                         url.hostname === request.url.hostname ? request.server_certificate : null
                     )
                 ));
@@ -98,7 +96,7 @@ export class NodeRequestImplementation extends RequestImplementation {
                 res.destroy();
             }
 
-            if (request.assert_status_code_is_ok && !response.status_code_is_ok && (!request.follow_redirects ? !is_redirect_status_code : true)) {
+            if (request.assert_status_code_is_ok && !response.status_code_is_ok) {
                 reject_promise(response);
                 return;
             }

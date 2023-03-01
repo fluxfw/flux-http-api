@@ -95,9 +95,9 @@ export class ProxyRequestCommand {
                         [HEADER_X_FORWARDED_PROTO]: proxy_request.request.url.protocol.slice(0, -1)
                     } : null
                 },
-                !response_redirect,
-                response_body,
                 !response_status,
+                response_body,
+                !response_redirect,
                 server_certificate
             )
         );
