@@ -1,8 +1,7 @@
-import { createReadStream } from "node:fs";
 import { NodeBodyImplementation } from "../BodyImplementation/NodeBodyImplementation.mjs";
 import { STATUS_CODE_MESSAGE } from "../Status/STATUS_CODE_MESSAGE.mjs";
-import { HEADER_CONTENT_LENGTH, HEADER_CONTENT_RANGE, HEADER_CONTENT_TYPE, HEADER_LOCATION } from "../Header/HEADER.mjs";
-import { STATUS_CODE_200, STATUS_CODE_206, STATUS_CODE_302 } from "../Status/STATUS_CODE.mjs";
+import { HEADER_CONTENT_TYPE, HEADER_LOCATION } from "../Header/HEADER.mjs";
+import { STATUS_CODE_200, STATUS_CODE_302 } from "../Status/STATUS_CODE.mjs";
 
 /** @typedef {import("../BodyImplementation/BodyImplementation.mjs").BodyImplementation} BodyImplementation */
 /** @typedef {import("../Range/RangeValue.mjs").RangeValue} RangeValue */
@@ -199,37 +198,21 @@ export class HttpServerResponse {
     }
 
     /**
-     * @param {string | null} path
-     * @param {string | null} content_type
-     * @param {number | null} length
-     * @param {RangeValue | null} range
+     * @param {URLSearchParams} search_params
      * @param {number | null} status_code
      * @param {{[key: string]: string | string[]} | null} headers
      * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null} | null} | null} cookies
      * @param {string | null} status_message
      * @returns {HttpServerResponse}
      */
-    static staticFile(path = null, content_type = null, length = null, range = null, status_code = null, headers = null, cookies = null, status_message = null) {
-        return this.stream(
-            path !== null ? createReadStream(path, {
-                ...range !== null ? {
-                    start: range.start,
-                    end: range.end
-                } : null
-            }) : null,
-            status_code ?? (range !== null ? STATUS_CODE_206 : null),
-            {
-                ...range !== null ? {
-                    [HEADER_CONTENT_LENGTH]: range.length,
-                    [HEADER_CONTENT_RANGE]: range.range
-                } : length !== null ? {
-                    [HEADER_CONTENT_LENGTH]: length
-                } : {},
-                ...content_type !== null ? {
-                    [HEADER_CONTENT_TYPE]: content_type
-                } : null,
-                ...headers
-            },
+    static searchParams(search_params, status_code = null, headers = null, cookies = null, status_message = null) {
+        return this.new(
+            NodeBodyImplementation.searchParams(
+                search_params,
+                headers?.[HEADER_CONTENT_TYPE] ?? null
+            ),
+            status_code,
+            headers,
             cookies,
             status_message
         );

@@ -51,7 +51,7 @@ export class MapResponseCommand {
                 response.cookies
             );
 
-            if (request?.method === METHOD_HEAD) {
+            if ((request?.method ?? null) === METHOD_HEAD) {
                 return;
             }
 

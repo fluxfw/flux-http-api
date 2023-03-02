@@ -257,6 +257,33 @@ export class HttpClientRequest {
 
     /**
      * @param {URL} url
+     * @param {URLSearchParams} search_params
+     * @param {string | null} method
+     * @param {{[key: string]: string | string[]} | null} headers
+     * @param {boolean | null} assert_status_code_is_ok
+     * @param {boolean | null} response_body
+     * @param {boolean | null} follow_redirects
+     * @param {string | null} server_certificate
+     * @returns {HttpClientRequest}
+     */
+    static searchParams(url, search_params, method = null, headers = null, assert_status_code_is_ok = null, response_body = null, follow_redirects = null, server_certificate = null) {
+        return this.new(
+            url,
+            WebBodyImplementation.searchParams(
+                search_params,
+                headers?.[HEADER_CONTENT_TYPE] ?? null
+            ),
+            method,
+            headers,
+            assert_status_code_is_ok,
+            response_body,
+            follow_redirects,
+            server_certificate
+        );
+    }
+
+    /**
+     * @param {URL} url
      * @param {string} string
      * @param {string | null} method
      * @param {{[key: string]: string | string[]} | null} headers

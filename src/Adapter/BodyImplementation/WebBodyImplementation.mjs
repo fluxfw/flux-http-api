@@ -131,6 +131,24 @@ export class WebBodyImplementation extends BodyImplementation {
     }
 
     /**
+     * @param {URLSearchParams} search_params
+     * @param {string | null} content_type
+     * @returns {WebBodyImplementation}
+     */
+    static searchParams(search_params, content_type = null) {
+        return this.new(
+            new Response(search_params, {
+                headers: {
+                    ...content_type !== null ? {
+                        [HEADER_CONTENT_TYPE]: content_type
+                    } : null
+                }
+            }),
+            content_type
+        );
+    }
+
+    /**
      * @param {string} string
      * @param {string | null} content_type
      * @returns {WebBodyImplementation}
