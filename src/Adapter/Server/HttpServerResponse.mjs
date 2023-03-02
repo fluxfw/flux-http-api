@@ -198,27 +198,6 @@ export class HttpServerResponse {
     }
 
     /**
-     * @param {URLSearchParams} search_params
-     * @param {number | null} status_code
-     * @param {{[key: string]: string | string[]} | null} headers
-     * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null} | null} | null} cookies
-     * @param {string | null} status_message
-     * @returns {HttpServerResponse}
-     */
-    static searchParams(search_params, status_code = null, headers = null, cookies = null, status_message = null) {
-        return this.new(
-            NodeBodyImplementation.searchParams(
-                search_params,
-                headers?.[HEADER_CONTENT_TYPE] ?? null
-            ),
-            status_code,
-            headers,
-            cookies,
-            status_message
-        );
-    }
-
-    /**
      * @param {Readable | ReadableStream | null} stream
      * @param {number | null} status_code
      * @param {{[key: string]: string | string[]} | null} headers
@@ -272,6 +251,27 @@ export class HttpServerResponse {
         return this.new(
             NodeBodyImplementation.text(
                 text,
+                headers?.[HEADER_CONTENT_TYPE] ?? null
+            ),
+            status_code,
+            headers,
+            cookies,
+            status_message
+        );
+    }
+
+    /**
+     * @param {URLSearchParams} url_search_params
+     * @param {number | null} status_code
+     * @param {{[key: string]: string | string[]} | null} headers
+     * @param {{[key: string]: string | {value: string | null, options: {[key: string]: *} | null} | null} | null} cookies
+     * @param {string | null} status_message
+     * @returns {HttpServerResponse}
+     */
+    static urlSearchParams(url_search_params, status_code = null, headers = null, cookies = null, status_message = null) {
+        return this.new(
+            NodeBodyImplementation.urlSearchParams(
+                url_search_params,
                 headers?.[HEADER_CONTENT_TYPE] ?? null
             ),
             status_code,

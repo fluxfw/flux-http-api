@@ -99,18 +99,6 @@ export class NodeBodyImplementation extends BodyImplementation {
     }
 
     /**
-     * @param {URLSearchParams} search_params
-     * @param {string | null} content_type
-     * @returns {NodeBodyImplementation}
-     */
-    static searchParams(search_params, content_type = null) {
-        return this.webResponse(
-            new Response(search_params),
-            content_type
-        );
-    }
-
-    /**
      * @param {string} string
      * @param {string | null} content_type
      * @returns {NodeBodyImplementation}
@@ -131,6 +119,18 @@ export class NodeBodyImplementation extends BodyImplementation {
         return this.string(
             text,
             content_type ?? CONTENT_TYPE_TEXT
+        );
+    }
+
+    /**
+     * @param {URLSearchParams} url_search_params
+     * @param {string | null} content_type
+     * @returns {NodeBodyImplementation}
+     */
+    static urlSearchParams(url_search_params, content_type = null) {
+        return this.webResponse(
+            new Response(url_search_params),
+            content_type
         );
     }
 
