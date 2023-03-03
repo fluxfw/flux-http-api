@@ -6,6 +6,12 @@ Changes:
 
 \-
 
+## v2023-03-03-2
+
+Changes:
+
+- Fix static files
+
 ## v2023-03-03-1
 
 Changes:
