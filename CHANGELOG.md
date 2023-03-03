@@ -6,6 +6,12 @@ Changes:
 
 \-
 
+## v2023-03-03-1
+
+Changes:
+
+- Fix missing error on nodejs request without body
+
 ## v2023-03-02-2
 
 Changes:

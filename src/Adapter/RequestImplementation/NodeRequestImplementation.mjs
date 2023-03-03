@@ -105,12 +105,13 @@ export class NodeRequestImplementation extends RequestImplementation {
         });
 
         try {
-            if (request.method !== METHOD_GET && request.method !== METHOD_HEAD) {
-                const stream = request.body.stream();
-
-                if (stream !== null) {
-                    await pipeline(stream, req);
-                }
+            let stream;
+            if (request.method !== METHOD_GET && request.method !== METHOD_HEAD && (stream = request.body.stream()) !== null) {
+                await pipeline(stream, req);
+            } else {
+                req.on("error", error => {
+                    reject_promise(error);
+                });
             }
         } finally {
             req.end();
