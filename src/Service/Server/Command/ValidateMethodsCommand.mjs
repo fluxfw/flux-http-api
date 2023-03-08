@@ -31,7 +31,9 @@ export class ValidateMethodsCommand {
                 null,
                 STATUS_CODE_405,
                 {
-                    [HEADER_ALLOW]: methods.join(", ")
+                    ...methods.includes(METHOD_OPTIONS) ? {
+                        [HEADER_ALLOW]: methods.join(", ")
+                    } : null
                 }
             );
         }
