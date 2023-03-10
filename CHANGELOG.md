@@ -6,6 +6,12 @@ Changes:
 
 \-
 
+## v2023-03-10-1
+
+Changes:
+
+- 405 Allow header only on OPTIONS
+
 ## v2023-03-03-2
 
 Changes:
