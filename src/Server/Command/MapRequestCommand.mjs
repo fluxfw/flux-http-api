@@ -1,9 +1,9 @@
-import { HttpServerRequest } from "../../../Adapter/Server/HttpServerRequest.mjs";
-import { NodeBodyImplementation } from "../../../Adapter/BodyImplementation/NodeBodyImplementation.mjs";
-import { SERVER_DEFAULT_FORWARDED_HEADERS } from "../../../Adapter/Server/SERVER.mjs";
-import { HEADER_CONTENT_TYPE, HEADER_COOKIE, HEADER_HOST, HEADER_X_FORWARDED_HOST, HEADER_X_FORWARDED_PROTO } from "../../../Adapter/Header/HEADER.mjs";
-import { METHOD_GET, METHOD_HEAD } from "../../../Adapter/Method/METHOD.mjs";
-import { PROTOCOL_HTTP, PROTOCOL_HTTPS } from "../../../Adapter/Protocol/PROTOCOL.mjs";
+import { HttpServerRequest } from "../../Server/HttpServerRequest.mjs";
+import { NodeBodyImplementation } from "../../BodyImplementation/NodeBodyImplementation.mjs";
+import { SERVER_DEFAULT_FORWARDED_HEADERS } from "../../Server/SERVER.mjs";
+import { HEADER_CONTENT_TYPE, HEADER_COOKIE, HEADER_HOST, HEADER_X_FORWARDED_HOST, HEADER_X_FORWARDED_PROTO } from "../../Header/HEADER.mjs";
+import { METHOD_GET, METHOD_HEAD } from "../../Method/METHOD.mjs";
+import { PROTOCOL_HTTP, PROTOCOL_HTTPS } from "../../Protocol/PROTOCOL.mjs";
 
 /** @typedef {import("node:http").IncomingMessage} IncomingMessage */
 /** @typedef {import("node:http").ServerResponse} ServerResponse */

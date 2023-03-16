@@ -1,23 +1,22 @@
-/** @typedef {import("../../Service/Client/Port/ClientService.mjs").ClientService} ClientService */
-/** @typedef {import("../Server/handleRequest.mjs").handleRequest} handleRequest */
-/** @typedef {import("../Client/HttpClientRequest.mjs").HttpClientRequest} HttpClientRequest */
-/** @typedef {import("../Client/HttpClientResponse.mjs").HttpClientResponse} HttpClientResponse */
-/** @typedef {import("../Server/HttpServerRequest.mjs").HttpServerRequest} HttpServerRequest */
-/** @typedef {import("../Server/HttpServerResponse.mjs").HttpServerResponse} HttpServerResponse */
-/** @typedef {import("../Proxy/ProxyRequest.mjs").ProxyRequest} ProxyRequest */
-/** @typedef {import("../Range/RangeUnit.mjs").RangeUnit} RangeUnit */
-/** @typedef {import("../Range/RangeValue.mjs").RangeValue} RangeValue */
-/** @typedef {import("../RequestImplementation/RequestImplementation.mjs").RequestImplementation} RequestImplementation */
-/** @typedef {import("../Server/_Server.mjs").Server} Server */
+/** @typedef {import("../../flux-shutdown-handler/src/FluxShutdownHandler.mjs").FluxShutdownHandler} FluxShutdownHandler */
+/** @typedef {import("./Server/handleRequest.mjs").handleRequest} handleRequest */
+/** @typedef {import("./Client/HttpClientRequest.mjs").HttpClientRequest} HttpClientRequest */
+/** @typedef {import("./Client/HttpClientResponse.mjs").HttpClientResponse} HttpClientResponse */
+/** @typedef {import("./Server/HttpServerRequest.mjs").HttpServerRequest} HttpServerRequest */
+/** @typedef {import("./Server/HttpServerResponse.mjs").HttpServerResponse} HttpServerResponse */
+/** @typedef {import("./Proxy/ProxyRequest.mjs").ProxyRequest} ProxyRequest */
+/** @typedef {import("./Range/RangeUnit.mjs").RangeUnit} RangeUnit */
+/** @typedef {import("./Range/RangeValue.mjs").RangeValue} RangeValue */
+/** @typedef {import("./RequestImplementation/RequestImplementation.mjs").RequestImplementation} RequestImplementation */
+/** @typedef {import("./Server/_Server.mjs").Server} Server */
 /** @typedef {import("node:http").ServerResponse} ServerResponse */
-/** @typedef {import("../../Service/Server/Port/ServerService.mjs").ServerService} ServerService */
-/** @typedef {import("../../../../flux-shutdown-handler-api/src/Adapter/ShutdownHandler/ShutdownHandler.mjs").ShutdownHandler} ShutdownHandler */
+/** @typedef {import("./Server/Port/ServerService.mjs").ServerService} ServerService */
 
-export class HttpApi {
+export class FluxHttpApi {
     /**
-     * @type {ClientService | null}
+     * @type {FluxShutdownHandler | null}
      */
-    #client_service = null;
+    #flux_shutdown_handler;
     /**
      * @type {RequestImplementation | null}
      */
@@ -26,27 +25,23 @@ export class HttpApi {
      * @type {ServerService | null}
      */
     #server_service = null;
-    /**
-     * @type {ShutdownHandler | null}
-     */
-    #shutdown_handler;
 
     /**
-     * @param {ShutdownHandler | null} shutdown_handler
-     * @returns {HttpApi}
+     * @param {FluxShutdownHandler | null} flux_shutdown_handler
+     * @returns {FluxHttpApi}
      */
-    static new(shutdown_handler = null) {
+    static new(flux_shutdown_handler = null) {
         return new this(
-            shutdown_handler
+            flux_shutdown_handler
         );
     }
 
     /**
-     * @param {ShutdownHandler | null} shutdown_handler
+     * @param {FluxShutdownHandler | null} flux_shutdown_handler
      * @private
      */
-    constructor(shutdown_handler) {
-        this.#shutdown_handler = shutdown_handler;
+    constructor(flux_shutdown_handler) {
+        this.#flux_shutdown_handler = flux_shutdown_handler;
     }
 
     /**
@@ -132,7 +127,7 @@ export class HttpApi {
      * @returns {Promise<HttpClientResponse>}
      */
     async request(request) {
-        return (await this.#getClientService()).request(
+        return (await this.#getRequestImplementation()).request(
             request
         );
     }
@@ -186,21 +181,10 @@ export class HttpApi {
     }
 
     /**
-     * @returns {Promise<ClientService>}
-     */
-    async #getClientService() {
-        this.#client_service ??= (await import("../../Service/Client/Port/ClientService.mjs")).ClientService.new(
-            await this.#getRequestImplementation()
-        );
-
-        return this.#client_service;
-    }
-
-    /**
      * @returns {Promise<RequestImplementation>}
      */
     async #getRequestImplementation() {
-        this.#request_implementation ??= typeof process !== "undefined" ? (await import("../RequestImplementation/NodeRequestImplementation.mjs")).NodeRequestImplementation.new() : (await import("../RequestImplementation/WebRequestImplementation.mjs")).WebRequestImplementation.new();
+        this.#request_implementation ??= typeof process !== "undefined" ? (await import("./RequestImplementation/NodeRequestImplementation.mjs")).NodeRequestImplementation.new() : (await import("./RequestImplementation/WebRequestImplementation.mjs")).WebRequestImplementation.new();
 
         return this.#request_implementation;
     }
@@ -209,9 +193,9 @@ export class HttpApi {
      * @returns {Promise<ServerService>}
      */
     async #getServerService() {
-        this.#server_service ??= (await import("../../Service/Server/Port/ServerService.mjs")).ServerService.new(
-            await this.#getClientService(),
-            this.#shutdown_handler
+        this.#server_service ??= (await import("./Server/Port/ServerService.mjs")).ServerService.new(
+            await this.#getRequestImplementation(),
+            this.#flux_shutdown_handler
         );
 
         return this.#server_service;

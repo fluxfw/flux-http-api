@@ -1,10 +1,10 @@
-import { HttpServerResponse } from "../../../Adapter/Server/HttpServerResponse.mjs";
-import { STATUS_CODE_416 } from "../../../Adapter/Status/STATUS_CODE.mjs";
-import { HEADER_ACCEPT_RANGES, HEADER_CONTENT_RANGE, HEADER_RANGE } from "../../../Adapter/Header/HEADER.mjs";
+import { HttpServerResponse } from "../HttpServerResponse.mjs";
+import { STATUS_CODE_416 } from "../../Status/STATUS_CODE.mjs";
+import { HEADER_ACCEPT_RANGES, HEADER_CONTENT_RANGE, HEADER_RANGE } from "../../Header/HEADER.mjs";
 
-/** @typedef {import("../../../Adapter/Server/HttpServerRequest.mjs").HttpServerRequest} HttpServerRequest */
-/** @typedef {import("../../../Adapter/Range/RangeUnit.mjs").RangeUnit} RangeUnit */
-/** @typedef {import("../../../Adapter/Range/RangeValue.mjs").RangeValue} RangeValue */
+/** @typedef {import("../HttpServerRequest.mjs").HttpServerRequest} HttpServerRequest */
+/** @typedef {import("../../Range/RangeUnit.mjs").RangeUnit} RangeUnit */
+/** @typedef {import("../../Range/RangeValue.mjs").RangeValue} RangeValue */
 
 export class ValidateRangesCommand {
     /**

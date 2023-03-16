@@ -1,13 +1,13 @@
 import { createReadStream } from "node:fs";
-import { HttpServerResponse } from "../../../Adapter/Server/HttpServerResponse.mjs";
+import { HttpServerResponse } from "../HttpServerResponse.mjs";
 import { join } from "node:path/posix";
-import { METHOD_HEAD } from "../../../Adapter/Method/METHOD.mjs";
-import { RANGE_UNIT_BYTES } from "../../../Adapter/Range/RANGE_UNIT.mjs";
+import { METHOD_HEAD } from "../../Method/METHOD.mjs";
+import { RANGE_UNIT_BYTES } from "../../Range/RANGE_UNIT.mjs";
 import { stat } from "node:fs/promises";
-import { HEADER_CONTENT_LENGTH, HEADER_CONTENT_RANGE, HEADER_CONTENT_TYPE } from "../../../Adapter/Header/HEADER.mjs";
-import { STATUS_CODE_206, STATUS_CODE_404 } from "../../../Adapter/Status/STATUS_CODE.mjs";
+import { HEADER_CONTENT_LENGTH, HEADER_CONTENT_RANGE, HEADER_CONTENT_TYPE } from "../../Header/HEADER.mjs";
+import { STATUS_CODE_206, STATUS_CODE_404 } from "../../Status/STATUS_CODE.mjs";
 
-/** @typedef {import("../../../Adapter/Server/HttpServerRequest.mjs").HttpServerRequest} HttpServerRequest */
+/** @typedef {import("../HttpServerRequest.mjs").HttpServerRequest} HttpServerRequest */
 /** @typedef {import("../Port/ServerService.mjs").ServerService} ServerService */
 
 export class GetStaticFileResponseCommand {

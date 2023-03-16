@@ -1,33 +1,33 @@
-import { HttpClientRequest } from "../../../Adapter/Client/HttpClientRequest.mjs";
-import { HttpServerResponse } from "../../../Adapter/Server/HttpServerResponse.mjs";
-import { HEADER_X_FORWARDED_HOST, HEADER_X_FORWARDED_PROTO } from "../../../Adapter/Header/HEADER.mjs";
-import { METHOD_GET, METHOD_HEAD } from "../../../Adapter/Method/METHOD.mjs";
+import { HttpClientRequest } from "../../Client/HttpClientRequest.mjs";
+import { HttpServerResponse } from "../HttpServerResponse.mjs";
+import { HEADER_X_FORWARDED_HOST, HEADER_X_FORWARDED_PROTO } from "../../Header/HEADER.mjs";
+import { METHOD_GET, METHOD_HEAD } from "../../Method/METHOD.mjs";
 
-/** @typedef {import("../../Client/Port/ClientService.mjs").ClientService} ClientService */
-/** @typedef {import("../../../Adapter/Proxy/ProxyRequest.mjs").ProxyRequest} ProxyRequest */
+/** @typedef {import("../../Proxy/ProxyRequest.mjs").ProxyRequest} ProxyRequest */
+/** @typedef {import("../../RequestImplementation/RequestImplementation.mjs").RequestImplementation} RequestImplementation */
 
 export class ProxyRequestCommand {
     /**
-     * @type {ClientService}
+     * @type {RequestImplementation}
      */
-    #client_service;
+    #request_implementation;
 
     /**
-     * @param {ClientService} client_service
+     * @param {RequestImplementation} request_implementation
      * @returns {ProxyRequestCommand}
      */
-    static new(client_service) {
+    static new(request_implementation) {
         return new this(
-            client_service
+            request_implementation
         );
     }
 
     /**
-     * @param {ClientService} client_service
+     * @param {RequestImplementation} request_implementation
      * @private
      */
-    constructor(client_service) {
-        this.#client_service = client_service;
+    constructor(request_implementation) {
+        this.#request_implementation = request_implementation;
     }
 
     /**
@@ -71,7 +71,7 @@ export class ProxyRequestCommand {
             }
         }
 
-        const response = await this.#client_service.request(
+        const response = await this.#request_implementation.request(
             await HttpClientRequest.nodeStream(
                 url,
                 request_body && proxy_request.request.method !== METHOD_HEAD && proxy_request.request.method !== METHOD_GET ? proxy_request.request.body.stream() : null,

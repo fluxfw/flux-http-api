@@ -1,45 +1,45 @@
-/** @typedef {import("../../Client/Port/ClientService.mjs").ClientService} ClientService */
-/** @typedef {import("../../../Adapter/Server/handleRequest.mjs").handleRequest} handleRequest */
-/** @typedef {import("../../../Adapter/Server/HttpServerRequest.mjs").HttpServerRequest} HttpServerRequest */
-/** @typedef {import("../../../Adapter/Server/HttpServerResponse.mjs").HttpServerResponse} HttpServerResponse */
+/** @typedef {import("../../../../flux-shutdown-handler/src/FluxShutdownHandler.mjs").FluxShutdownHandler} FluxShutdownHandler */
+/** @typedef {import("../handleRequest.mjs").handleRequest} handleRequest */
+/** @typedef {import("../HttpServerRequest.mjs").HttpServerRequest} HttpServerRequest */
+/** @typedef {import("../HttpServerResponse.mjs").HttpServerResponse} HttpServerResponse */
 /** @typedef {import("node:http").IncomingMessage} IncomingMessage */
-/** @typedef {import("../../../Adapter/Proxy/ProxyRequest.mjs").ProxyRequest} ProxyRequest */
-/** @typedef {import("../../../Adapter/Range/RangeUnit.mjs").RangeUnit} RangeUnit */
-/** @typedef {import("../../../Adapter/Range/RangeValue.mjs").RangeValue} RangeValue */
-/** @typedef {import("../../../Adapter/Server/_Server.mjs").Server} Server */
+/** @typedef {import("../../Proxy/ProxyRequest.mjs").ProxyRequest} ProxyRequest */
+/** @typedef {import("../../Range/RangeUnit.mjs").RangeUnit} RangeUnit */
+/** @typedef {import("../../Range/RangeValue.mjs").RangeValue} RangeValue */
+/** @typedef {import("../../RequestImplementation/RequestImplementation.mjs").RequestImplementation} RequestImplementation */
+/** @typedef {import("../_Server.mjs").Server} Server */
 /** @typedef {import("node:http").ServerResponse} ServerResponse */
-/** @typedef {import("../../../../../flux-shutdown-handler-api/src/Adapter/ShutdownHandler/ShutdownHandler.mjs").ShutdownHandler} ShutdownHandler */
 
 export class ServerService {
     /**
-     * @type {ClientService}
+     * @type {FluxShutdownHandler | null}
      */
-    #client_service;
+    #flux_shutdown_handler;
     /**
-     * @type {ShutdownHandler | null}
+     * @type {RequestImplementation}
      */
-    #shutdown_handler;
+    #request_implementation;
 
     /**
-     * @param {ClientService} client_service
-     * @param {ShutdownHandler | null} shutdown_handler
+     * @param {RequestImplementation} request_implementation
+     * @param {FluxShutdownHandler | null} flux_shutdown_handler
      * @returns {ServerService}
      */
-    static new(client_service, shutdown_handler = null) {
+    static new(request_implementation, flux_shutdown_handler = null) {
         return new this(
-            client_service,
-            shutdown_handler
+            request_implementation,
+            flux_shutdown_handler
         );
     }
 
     /**
-     * @param {ClientService} client_service
-     * @param {ShutdownHandler | null} shutdown_handler
+     * @param {RequestImplementation} request_implementation
+     * @param {FluxShutdownHandler | null} flux_shutdown_handler
      * @private
      */
-    constructor(client_service, shutdown_handler) {
-        this.#client_service = client_service;
-        this.#shutdown_handler = shutdown_handler;
+    constructor(request_implementation, flux_shutdown_handler) {
+        this.#request_implementation = request_implementation;
+        this.#flux_shutdown_handler = flux_shutdown_handler;
     }
 
     /**
@@ -157,7 +157,7 @@ export class ServerService {
      */
     async proxyRequest(proxy_request) {
         return (await import("../Command/ProxyRequestCommand.mjs")).ProxyRequestCommand.new(
-            this.#client_service
+            this.#request_implementation
         )
             .proxyRequest(
                 proxy_request
@@ -170,13 +170,13 @@ export class ServerService {
      * @returns {Promise<void>}
      */
     async runServer(handle_request, server = null) {
-        if (this.#shutdown_handler === null) {
-            throw new Error("Missing ShutdownHandler");
+        if (this.#flux_shutdown_handler === null) {
+            throw new Error("Missing FluxShutdownHandler");
         }
 
         await (await import("../Command/RunServerCommand.mjs")).RunServerCommand.new(
-            this,
-            this.#shutdown_handler
+            this.#flux_shutdown_handler,
+            this
         )
             .runServer(
                 handle_request,

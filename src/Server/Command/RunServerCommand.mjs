@@ -1,49 +1,49 @@
 import { createServer as createServerHttp } from "node:http";
 import { createServer as createServerHttps } from "node:https";
-import { HEADER_REFERRER_POLICY } from "../../../Adapter/Header/HEADER.mjs";
-import { HttpServerResponse } from "../../../Adapter/Server/HttpServerResponse.mjs";
-import { PROTOCOL_HTTPS } from "../../../Adapter/Protocol/PROTOCOL.mjs";
-import { REFERRER_POLICY_NO_REFERRER } from "../../../Adapter/Referrer/REFERRER_POLICY.mjs";
-import { SERVER_DEFAULT_FORWARDED_HEADERS, SERVER_DEFAULT_LISTEN_HTTP_PORT, SERVER_DEFAULT_LISTEN_HTTPS_PORT, SERVER_DEFAULT_NO_DATE, SERVER_DEFAULT_NO_REFERRER, SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS, SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS_PORT, SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS_STATUS_CODE, SERVER_LISTEN_HTTP_PORT_DISABLED, SERVER_LISTEN_HTTPS_PORT_DISABLED } from "../../../Adapter/Server/SERVER.mjs";
-import { STATUS_CODE_400, STATUS_CODE_404, STATUS_CODE_500 } from "../../../Adapter/Status/STATUS_CODE.mjs";
+import { HEADER_REFERRER_POLICY } from "../../Header/HEADER.mjs";
+import { HttpServerResponse } from "../HttpServerResponse.mjs";
+import { PROTOCOL_HTTPS } from "../../Protocol/PROTOCOL.mjs";
+import { REFERRER_POLICY_NO_REFERRER } from "../../Referrer/REFERRER_POLICY.mjs";
+import { SERVER_DEFAULT_FORWARDED_HEADERS, SERVER_DEFAULT_LISTEN_HTTP_PORT, SERVER_DEFAULT_LISTEN_HTTPS_PORT, SERVER_DEFAULT_NO_DATE, SERVER_DEFAULT_NO_REFERRER, SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS, SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS_PORT, SERVER_DEFAULT_REDIRECT_HTTP_TO_HTTPS_STATUS_CODE, SERVER_LISTEN_HTTP_PORT_DISABLED, SERVER_LISTEN_HTTPS_PORT_DISABLED } from "../SERVER.mjs";
+import { STATUS_CODE_400, STATUS_CODE_404, STATUS_CODE_500 } from "../../Status/STATUS_CODE.mjs";
 
-/** @typedef {import("../../../Adapter/Server/handleRequest.mjs").handleRequest} handleRequest */
+/** @typedef {import("../../../../flux-shutdown-handler/src/FluxShutdownHandler.mjs").FluxShutdownHandler} FluxShutdownHandler */
+/** @typedef {import("../handleRequest.mjs").handleRequest} handleRequest */
 /** @typedef {import("node:http").IncomingMessage} IncomingMessage */
-/** @typedef {import("../../../Adapter/Server/_Server.mjs").Server} Server */
+/** @typedef {import("../_Server.mjs").Server} Server */
 /** @typedef {import("node:http").ServerResponse} ServerResponse */
 /** @typedef {import("../Port/ServerService.mjs").ServerService} ServerService */
-/** @typedef {import("../../../../../flux-shutdown-handler-api/src/Adapter/ShutdownHandler/ShutdownHandler.mjs").ShutdownHandler} ShutdownHandler */
 
 export class RunServerCommand {
+    /**
+     * @type {FluxShutdownHandler}
+     */
+    #flux_shutdown_handler;
     /**
      * @type {ServerService}
      */
     #server_service;
-    /**
-     * @type {ShutdownHandler}
-     */
-    #shutdown_handler;
 
     /**
+     * @param {FluxShutdownHandler} flux_shutdown_handler
      * @param {ServerService} server_service
-     * @param {ShutdownHandler} shutdown_handler
      * @returns {RunServerCommand}
      */
-    static new(server_service, shutdown_handler) {
+    static new(flux_shutdown_handler, server_service) {
         return new this(
-            server_service,
-            shutdown_handler
+            flux_shutdown_handler,
+            server_service
         );
     }
 
     /**
+     * @param {FluxShutdownHandler} flux_shutdown_handler
      * @param {ServerService} server_service
-     * @param {ShutdownHandler} shutdown_handler
      * @private
      */
-    constructor(server_service, shutdown_handler) {
+    constructor(flux_shutdown_handler, server_service) {
+        this.#flux_shutdown_handler = flux_shutdown_handler;
         this.#server_service = server_service;
-        this.#shutdown_handler = shutdown_handler;
     }
 
     /**
@@ -123,13 +123,13 @@ export class RunServerCommand {
         await new Promise((resolve, reject) => {
             const server = create_server(options, handle_request);
 
-            server.listen(port, server_listen_interface, error => {
+            server.listen(port, server_listen_interface, async error => {
                 if (error) {
                     reject(error);
                     return;
                 }
 
-                this.#shutdown_handler.addShutdownTask(async () => {
+                await this.#flux_shutdown_handler.addTask(async () => {
                     await new Promise((_resolve, _reject) => {
                         server.close(_error => {
                             if (_error) {

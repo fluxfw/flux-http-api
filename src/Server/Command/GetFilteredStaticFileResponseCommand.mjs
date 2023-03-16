@@ -1,8 +1,8 @@
-import { HttpServerResponse } from "../../../Adapter/Server/HttpServerResponse.mjs";
+import { HttpServerResponse } from "../HttpServerResponse.mjs";
 import { join } from "node:path/posix";
-import { STATUS_CODE_400 } from "../../../Adapter/Status/STATUS_CODE.mjs";
+import { STATUS_CODE_400 } from "../../Status/STATUS_CODE.mjs";
 
-/** @typedef {import("../../../Adapter/Server/HttpServerRequest.mjs").HttpServerRequest} HttpServerRequest */
+/** @typedef {import("../HttpServerRequest.mjs").HttpServerRequest} HttpServerRequest */
 /** @typedef {import("../Port/ServerService.mjs").ServerService} ServerService */
 
 export class GetFilteredStaticFileResponseCommand {

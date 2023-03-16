@@ -1,12 +1,12 @@
-import { HEADER_SET_COOKIE } from "../../../Adapter/Header/HEADER.mjs";
-import { METHOD_HEAD } from "../../../Adapter/Method/METHOD.mjs";
+import { HEADER_SET_COOKIE } from "../../Header/HEADER.mjs";
+import { METHOD_HEAD } from "../../Method/METHOD.mjs";
 import { pipeline } from "node:stream/promises";
-import { STATUS_CODE_500 } from "../../../Adapter/Status/STATUS_CODE.mjs";
-import { STATUS_CODE_MESSAGE } from "../../../Adapter/Status/STATUS_CODE_MESSAGE.mjs";
-import { SET_COOKIE_OPTION_DEFAULT_HTTP_ONLY, SET_COOKIE_OPTION_DEFAULT_MAX_AGE, SET_COOKIE_OPTION_DEFAULT_PATH, SET_COOKIE_OPTION_DEFAULT_PRIORITY, SET_COOKIE_OPTION_DEFAULT_SAME_SITE, SET_COOKIE_OPTION_DEFAULT_SECURE, SET_COOKIE_OPTION_EXPIRES, SET_COOKIE_OPTION_HTTP_ONLY, SET_COOKIE_OPTION_MAX_AGE, SET_COOKIE_OPTION_MAX_AGE_SESSION, SET_COOKIE_OPTION_PATH, SET_COOKIE_OPTION_PRIORITY, SET_COOKIE_OPTION_SAME_SITE, SET_COOKIE_OPTION_SECURE } from "../../../Adapter/Cookie/SET_COOKIE_OPTION.mjs";
+import { STATUS_CODE_500 } from "../../Status/STATUS_CODE.mjs";
+import { STATUS_CODE_MESSAGE } from "../../Status/STATUS_CODE_MESSAGE.mjs";
+import { SET_COOKIE_OPTION_DEFAULT_HTTP_ONLY, SET_COOKIE_OPTION_DEFAULT_MAX_AGE, SET_COOKIE_OPTION_DEFAULT_PATH, SET_COOKIE_OPTION_DEFAULT_PRIORITY, SET_COOKIE_OPTION_DEFAULT_SAME_SITE, SET_COOKIE_OPTION_DEFAULT_SECURE, SET_COOKIE_OPTION_EXPIRES, SET_COOKIE_OPTION_HTTP_ONLY, SET_COOKIE_OPTION_MAX_AGE, SET_COOKIE_OPTION_MAX_AGE_SESSION, SET_COOKIE_OPTION_PATH, SET_COOKIE_OPTION_PRIORITY, SET_COOKIE_OPTION_SAME_SITE, SET_COOKIE_OPTION_SECURE } from "../../Cookie/SET_COOKIE_OPTION.mjs";
 
-/** @typedef {import("../../../Adapter/Server/HttpServerRequest.mjs").HttpServerRequest} HttpServerRequest */
-/** @typedef {import("../../../Adapter/Server/HttpServerResponse.mjs").HttpServerResponse} HttpServerResponse */
+/** @typedef {import("../HttpServerRequest.mjs").HttpServerRequest} HttpServerRequest */
+/** @typedef {import("../HttpServerResponse.mjs").HttpServerResponse} HttpServerResponse */
 /** @typedef {import("node:http").ServerResponse} ServerResponse */
 
 export class MapResponseCommand {
