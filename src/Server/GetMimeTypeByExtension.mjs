@@ -1,10 +1,10 @@
-import MIME_DB from "../../../../mime-db/db.json" assert {type: "json"};
+import MIME_DB from "../../../mime-db/db.json" assert {type: "json"};
 
 const MIME_DB_ENTRIES = Object.entries(MIME_DB);
 
-export class GetMimeTypeByExtensionCommand {
+export class GetMimeTypeByExtension {
     /**
-     * @returns {GetMimeTypeByExtensionCommand}
+     * @returns {GetMimeTypeByExtension}
      */
     static new() {
         return new this();

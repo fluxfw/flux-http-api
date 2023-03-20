@@ -1,12 +1,12 @@
-import { HttpServerResponse } from "../HttpServerResponse.mjs";
-import { HEADER_AUTHORIZATION, HEADER_WWW_AUTHENTICATE } from "../../Header/HEADER.mjs";
-import { STATUS_CODE_400, STATUS_CODE_401 } from "../../Status/STATUS_CODE.mjs";
+import { HttpServerResponse } from "./HttpServerResponse.mjs";
+import { HEADER_AUTHORIZATION, HEADER_WWW_AUTHENTICATE } from "../Header/HEADER.mjs";
+import { STATUS_CODE_400, STATUS_CODE_401 } from "../Status/STATUS_CODE.mjs";
 
-/** @typedef {import("../HttpServerRequest.mjs").HttpServerRequest} HttpServerRequest */
+/** @typedef {import("./HttpServerRequest.mjs").HttpServerRequest} HttpServerRequest */
 
-export class GetAuthorizationParametersCommand {
+export class GetAuthorizationParameters {
     /**
-     * @returns {GetAuthorizationParametersCommand}
+     * @returns {GetAuthorizationParameters}
      */
     static new() {
         return new this();

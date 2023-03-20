@@ -10,7 +10,6 @@
 /** @typedef {import("./RequestImplementation/RequestImplementation.mjs").RequestImplementation} RequestImplementation */
 /** @typedef {import("./Server/_Server.mjs").Server} Server */
 /** @typedef {import("node:http").ServerResponse} ServerResponse */
-/** @typedef {import("./Server/Port/ServerService.mjs").ServerService} ServerService */
 
 export class FluxHttpApi {
     /**
@@ -21,10 +20,6 @@ export class FluxHttpApi {
      * @type {RequestImplementation | null}
      */
     #request_implementation = null;
-    /**
-     * @type {ServerService | null}
-     */
-    #server_service = null;
 
     /**
      * @param {FluxShutdownHandler | null} flux_shutdown_handler
@@ -51,11 +46,12 @@ export class FluxHttpApi {
      * @returns {Promise<string | HttpServerResponse>}
      */
     async getAuthorizationParameters(request, schema, parameters = null) {
-        return (await this.#getServerService()).getAuthorizationParameters(
-            request,
-            schema,
-            parameters
-        );
+        return (await import("./Server/GetAuthorizationParameters.mjs")).GetAuthorizationParameters.new()
+            .getAuthorizationParameters(
+                request,
+                schema,
+                parameters
+            );
     }
 
     /**
@@ -67,13 +63,16 @@ export class FluxHttpApi {
      * @returns {Promise<HttpServerResponse>}
      */
     async getFilteredStaticFileResponse(root, path, request, content_type = null, headers = null) {
-        return (await this.#getServerService()).getFilteredStaticFileResponse(
-            root,
-            path,
-            request,
-            content_type,
-            headers
-        );
+        return (await import("./Server/GetFilteredStaticFileResponse.mjs")).GetFilteredStaticFileResponse.new(
+            this
+        )
+            .getFilteredStaticFileResponse(
+                root,
+                path,
+                request,
+                content_type,
+                headers
+            );
     }
 
     /**
@@ -81,9 +80,10 @@ export class FluxHttpApi {
      * @returns {Promise<string | null>}
      */
     async getMimeTypeByExtension(extension) {
-        return (await this.#getServerService()).getMimeTypeByExtension(
-            extension
-        );
+        return (await import("./Server/GetMimeTypeByExtension.mjs")).GetMimeTypeByExtension.new()
+            .getMimeTypeByExtension(
+                extension
+            );
     }
 
     /**
@@ -91,9 +91,12 @@ export class FluxHttpApi {
      * @returns {Promise<string | null>}
      */
     async getMimeTypeByPath(path) {
-        return (await this.#getServerService()).getMimeTypeByPath(
-            path
-        );
+        return (await import("./Server/GetMimeTypeByPath.mjs")).GetMimeTypeByPath.new(
+            this
+        )
+            .getMimeTypeByPath(
+                path
+            );
     }
 
     /**
@@ -104,12 +107,15 @@ export class FluxHttpApi {
      * @returns {Promise<HttpServerResponse>}
      */
     async getStaticFileResponse(path, request, content_type = null, headers = null) {
-        return (await this.#getServerService()).getStaticFileResponse(
-            path,
-            request,
-            content_type,
-            headers
-        );
+        return (await import("./Server/GetStaticFileResponse.mjs")).GetStaticFileResponse.new(
+            this
+        )
+            .getStaticFileResponse(
+                path,
+                request,
+                content_type,
+                headers
+            );
     }
 
     /**
@@ -117,9 +123,12 @@ export class FluxHttpApi {
      * @returns {Promise<HttpServerResponse>}
      */
     async proxyRequest(proxy_request) {
-        return (await this.#getServerService()).proxyRequest(
-            proxy_request
-        );
+        return (await import("./Server/ProxyRequest.mjs")).ProxyRequest.new(
+            this.#request_implementation
+        )
+            .proxyRequest(
+                proxy_request
+            );
     }
 
     /**
@@ -138,10 +147,17 @@ export class FluxHttpApi {
      * @returns {Promise<void>}
      */
     async runServer(handle_request, server = null) {
-        await (await this.#getServerService()).runServer(
-            handle_request,
-            server
-        );
+        if (this.#flux_shutdown_handler === null) {
+            throw new Error("Missing FluxShutdownHandler");
+        }
+
+        await (await import("./Server/RunServer.mjs")).RunServer.new(
+            this.#flux_shutdown_handler
+        )
+            .runServer(
+                handle_request,
+                server
+            );
     }
 
     /**
@@ -150,10 +166,17 @@ export class FluxHttpApi {
      * @returns {Promise<void>}
      */
     async _setCookies(_res, cookies) {
-        await (await this.#getServerService())._setCookies(
-            _res,
-            cookies
-        );
+        if (this.#flux_shutdown_handler === null) {
+            throw new Error("Missing FluxShutdownHandler");
+        }
+
+        await (await import("./Server/RunServer.mjs")).RunServer.new(
+            this.#flux_shutdown_handler
+        )
+            ._setCookies(
+                _res,
+                cookies
+            );
     }
 
     /**
@@ -162,10 +185,11 @@ export class FluxHttpApi {
      * @returns {Promise<HttpServerResponse | null>}
      */
     async validateMethods(request, methods) {
-        return (await this.#getServerService()).validateMethods(
-            request,
-            methods
-        );
+        return (await import("./Server/ValidateMethods.mjs")).ValidateMethods.new()
+            .validateMethods(
+                request,
+                methods
+            );
     }
 
     /**
@@ -174,10 +198,11 @@ export class FluxHttpApi {
      * @returns {Promise<RangeValue | HttpServerResponse | null>}
      */
     async validateRanges(request, units) {
-        return (await this.#getServerService()).validateRanges(
-            request,
-            units
-        );
+        return (await import("./Server/ValidateRanges.mjs")).ValidateRanges.new()
+            .validateRanges(
+                request,
+                units
+            );
     }
 
     /**
@@ -187,17 +212,5 @@ export class FluxHttpApi {
         this.#request_implementation ??= typeof process !== "undefined" ? (await import("./RequestImplementation/NodeRequestImplementation.mjs")).NodeRequestImplementation.new() : (await import("./RequestImplementation/WebRequestImplementation.mjs")).WebRequestImplementation.new();
 
         return this.#request_implementation;
-    }
-
-    /**
-     * @returns {Promise<ServerService>}
-     */
-    async #getServerService() {
-        this.#server_service ??= (await import("./Server/Port/ServerService.mjs")).ServerService.new(
-            await this.#getRequestImplementation(),
-            this.#flux_shutdown_handler
-        );
-
-        return this.#server_service;
     }
 }

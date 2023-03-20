@@ -1,12 +1,12 @@
-import { HttpClientRequest } from "../../Client/HttpClientRequest.mjs";
-import { HttpServerResponse } from "../HttpServerResponse.mjs";
-import { HEADER_X_FORWARDED_HOST, HEADER_X_FORWARDED_PROTO } from "../../Header/HEADER.mjs";
-import { METHOD_GET, METHOD_HEAD } from "../../Method/METHOD.mjs";
+import { HttpClientRequest } from "../Client/HttpClientRequest.mjs";
+import { HttpServerResponse } from "./HttpServerResponse.mjs";
+import { HEADER_X_FORWARDED_HOST, HEADER_X_FORWARDED_PROTO } from "../Header/HEADER.mjs";
+import { METHOD_GET, METHOD_HEAD } from "../Method/METHOD.mjs";
 
-/** @typedef {import("../../Proxy/ProxyRequest.mjs").ProxyRequest} ProxyRequest */
-/** @typedef {import("../../RequestImplementation/RequestImplementation.mjs").RequestImplementation} RequestImplementation */
+/** @typedef {import("../Proxy/ProxyRequest.mjs").ProxyRequest} ProxyRequest */
+/** @typedef {import("../RequestImplementation/RequestImplementation.mjs").RequestImplementation} RequestImplementation */
 
-export class ProxyRequestCommand {
+export class ProxyRequest {
     /**
      * @type {RequestImplementation}
      */
@@ -14,7 +14,7 @@ export class ProxyRequestCommand {
 
     /**
      * @param {RequestImplementation} request_implementation
-     * @returns {ProxyRequestCommand}
+     * @returns {ProxyRequest}
      */
     static new(request_implementation) {
         return new this(

@@ -1,37 +1,37 @@
 import { createReadStream } from "node:fs";
-import { HttpServerResponse } from "../HttpServerResponse.mjs";
+import { HttpServerResponse } from "./HttpServerResponse.mjs";
 import { join } from "node:path/posix";
-import { METHOD_HEAD } from "../../Method/METHOD.mjs";
-import { RANGE_UNIT_BYTES } from "../../Range/RANGE_UNIT.mjs";
+import { METHOD_HEAD } from "../Method/METHOD.mjs";
+import { RANGE_UNIT_BYTES } from "../Range/RANGE_UNIT.mjs";
 import { stat } from "node:fs/promises";
-import { HEADER_CONTENT_LENGTH, HEADER_CONTENT_RANGE, HEADER_CONTENT_TYPE } from "../../Header/HEADER.mjs";
-import { STATUS_CODE_206, STATUS_CODE_404 } from "../../Status/STATUS_CODE.mjs";
+import { HEADER_CONTENT_LENGTH, HEADER_CONTENT_RANGE, HEADER_CONTENT_TYPE } from "../Header/HEADER.mjs";
+import { STATUS_CODE_206, STATUS_CODE_404 } from "../Status/STATUS_CODE.mjs";
 
-/** @typedef {import("../HttpServerRequest.mjs").HttpServerRequest} HttpServerRequest */
-/** @typedef {import("../Port/ServerService.mjs").ServerService} ServerService */
+/** @typedef {import("../FluxHttpApi.mjs").FluxHttpApi} FluxHttpApi */
+/** @typedef {import("./HttpServerRequest.mjs").HttpServerRequest} HttpServerRequest */
 
-export class GetStaticFileResponseCommand {
+export class GetStaticFileResponse {
     /**
-     * @type {ServerService}
+     * @type {FluxHttpApi}
      */
-    #server_service;
+    #flux_http_api;
 
     /**
-     * @param {ServerService} server_service
-     * @returns {GetStaticFileResponseCommand}
+     * @param {FluxHttpApi} flux_http_api
+     * @returns {GetStaticFileResponse}
      */
-    static new(server_service) {
+    static new(flux_http_api) {
         return new this(
-            server_service
+            flux_http_api
         );
     }
 
     /**
-     * @param {ServerService} server_service
+     * @param {FluxHttpApi} flux_http_api
      * @private
      */
-    constructor(server_service) {
-        this.#server_service = server_service;
+    constructor(flux_http_api) {
+        this.#flux_http_api = flux_http_api;
     }
 
     /**
@@ -77,7 +77,7 @@ export class GetStaticFileResponseCommand {
             );
         }
 
-        const range = await this.#server_service.validateRanges(
+        const range = await this.#flux_http_api.validateRanges(
             request,
             [
                 {
@@ -91,7 +91,7 @@ export class GetStaticFileResponseCommand {
             return range;
         }
 
-        const _content_type = content_type ?? await this.#server_service.getMimeTypeByPath(
+        const _content_type = content_type ?? await this.#flux_http_api.getMimeTypeByPath(
             path
         );
 

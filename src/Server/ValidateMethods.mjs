@@ -1,13 +1,13 @@
-import { HEADER_ALLOW } from "../../Header/HEADER.mjs";
-import { HttpServerResponse } from "../HttpServerResponse.mjs";
-import { METHOD_OPTIONS } from "../../Method/METHOD.mjs";
-import { STATUS_CODE_204, STATUS_CODE_405 } from "../../Status/STATUS_CODE.mjs";
+import { HEADER_ALLOW } from "../Header/HEADER.mjs";
+import { HttpServerResponse } from "./HttpServerResponse.mjs";
+import { METHOD_OPTIONS } from "../Method/METHOD.mjs";
+import { STATUS_CODE_204, STATUS_CODE_405 } from "../Status/STATUS_CODE.mjs";
 
-/** @typedef {import("../HttpServerRequest.mjs").HttpServerRequest} HttpServerRequest */
+/** @typedef {import("./HttpServerRequest.mjs").HttpServerRequest} HttpServerRequest */
 
-export class ValidateMethodsCommand {
+export class ValidateMethods {
     /**
-     * @returns {ValidateMethodsCommand}
+     * @returns {ValidateMethods}
      */
     static new() {
         return new this();

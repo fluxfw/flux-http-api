@@ -1,32 +1,32 @@
-import { HttpServerResponse } from "../HttpServerResponse.mjs";
+import { HttpServerResponse } from "./HttpServerResponse.mjs";
 import { join } from "node:path/posix";
-import { STATUS_CODE_400 } from "../../Status/STATUS_CODE.mjs";
+import { STATUS_CODE_400 } from "../Status/STATUS_CODE.mjs";
 
-/** @typedef {import("../HttpServerRequest.mjs").HttpServerRequest} HttpServerRequest */
-/** @typedef {import("../Port/ServerService.mjs").ServerService} ServerService */
+/** @typedef {import("../FluxHttpApi.mjs").FluxHttpApi} FluxHttpApi */
+/** @typedef {import("./HttpServerRequest.mjs").HttpServerRequest} HttpServerRequest */
 
-export class GetFilteredStaticFileResponseCommand {
+export class GetFilteredStaticFileResponse {
     /**
-     * @type {ServerService}
+     * @type {FluxHttpApi}
      */
-    #server_service;
+    #flux_http_api;
 
     /**
-     * @param {ServerService} server_service
-     * @returns {GetFilteredStaticFileResponseCommand}
+     * @param {FluxHttpApi} flux_http_api
+     * @returns {GetFilteredStaticFileResponse}
      */
-    static new(server_service) {
+    static new(flux_http_api) {
         return new this(
-            server_service
+            flux_http_api
         );
     }
 
     /**
-     * @param {ServerService} server_service
+     * @param {FluxHttpApi} flux_http_api
      * @private
      */
-    constructor(server_service) {
-        this.#server_service = server_service;
+    constructor(flux_http_api) {
+        this.#flux_http_api = flux_http_api;
     }
 
     /**
@@ -45,7 +45,7 @@ export class GetFilteredStaticFileResponseCommand {
             );
         }
 
-        return this.#server_service.getStaticFileResponse(
+        return this.#flux_http_api.getStaticFileResponse(
             join(root, path.startsWith("/") ? path.substring(1) : path),
             request,
             content_type,
