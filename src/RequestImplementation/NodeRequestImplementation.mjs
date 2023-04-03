@@ -42,7 +42,8 @@ export class NodeRequestImplementation extends RequestImplementation {
             headers: request.headers,
             ca: request.server_certificate !== null ? [
                 request.server_certificate
-            ] : null
+            ] : null,
+            signal: request.abort_signal
         }, res => {
             if (request.follow_redirects && res.statusCode >= STATUS_CODE_300 && res.statusCode < STATUS_CODE_400) {
                 res.destroy();
@@ -75,7 +76,8 @@ export class NodeRequestImplementation extends RequestImplementation {
                         request.assert_status_code_is_ok,
                         request.response_body,
                         request.follow_redirects,
-                        url.hostname === request.url.hostname ? request.server_certificate : null
+                        url.hostname === request.url.hostname ? request.server_certificate : null,
+                        request.abort_signal
                     )
                 ));
 

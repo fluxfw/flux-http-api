@@ -35,7 +35,8 @@ export class WebRequestImplementation extends RequestImplementation {
             body: request.method !== METHOD_GET && request.method !== METHOD_HEAD && request.body.stream() !== null ? await request.body.blob() : null,
             ...!request.follow_redirects ? {
                 redirect: "manual"
-            } : null
+            } : null,
+            signal: request.abort_signal
         });
 
         const response = HttpClientResponse.new(
