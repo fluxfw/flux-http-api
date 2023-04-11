@@ -1,10 +1,13 @@
-import { BodyImplementation } from "./BodyImplementation.mjs";
 import { HEADER_CONTENT_TYPE } from "../Header/HEADER.mjs";
 import { CONTENT_TYPE_CSS, CONTENT_TYPE_FORM_DATA_MULTIPART, CONTENT_TYPE_FORM_DATA_URL_ENCODED, CONTENT_TYPE_HTML, CONTENT_TYPE_JSON, CONTENT_TYPE_TEXT } from "../ContentType/CONTENT_TYPE.mjs";
 
+/** @typedef {import("./BodyImplementation.mjs").BodyImplementation} BodyImplementation */
 /** @typedef {import("node:stream").Readable} Readable */
 
-export class WebBodyImplementation extends BodyImplementation {
+/**
+ * @implements {BodyImplementation}
+ */
+export class WebBodyImplementation {
     /**
      * @type {string | null}
      */
@@ -218,8 +221,6 @@ export class WebBodyImplementation extends BodyImplementation {
      * @private
      */
     constructor(web_response, content_type) {
-        super();
-
         this.#web_response = web_response;
         this.#content_type = content_type;
     }

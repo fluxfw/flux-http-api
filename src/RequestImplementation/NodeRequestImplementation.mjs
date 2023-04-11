@@ -5,12 +5,16 @@ import { pipeline } from "node:stream/promises";
 import { PROTOCOL_HTTPS } from "../Protocol/PROTOCOL.mjs";
 import { request as requestHttp } from "node:http";
 import { request as requestHttps } from "node:https";
-import { RequestImplementation } from "./RequestImplementation.mjs";
 import { HEADER_CONTENT_TYPE, HEADER_LOCATION } from "../Header/HEADER.mjs";
 import { METHOD_GET, METHOD_HEAD } from "../Method/METHOD.mjs";
 import { STATUS_CODE_300, STATUS_CODE_301, STATUS_CODE_302, STATUS_CODE_307, STATUS_CODE_308, STATUS_CODE_400 } from "../Status/STATUS_CODE.mjs";
 
-export class NodeRequestImplementation extends RequestImplementation {
+/** @typedef {import("./RequestImplementation.mjs").RequestImplementation} RequestImplementation */
+
+/**
+ * @implements {RequestImplementation}
+ */
+export class NodeRequestImplementation {
     /**
      * @returns {NodeRequestImplementation}
      */
@@ -22,7 +26,7 @@ export class NodeRequestImplementation extends RequestImplementation {
      * @private
      */
     constructor() {
-        super();
+
     }
 
     /**

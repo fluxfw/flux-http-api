@@ -1,10 +1,14 @@
-import { BodyImplementation } from "./BodyImplementation.mjs";
 import { HEADER_CONTENT_TYPE } from "../Header/HEADER.mjs";
 import { Readable } from "node:stream";
 import { arrayBuffer as bodyAsArrayBuffer, blob as bodyAsBlob, buffer as bodyAsBuffer, json as bodyAsJson, text as bodyAsString } from "node:stream/consumers";
 import { CONTENT_TYPE_CSS, CONTENT_TYPE_FORM_DATA_MULTIPART, CONTENT_TYPE_FORM_DATA_URL_ENCODED, CONTENT_TYPE_HTML, CONTENT_TYPE_JSON, CONTENT_TYPE_TEXT } from "../ContentType/CONTENT_TYPE.mjs";
 
-export class NodeBodyImplementation extends BodyImplementation {
+/** @typedef {import("./BodyImplementation.mjs").BodyImplementation} BodyImplementation */
+
+/**
+ * @implements {BodyImplementation}
+ */
+export class NodeBodyImplementation {
     /**
      * @type {string | null}
      */
@@ -164,8 +168,6 @@ export class NodeBodyImplementation extends BodyImplementation {
      * @private
      */
     constructor(stream, content_type) {
-        super();
-
         this.#stream = stream;
         this.#content_type = content_type;
     }

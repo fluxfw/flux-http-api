@@ -1,11 +1,14 @@
 import { HttpClientResponse } from "../Client/HttpClientResponse.mjs";
-import { RequestImplementation } from "./RequestImplementation.mjs";
 import { WebBodyImplementation } from "../BodyImplementation/WebBodyImplementation.mjs";
 import { METHOD_GET, METHOD_HEAD } from "../Method/METHOD.mjs";
 
 /** @typedef {import("../Client/HttpClientRequest.mjs").HttpClientRequest} HttpClientRequest */
+/** @typedef {import("./RequestImplementation.mjs").RequestImplementation} RequestImplementation */
 
-export class WebRequestImplementation extends RequestImplementation {
+/**
+ * @implements {RequestImplementation}
+ */
+export class WebRequestImplementation {
     /**
      * @returns {WebRequestImplementation}
      */
@@ -17,7 +20,7 @@ export class WebRequestImplementation extends RequestImplementation {
      * @private
      */
     constructor() {
-        super();
+
     }
 
     /**
