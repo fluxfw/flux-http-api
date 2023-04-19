@@ -124,7 +124,7 @@ export class FluxHttpApi {
      */
     async proxyRequest(proxy_request) {
         return (await import("./Server/ProxyRequest.mjs")).ProxyRequest.new(
-            this.#request_implementation
+            await this.#getRequestImplementation()
         )
             .proxyRequest(
                 proxy_request
