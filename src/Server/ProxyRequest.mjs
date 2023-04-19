@@ -1,9 +1,9 @@
 import { HttpClientRequest } from "../Client/HttpClientRequest.mjs";
 import { HttpServerResponse } from "./HttpServerResponse.mjs";
-import { HEADER_X_FORWARDED_HOST, HEADER_X_FORWARDED_PROTO } from "../Header/HEADER.mjs";
+import { HEADER_AUTHORIZATION, HEADER_X_FORWARDED_HOST, HEADER_X_FORWARDED_PROTO } from "../Header/HEADER.mjs";
 import { METHOD_GET, METHOD_HEAD } from "../Method/METHOD.mjs";
 
-/** @typedef {import("../Proxy/ProxyRequest.mjs").ProxyRequest} ProxyRequest */
+/** @typedef {import("../Proxy/ProxyRequest.mjs").ProxyRequest} _ProxyRequest */
 /** @typedef {import("../RequestImplementation/RequestImplementation.mjs").RequestImplementation} RequestImplementation */
 
 export class ProxyRequest {
@@ -31,7 +31,7 @@ export class ProxyRequest {
     }
 
     /**
-     * @param {ProxyRequest} proxy_request
+     * @param {_ProxyRequest} proxy_request
      * @returns {Promise<HttpServerResponse>}
      */
     async proxyRequest(proxy_request) {
@@ -44,6 +44,7 @@ export class ProxyRequest {
         const response_status = proxy_request.response_status ?? true;
         const response_headers = proxy_request.response_headers ?? false;
         const response_body = proxy_request.response_body ?? true;
+        const authorization = proxy_request.authorization ?? null;
         const server_certificate = proxy_request.server_certificate ?? null;
 
         const url = new URL(proxy_request.url);
@@ -90,6 +91,9 @@ export class ProxyRequest {
 
                         return headers;
                     }, {}) : request_headers ? proxy_request.request.headers : null,
+                    ...authorization !== null ? {
+                        [HEADER_AUTHORIZATION]: authorization
+                    } : null,
                     ...request_forwarded_headers ? {
                         [HEADER_X_FORWARDED_HOST]: proxy_request.request.url.host,
                         [HEADER_X_FORWARDED_PROTO]: proxy_request.request.url.protocol.slice(0, -1)

@@ -6,6 +6,12 @@ Changes:
 
 \-
 
+## v2023-04-19-1
+
+Changes:
+
+- Proxy request authorization
+
 ## v2023-04-11-1
 
 Changes:
