@@ -6,6 +6,14 @@ Changes:
 
 \-
 
+## v2023-04-20-1
+
+Changes:
+
+- Disable http if https config
+- Protocol default ports
+- Disable redirect http to https per default
+
 ## v2023-04-19-2
 
 Changes:
