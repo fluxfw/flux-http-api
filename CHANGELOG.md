@@ -6,6 +6,12 @@ Changes:
 
 \-
 
+## v2023-06-19-1
+
+Changes:
+
+- Workaround for NodeJs for error log of `HttpClientResponse`
+
 ## v2023-04-20-1
 
 Changes:

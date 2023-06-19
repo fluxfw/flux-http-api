@@ -124,4 +124,17 @@ export class HttpClientResponse {
     get status_message() {
         return this.#status_message;
     }
+
+    /**
+     * @returns {string}
+     */
+    [Symbol.for("nodejs.util.inspect.custom")]() {
+        return `${this.constructor.name} ${JSON.stringify({
+            body: this.body,
+            headers: this.headers,
+            status_code: this.status_code,
+            status_code_is_ok: this.status_code_is_ok,
+            status_message: this.status_message
+        }, null, 4)}`;
+    }
 }
