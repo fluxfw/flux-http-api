@@ -13,34 +13,34 @@ import { SERVER_DEFAULT_DISABLE_HTTP_IF_HTTPS, SERVER_DEFAULT_FORWARDED_HEADERS,
 import { SET_COOKIE_OPTION_DEFAULT_HTTP_ONLY, SET_COOKIE_OPTION_DEFAULT_MAX_AGE, SET_COOKIE_OPTION_DEFAULT_PATH, SET_COOKIE_OPTION_DEFAULT_PRIORITY, SET_COOKIE_OPTION_DEFAULT_SAME_SITE, SET_COOKIE_OPTION_DEFAULT_SECURE, SET_COOKIE_OPTION_EXPIRES, SET_COOKIE_OPTION_HTTP_ONLY, SET_COOKIE_OPTION_MAX_AGE, SET_COOKIE_OPTION_MAX_AGE_SESSION, SET_COOKIE_OPTION_PATH, SET_COOKIE_OPTION_PRIORITY, SET_COOKIE_OPTION_SAME_SITE, SET_COOKIE_OPTION_SECURE } from "../Cookie/SET_COOKIE_OPTION.mjs";
 import { STATUS_CODE_400, STATUS_CODE_404, STATUS_CODE_500 } from "../Status/STATUS_CODE.mjs";
 
-/** @typedef {import("../../../flux-shutdown-handler/src/FluxShutdownHandler.mjs").FluxShutdownHandler} FluxShutdownHandler */
 /** @typedef {import("./handleRequest.mjs").handleRequest} handleRequest */
 /** @typedef {import("node:http").IncomingMessage} IncomingMessage */
 /** @typedef {import("./_Server.mjs").Server} Server */
 /** @typedef {import("node:http").ServerResponse} ServerResponse */
+/** @typedef {import("../ShutdownHandler/ShutdownHandler.mjs").ShutdownHandler} ShutdownHandler */
 
 export class RunServer {
     /**
-     * @type {FluxShutdownHandler}
+     * @type {ShutdownHandler | null}
      */
-    #flux_shutdown_handler;
+    #shutdown_handler;
 
     /**
-     * @param {FluxShutdownHandler} flux_shutdown_handler
+     * @param {ShutdownHandler | null} shutdown_handler
      * @returns {RunServer}
      */
-    static new(flux_shutdown_handler) {
+    static new(shutdown_handler = null) {
         return new this(
-            flux_shutdown_handler
+            shutdown_handler
         );
     }
 
     /**
-     * @param {FluxShutdownHandler} flux_shutdown_handler
+     * @param {ShutdownHandler | null} shutdown_handler
      * @private
      */
-    constructor(flux_shutdown_handler) {
-        this.#flux_shutdown_handler = flux_shutdown_handler;
+    constructor(shutdown_handler) {
+        this.#shutdown_handler = shutdown_handler;
     }
 
     /**
@@ -139,7 +139,10 @@ export class RunServer {
                     return;
                 }
 
-                await this.#flux_shutdown_handler.addTask(async () => {
+                /**
+                 * @returns {Promise<void>}
+                 */
+                const close_server = async () => {
                     await new Promise((_resolve, _reject) => {
                         server.close(_error => {
                             if (_error) {
@@ -150,7 +153,22 @@ export class RunServer {
                             _resolve();
                         });
                     });
-                });
+                };
+
+                if (this.#shutdown_handler !== null) {
+                    await this.#shutdown_handler.addTask(async () => {
+                        await close_server();
+                    });
+                } else {
+                    for (const name of [
+                        "SIGINT",
+                        "SIGTERM"
+                    ]) {
+                        process.on(name, async () => {
+                            await close_server();
+                        });
+                    }
+                }
 
                 resolve();
             });

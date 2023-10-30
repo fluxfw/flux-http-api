@@ -1,4 +1,3 @@
-/** @typedef {import("../../flux-shutdown-handler/src/FluxShutdownHandler.mjs").FluxShutdownHandler} FluxShutdownHandler */
 /** @typedef {import("./Server/handleRequest.mjs").handleRequest} handleRequest */
 /** @typedef {import("./Client/HttpClientRequest.mjs").HttpClientRequest} HttpClientRequest */
 /** @typedef {import("./Client/HttpClientResponse.mjs").HttpClientResponse} HttpClientResponse */
@@ -10,33 +9,34 @@
 /** @typedef {import("./RequestImplementation/RequestImplementation.mjs").RequestImplementation} RequestImplementation */
 /** @typedef {import("./Server/_Server.mjs").Server} Server */
 /** @typedef {import("node:http").ServerResponse} ServerResponse */
+/** @typedef {import("./ShutdownHandler/ShutdownHandler.mjs").ShutdownHandler} ShutdownHandler */
 
 export class FluxHttpApi {
-    /**
-     * @type {FluxShutdownHandler | null}
-     */
-    #flux_shutdown_handler;
     /**
      * @type {RequestImplementation | null}
      */
     #request_implementation = null;
+    /**
+     * @type {ShutdownHandler | null}
+     */
+    #shutdown_handler;
 
     /**
-     * @param {FluxShutdownHandler | null} flux_shutdown_handler
+     * @param {ShutdownHandler | null} shutdown_handler
      * @returns {FluxHttpApi}
      */
-    static new(flux_shutdown_handler = null) {
+    static new(shutdown_handler = null) {
         return new this(
-            flux_shutdown_handler
+            shutdown_handler
         );
     }
 
     /**
-     * @param {FluxShutdownHandler | null} flux_shutdown_handler
+     * @param {ShutdownHandler | null} shutdown_handler
      * @private
      */
-    constructor(flux_shutdown_handler) {
-        this.#flux_shutdown_handler = flux_shutdown_handler;
+    constructor(shutdown_handler) {
+        this.#shutdown_handler = shutdown_handler;
     }
 
     /**
@@ -147,12 +147,8 @@ export class FluxHttpApi {
      * @returns {Promise<void>}
      */
     async runServer(handle_request, server = null) {
-        if (this.#flux_shutdown_handler === null) {
-            throw new Error("Missing FluxShutdownHandler");
-        }
-
         await (await import("./Server/RunServer.mjs")).RunServer.new(
-            this.#flux_shutdown_handler
+            this.#shutdown_handler
         )
             .runServer(
                 handle_request,
@@ -166,12 +162,8 @@ export class FluxHttpApi {
      * @returns {Promise<void>}
      */
     async _setCookies(_res, cookies) {
-        if (this.#flux_shutdown_handler === null) {
-            throw new Error("Missing FluxShutdownHandler");
-        }
-
         await (await import("./Server/RunServer.mjs")).RunServer.new(
-            this.#flux_shutdown_handler
+            this.#shutdown_handler
         )
             ._setCookies(
                 _res,
