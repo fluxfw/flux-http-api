@@ -156,9 +156,11 @@ export class RunServer {
                 };
 
                 if (this.#shutdown_handler !== null) {
-                    await this.#shutdown_handler.addTask(async () => {
-                        await close_server();
-                    });
+                    await this.#shutdown_handler.addTask(
+                        async () => {
+                            await close_server();
+                        }
+                    );
                 } else {
                     for (const name of [
                         "SIGINT",
