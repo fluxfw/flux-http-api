@@ -1,29 +1,29 @@
 import { extname } from "node:path/posix";
 
-/** @typedef {import("../FluxHttpApi.mjs").FluxHttpApi} FluxHttpApi */
+/** @typedef {import("../FluxHttp.mjs").FluxHttp} FluxHttp */
 
 export class GetMimeTypeByPath {
     /**
-     * @type {FluxHttpApi}
+     * @type {FluxHttp}
      */
-    #flux_http_api;
+    #flux_http;
 
     /**
-     * @param {FluxHttpApi} flux_http_api
+     * @param {FluxHttp} flux_http
      * @returns {GetMimeTypeByPath}
      */
-    static new(flux_http_api) {
+    static new(flux_http) {
         return new this(
-            flux_http_api
+            flux_http
         );
     }
 
     /**
-     * @param {FluxHttpApi} flux_http_api
+     * @param {FluxHttp} flux_http
      * @private
      */
-    constructor(flux_http_api) {
-        this.#flux_http_api = flux_http_api;
+    constructor(flux_http) {
+        this.#flux_http = flux_http;
     }
 
     /**
@@ -31,7 +31,7 @@ export class GetMimeTypeByPath {
      * @returns {Promise<string | null>}
      */
     async getMimeTypeByPath(path) {
-        return this.#flux_http_api.getMimeTypeByExtension(
+        return this.#flux_http.getMimeTypeByExtension(
             extname(path).substring(1)
         );
     }

@@ -11,7 +11,7 @@
 /** @typedef {import("node:http").ServerResponse} ServerResponse */
 /** @typedef {import("./ShutdownHandler/ShutdownHandler.mjs").ShutdownHandler} ShutdownHandler */
 
-export class FluxHttpApi {
+export class FluxHttp {
     /**
      * @type {RequestImplementation | null}
      */
@@ -23,7 +23,7 @@ export class FluxHttpApi {
 
     /**
      * @param {ShutdownHandler | null} shutdown_handler
-     * @returns {FluxHttpApi}
+     * @returns {FluxHttp}
      */
     static new(shutdown_handler = null) {
         return new this(

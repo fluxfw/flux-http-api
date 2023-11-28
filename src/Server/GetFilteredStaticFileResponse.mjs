@@ -2,31 +2,31 @@ import { HttpServerResponse } from "./HttpServerResponse.mjs";
 import { join } from "node:path/posix";
 import { STATUS_CODE_400 } from "../Status/STATUS_CODE.mjs";
 
-/** @typedef {import("../FluxHttpApi.mjs").FluxHttpApi} FluxHttpApi */
+/** @typedef {import("../FluxHttp.mjs").FluxHttp} FluxHttp */
 /** @typedef {import("./HttpServerRequest.mjs").HttpServerRequest} HttpServerRequest */
 
 export class GetFilteredStaticFileResponse {
     /**
-     * @type {FluxHttpApi}
+     * @type {FluxHttp}
      */
-    #flux_http_api;
+    #flux_http;
 
     /**
-     * @param {FluxHttpApi} flux_http_api
+     * @param {FluxHttp} flux_http
      * @returns {GetFilteredStaticFileResponse}
      */
-    static new(flux_http_api) {
+    static new(flux_http) {
         return new this(
-            flux_http_api
+            flux_http
         );
     }
 
     /**
-     * @param {FluxHttpApi} flux_http_api
+     * @param {FluxHttp} flux_http
      * @private
      */
-    constructor(flux_http_api) {
-        this.#flux_http_api = flux_http_api;
+    constructor(flux_http) {
+        this.#flux_http = flux_http;
     }
 
     /**
@@ -45,7 +45,7 @@ export class GetFilteredStaticFileResponse {
             );
         }
 
-        return this.#flux_http_api.getStaticFileResponse(
+        return this.#flux_http.getStaticFileResponse(
             join(root, path.startsWith("/") ? path.substring(1) : path),
             request,
             content_type,

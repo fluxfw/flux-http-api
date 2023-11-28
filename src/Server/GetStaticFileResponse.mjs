@@ -7,31 +7,31 @@ import { stat } from "node:fs/promises";
 import { HEADER_CONTENT_LENGTH, HEADER_CONTENT_RANGE, HEADER_CONTENT_TYPE } from "../Header/HEADER.mjs";
 import { STATUS_CODE_206, STATUS_CODE_404 } from "../Status/STATUS_CODE.mjs";
 
-/** @typedef {import("../FluxHttpApi.mjs").FluxHttpApi} FluxHttpApi */
+/** @typedef {import("../FluxHttp.mjs").FluxHttp} FluxHttp */
 /** @typedef {import("./HttpServerRequest.mjs").HttpServerRequest} HttpServerRequest */
 
 export class GetStaticFileResponse {
     /**
-     * @type {FluxHttpApi}
+     * @type {FluxHttp}
      */
-    #flux_http_api;
+    #flux_http;
 
     /**
-     * @param {FluxHttpApi} flux_http_api
+     * @param {FluxHttp} flux_http
      * @returns {GetStaticFileResponse}
      */
-    static new(flux_http_api) {
+    static new(flux_http) {
         return new this(
-            flux_http_api
+            flux_http
         );
     }
 
     /**
-     * @param {FluxHttpApi} flux_http_api
+     * @param {FluxHttp} flux_http
      * @private
      */
-    constructor(flux_http_api) {
-        this.#flux_http_api = flux_http_api;
+    constructor(flux_http) {
+        this.#flux_http = flux_http;
     }
 
     /**
@@ -77,7 +77,7 @@ export class GetStaticFileResponse {
             );
         }
 
-        const range = await this.#flux_http_api.validateRanges(
+        const range = await this.#flux_http.validateRanges(
             request,
             [
                 {
@@ -91,7 +91,7 @@ export class GetStaticFileResponse {
             return range;
         }
 
-        const _content_type = content_type ?? await this.#flux_http_api.getMimeTypeByPath(
+        const _content_type = content_type ?? await this.#flux_http.getMimeTypeByPath(
             path
         );
 
