@@ -6,6 +6,12 @@ Changes:
 
 \-
 
+## v2023-12-04-2
+
+Changes:
+
+- Fix minfiy
+
 ## v2023-12-04-1
 
 Changes:

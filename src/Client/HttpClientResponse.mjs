@@ -129,12 +129,12 @@ export class HttpClientResponse {
      * @returns {string}
      */
     [Symbol.for("nodejs.util.inspect.custom")]() {
-        return `${this.constructor.name} ${JSON.stringify({
+        return JSON.stringify({
             body: this.#body_implementation,
             headers: this.#headers,
             status_code: this.#status_code,
             status_code_is_ok: this.#status_code_is_ok,
             status_message: this.#status_message
-        }, null, 4)}`;
+        }, null, 4);
     }
 }
