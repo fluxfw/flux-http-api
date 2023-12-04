@@ -1,6 +1,4 @@
-import MIME_DB from "../../../mime-db/db.json" assert {type: "json"};
-
-const MIME_DB_ENTRIES = Object.entries(MIME_DB);
+import MIME_DB from "mime-db";
 
 export class GetMimeTypeByExtension {
     /**
@@ -24,7 +22,7 @@ export class GetMimeTypeByExtension {
     async getMimeTypeByExtension(extension) {
         const _extension = extension.toLowerCase();
 
-        return MIME_DB_ENTRIES.find(([
+        return Object.entries(MIME_DB).find(([
             ,
             value
         ]) => value?.extensions?.includes(_extension) ?? false)?.[0] ?? null;

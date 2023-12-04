@@ -6,6 +6,12 @@ Changes:
 
 \-
 
+## v2023-12-04-1
+
+Changes:
+
+- `mime-db`
+
 ## v2023-11-28-1
 
 Changes:
