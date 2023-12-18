@@ -1,21 +1,14 @@
 /** @typedef {import("./Server/handleRequest.mjs").handleRequest} handleRequest */
-/** @typedef {import("./Client/HttpClientRequest.mjs").HttpClientRequest} HttpClientRequest */
-/** @typedef {import("./Client/HttpClientResponse.mjs").HttpClientResponse} HttpClientResponse */
 /** @typedef {import("./Server/HttpServerRequest.mjs").HttpServerRequest} HttpServerRequest */
 /** @typedef {import("./Server/HttpServerResponse.mjs").HttpServerResponse} HttpServerResponse */
 /** @typedef {import("./Proxy/ProxyRequest.mjs").ProxyRequest} ProxyRequest */
 /** @typedef {import("./Range/RangeUnit.mjs").RangeUnit} RangeUnit */
 /** @typedef {import("./Range/RangeValue.mjs").RangeValue} RangeValue */
-/** @typedef {import("./RequestImplementation/RequestImplementation.mjs").RequestImplementation} RequestImplementation */
 /** @typedef {import("./Server/_Server.mjs").Server} Server */
 /** @typedef {import("node:http").ServerResponse} ServerResponse */
 /** @typedef {import("./ShutdownHandler/ShutdownHandler.mjs").ShutdownHandler} ShutdownHandler */
 
 export class FluxHttp {
-    /**
-     * @type {RequestImplementation | null}
-     */
-    #request_implementation = null;
     /**
      * @type {ShutdownHandler | null}
      */
@@ -119,29 +112,6 @@ export class FluxHttp {
     }
 
     /**
-     * @param {ProxyRequest} proxy_request
-     * @returns {Promise<HttpServerResponse>}
-     */
-    async proxyRequest(proxy_request) {
-        return (await import("./Server/ProxyRequest.mjs")).ProxyRequest.new(
-            await this.#getRequestImplementation()
-        )
-            .proxyRequest(
-                proxy_request
-            );
-    }
-
-    /**
-     * @param {HttpClientRequest} request
-     * @returns {Promise<HttpClientResponse>}
-     */
-    async request(request) {
-        return (await this.#getRequestImplementation()).request(
-            request
-        );
-    }
-
-    /**
      * @param {handleRequest} handle_request
      * @param {Server | null} server
      * @returns {Promise<void>}
@@ -195,14 +165,5 @@ export class FluxHttp {
                 request,
                 units
             );
-    }
-
-    /**
-     * @returns {Promise<RequestImplementation>}
-     */
-    async #getRequestImplementation() {
-        this.#request_implementation ??= typeof process !== "undefined" ? (await import("./RequestImplementation/NodeRequestImplementation.mjs")).NodeRequestImplementation.new() : (await import("./RequestImplementation/WebRequestImplementation.mjs")).WebRequestImplementation.new();
-
-        return this.#request_implementation;
     }
 }

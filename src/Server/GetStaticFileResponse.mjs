@@ -1,6 +1,6 @@
 import { createReadStream } from "node:fs";
 import { HttpServerResponse } from "./HttpServerResponse.mjs";
-import { join } from "node:path/posix";
+import { join } from "node:path";
 import { METHOD_HEAD } from "../Method/METHOD.mjs";
 import { RANGE_UNIT_BYTES } from "../Range/RANGE_UNIT.mjs";
 import { stat } from "node:fs/promises";

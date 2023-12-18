@@ -1,8 +1,8 @@
+import { Body } from "./Body.mjs";
 import { createServer as createServerHttp } from "node:http";
 import { createServer as createServerHttps } from "node:https";
 import { HttpServerRequest } from "../Server/HttpServerRequest.mjs";
 import { HttpServerResponse } from "./HttpServerResponse.mjs";
-import { NodeBodyImplementation } from "../BodyImplementation/NodeBodyImplementation.mjs";
 import { pipeline } from "node:stream/promises";
 import { REFERRER_POLICY_NO_REFERRER } from "../Referrer/REFERRER_POLICY.mjs";
 import { STATUS_CODE_MESSAGE } from "../Status/STATUS_CODE_MESSAGE.mjs";
@@ -297,7 +297,7 @@ export class RunServer {
 
         return HttpServerRequest.new(
             new URL(req.url, `${(_forwarded_headers ? req.headers[HEADER_X_FORWARDED_PROTO.toLowerCase()] : null) ?? (req.socket.encrypted ? PROTOCOL_HTTPS : PROTOCOL_HTTP)}://${(_forwarded_headers ? req.headers[HEADER_X_FORWARDED_HOST.toLowerCase()] : null) ?? req.headers[HEADER_HOST.toLowerCase()] ?? "host"}`),
-            req.method !== METHOD_GET && req.method !== METHOD_HEAD ? NodeBodyImplementation.new(
+            req.method !== METHOD_GET && req.method !== METHOD_HEAD ? Body.new(
                 req,
                 req.headers[HEADER_CONTENT_TYPE.toLowerCase()] ?? null
             ) : null,

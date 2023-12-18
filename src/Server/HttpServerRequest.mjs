@@ -1,14 +1,13 @@
+import { Body } from "./Body.mjs";
 import { METHOD_GET } from "../Method/METHOD.mjs";
-import { NodeBodyImplementation } from "../BodyImplementation/NodeBodyImplementation.mjs";
 
-/** @typedef {import("../BodyImplementation/BodyImplementation.mjs").BodyImplementation} BodyImplementation */
 /** @typedef {import("node:http").ServerResponse} ServerResponse */
 
 export class HttpServerRequest {
     /**
-     * @type {BodyImplementation}
+     * @type {Body}
      */
-    #body_implementation;
+    #body;
     /**
      * @type {{[key: string]: string}}
      */
@@ -36,7 +35,7 @@ export class HttpServerRequest {
 
     /**
      * @param {URL} url
-     * @param {BodyImplementation | null} body_implementation
+     * @param {Body | null} body
      * @param {string | null} method
      * @param {{[key: string]: string | string[]} | null} headers
      * @param {{[key: string]: string} | null} cookies
@@ -44,10 +43,10 @@ export class HttpServerRequest {
      * @param {ServerResponse | null} _res
      * @returns {HttpServerRequest}
      */
-    static new(url, body_implementation = null, method = null, headers = null, cookies = null, url_path_parts = null, _res = null) {
+    static new(url, body = null, method = null, headers = null, cookies = null, url_path_parts = null, _res = null) {
         return new this(
             url,
-            body_implementation ?? NodeBodyImplementation.new(),
+            body ?? Body.new(),
             method ?? METHOD_GET,
             headers ?? {},
             cookies ?? {},
@@ -58,7 +57,7 @@ export class HttpServerRequest {
 
     /**
      * @param {URL} url
-     * @param {BodyImplementation} body_implementation
+     * @param {Body} body
      * @param {string} method
      * @param {{[key: string]: string | string[]}} headers
      * @param {{[key: string]: string}} cookies
@@ -66,9 +65,9 @@ export class HttpServerRequest {
      * @param {ServerResponse | null} _res
      * @private
      */
-    constructor(url, body_implementation, method, headers, cookies, url_path_parts, _res) {
+    constructor(url, body, method, headers, cookies, url_path_parts, _res) {
         this.#url = url;
-        this.#body_implementation = body_implementation;
+        this.#body = body;
         this.#method = method;
         this.#headers = headers;
         this.#cookies = cookies;
@@ -77,10 +76,10 @@ export class HttpServerRequest {
     }
 
     /**
-     * @returns {BodyImplementation}
+     * @returns {Body}
      */
     get body() {
-        return this.#body_implementation;
+        return this.#body;
     }
 
     /**

@@ -1,4 +1,4 @@
-import { extname } from "node:path/posix";
+import { extname } from "node:path";
 
 /** @typedef {import("../FluxHttp.mjs").FluxHttp} FluxHttp */
 

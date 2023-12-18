@@ -1,5 +1,5 @@
 import { HttpServerResponse } from "./HttpServerResponse.mjs";
-import { join } from "node:path/posix";
+import { join } from "node:path";
 import { STATUS_CODE_400 } from "../Status/STATUS_CODE.mjs";
 
 /** @typedef {import("../FluxHttp.mjs").FluxHttp} FluxHttp */
