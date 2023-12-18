@@ -1,7 +1,6 @@
 /** @typedef {import("./Server/handleRequest.mjs").handleRequest} handleRequest */
 /** @typedef {import("./Server/HttpServerRequest.mjs").HttpServerRequest} HttpServerRequest */
 /** @typedef {import("./Server/HttpServerResponse.mjs").HttpServerResponse} HttpServerResponse */
-/** @typedef {import("./Proxy/ProxyRequest.mjs").ProxyRequest} ProxyRequest */
 /** @typedef {import("./Range/RangeUnit.mjs").RangeUnit} RangeUnit */
 /** @typedef {import("./Range/RangeValue.mjs").RangeValue} RangeValue */
 /** @typedef {import("./Server/_Server.mjs").Server} Server */
