@@ -1,4 +1,4 @@
-import MIME_DB from "mime-db";
+import MIME_DB from "mime-db/db.json" with { type: "json" };
 
 export class GetMimeTypeByExtension {
     /**
