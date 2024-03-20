@@ -15,9 +15,9 @@ export class FluxHttp {
 
     /**
      * @param {ShutdownHandler | null} shutdown_handler
-     * @returns {FluxHttp}
+     * @returns {Promise<FluxHttp>}
      */
-    static new(shutdown_handler = null) {
+    static async new(shutdown_handler = null) {
         return new this(
             shutdown_handler
         );
@@ -38,7 +38,7 @@ export class FluxHttp {
      * @returns {Promise<string | HttpServerResponse>}
      */
     async getAuthorizationParameters(request, schema, parameters = null) {
-        return (await import("./Server/GetAuthorizationParameters.mjs")).GetAuthorizationParameters.new()
+        return (await (await import("./Server/GetAuthorizationParameters.mjs")).GetAuthorizationParameters.new())
             .getAuthorizationParameters(
                 request,
                 schema,
@@ -55,9 +55,9 @@ export class FluxHttp {
      * @returns {Promise<HttpServerResponse>}
      */
     async getFilteredStaticFileResponse(root, path, request, content_type = null, headers = null) {
-        return (await import("./Server/GetFilteredStaticFileResponse.mjs")).GetFilteredStaticFileResponse.new(
+        return (await (await import("./Server/GetFilteredStaticFileResponse.mjs")).GetFilteredStaticFileResponse.new(
             this
-        )
+        ))
             .getFilteredStaticFileResponse(
                 root,
                 path,
@@ -72,7 +72,7 @@ export class FluxHttp {
      * @returns {Promise<string | null>}
      */
     async getMimeTypeByExtension(extension) {
-        return (await import("./Server/GetMimeTypeByExtension.mjs")).GetMimeTypeByExtension.new()
+        return (await (await import("./Server/GetMimeTypeByExtension.mjs")).GetMimeTypeByExtension.new())
             .getMimeTypeByExtension(
                 extension
             );
@@ -83,9 +83,9 @@ export class FluxHttp {
      * @returns {Promise<string | null>}
      */
     async getMimeTypeByPath(path) {
-        return (await import("./Server/GetMimeTypeByPath.mjs")).GetMimeTypeByPath.new(
+        return (await (await import("./Server/GetMimeTypeByPath.mjs")).GetMimeTypeByPath.new(
             this
-        )
+        ))
             .getMimeTypeByPath(
                 path
             );
@@ -99,9 +99,9 @@ export class FluxHttp {
      * @returns {Promise<HttpServerResponse>}
      */
     async getStaticFileResponse(path, request, content_type = null, headers = null) {
-        return (await import("./Server/GetStaticFileResponse.mjs")).GetStaticFileResponse.new(
+        return (await (await import("./Server/GetStaticFileResponse.mjs")).GetStaticFileResponse.new(
             this
-        )
+        ))
             .getStaticFileResponse(
                 path,
                 request,
@@ -116,9 +116,9 @@ export class FluxHttp {
      * @returns {Promise<void>}
      */
     async runServer(handle_request, server = null) {
-        await (await import("./Server/RunServer.mjs")).RunServer.new(
+        await (await (await import("./Server/RunServer.mjs")).RunServer.new(
             this.#shutdown_handler
-        )
+        ))
             .runServer(
                 handle_request,
                 server
@@ -131,9 +131,9 @@ export class FluxHttp {
      * @returns {Promise<void>}
      */
     async _setCookies(_res, cookies) {
-        await (await import("./Server/RunServer.mjs")).RunServer.new(
+        await (await (await import("./Server/RunServer.mjs")).RunServer.new(
             this.#shutdown_handler
-        )
+        ))
             ._setCookies(
                 _res,
                 cookies
@@ -146,7 +146,7 @@ export class FluxHttp {
      * @returns {Promise<HttpServerResponse | null>}
      */
     async validateMethods(request, methods) {
-        return (await import("./Server/ValidateMethods.mjs")).ValidateMethods.new()
+        return (await (await import("./Server/ValidateMethods.mjs")).ValidateMethods.new())
             .validateMethods(
                 request,
                 methods
@@ -159,7 +159,7 @@ export class FluxHttp {
      * @returns {Promise<RangeValue | HttpServerResponse | null>}
      */
     async validateRanges(request, units) {
-        return (await import("./Server/ValidateRanges.mjs")).ValidateRanges.new()
+        return (await (await import("./Server/ValidateRanges.mjs")).ValidateRanges.new())
             .validateRanges(
                 request,
                 units

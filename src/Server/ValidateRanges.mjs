@@ -8,9 +8,9 @@ import { HEADER_ACCEPT_RANGES, HEADER_CONTENT_RANGE, HEADER_RANGE } from "../Hea
 
 export class ValidateRanges {
     /**
-     * @returns {ValidateRanges}
+     * @returns {Promise<ValidateRanges>}
      */
-    static new() {
+    static async new() {
         return new this();
     }
 

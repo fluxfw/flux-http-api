@@ -6,9 +6,9 @@ import { STATUS_CODE_400, STATUS_CODE_401 } from "../Status/STATUS_CODE.mjs";
 
 export class GetAuthorizationParameters {
     /**
-     * @returns {GetAuthorizationParameters}
+     * @returns {Promise<GetAuthorizationParameters>}
      */
-    static new() {
+    static async new() {
         return new this();
     }
 

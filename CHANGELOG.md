@@ -6,6 +6,13 @@ Changes:
 
 \-
 
+## v2024-03-20-1
+
+Changes:
+
+- Make static new async
+- Use `null` for empty destruct
+
 ## v2024-01-15-1
 
 Changes:

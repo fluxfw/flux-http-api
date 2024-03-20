@@ -18,9 +18,9 @@ export class GetStaticFileResponse {
 
     /**
      * @param {FluxHttp} flux_http
-     * @returns {GetStaticFileResponse}
+     * @returns {Promise<GetStaticFileResponse>}
      */
-    static new(flux_http) {
+    static async new(flux_http) {
         return new this(
             flux_http
         );
@@ -109,7 +109,7 @@ export class GetStaticFileResponse {
                     [HEADER_CONTENT_RANGE]: range.range
                 } : _stat.size !== null ? {
                     [HEADER_CONTENT_LENGTH]: _stat.size
-                } : {},
+                } : null,
                 ..._content_type !== null ? {
                     [HEADER_CONTENT_TYPE]: _content_type
                 } : null,

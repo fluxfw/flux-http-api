@@ -7,9 +7,9 @@ import { STATUS_CODE_204, STATUS_CODE_405 } from "../Status/STATUS_CODE.mjs";
 
 export class ValidateMethods {
     /**
-     * @returns {ValidateMethods}
+     * @returns {Promise<ValidateMethods>}
      */
-    static new() {
+    static async new() {
         return new this();
     }
 

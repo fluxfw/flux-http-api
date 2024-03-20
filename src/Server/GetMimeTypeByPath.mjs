@@ -10,9 +10,9 @@ export class GetMimeTypeByPath {
 
     /**
      * @param {FluxHttp} flux_http
-     * @returns {GetMimeTypeByPath}
+     * @returns {Promise<GetMimeTypeByPath>}
      */
-    static new(flux_http) {
+    static async new(flux_http) {
         return new this(
             flux_http
         );

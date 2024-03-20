@@ -13,9 +13,9 @@ export class GetFilteredStaticFileResponse {
 
     /**
      * @param {FluxHttp} flux_http
-     * @returns {GetFilteredStaticFileResponse}
+     * @returns {Promise<GetFilteredStaticFileResponse>}
      */
-    static new(flux_http) {
+    static async new(flux_http) {
         return new this(
             flux_http
         );

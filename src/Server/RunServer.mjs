@@ -27,9 +27,9 @@ export class RunServer {
 
     /**
      * @param {ShutdownHandler | null} shutdown_handler
-     * @returns {RunServer}
+     * @returns {Promise<RunServer>}
      */
-    static new(shutdown_handler = null) {
+    static async new(shutdown_handler = null) {
         return new this(
             shutdown_handler
         );

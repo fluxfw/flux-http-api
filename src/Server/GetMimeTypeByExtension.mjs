@@ -2,9 +2,9 @@ import MIME_DB from "mime-db/db.json" with { type: "json" };
 
 export class GetMimeTypeByExtension {
     /**
-     * @returns {GetMimeTypeByExtension}
+     * @returns {Promise<GetMimeTypeByExtension>}
      */
-    static new() {
+    static async new() {
         return new this();
     }
 
