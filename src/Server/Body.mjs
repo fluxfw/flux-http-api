@@ -172,7 +172,7 @@ export class Body {
      */
     async arrayBuffer() {
         if (this.#stream === null) {
-            throw new Error("No stream");
+            throw new Error("No stream!");
         }
 
         return bodyAsArrayBuffer(this.#stream);
@@ -183,7 +183,7 @@ export class Body {
      */
     async blob() {
         if (this.#stream === null) {
-            throw new Error("No stream");
+            throw new Error("No stream!");
         }
 
         const blob = await bodyAsBlob(this.#stream);
@@ -200,7 +200,7 @@ export class Body {
      */
     async buffer() {
         if (this.#stream === null) {
-            throw new Error("No stream");
+            throw new Error("No stream!");
         }
 
         return bodyAsBuffer(this.#stream);
@@ -218,11 +218,11 @@ export class Body {
      */
     async css() {
         if (this.#stream === null) {
-            throw new Error("No stream");
+            throw new Error("No stream!");
         }
 
         if (!(this.#content_type?.includes(CONTENT_TYPE_CSS) ?? false)) {
-            throw new Error(`Content type needs to be ${CONTENT_TYPE_CSS}, got ${this.#content_type}`);
+            throw new Error(`Content type needs to be ${CONTENT_TYPE_CSS}, got ${this.#content_type}!`);
         }
 
         return this.string();
@@ -233,11 +233,11 @@ export class Body {
      */
     async formData() {
         if (this.#stream === null) {
-            throw new Error("No stream");
+            throw new Error("No stream!");
         }
 
         if (this.#content_type === null || !(this.#content_type.includes(CONTENT_TYPE_FORM_DATA_MULTIPART) || this.#content_type.includes(CONTENT_TYPE_FORM_DATA_URL_ENCODED))) {
-            throw new Error(`Content type needs to be ${CONTENT_TYPE_FORM_DATA_MULTIPART} or ${CONTENT_TYPE_FORM_DATA_URL_ENCODED}, got ${this.#content_type}`);
+            throw new Error(`Content type needs to be ${CONTENT_TYPE_FORM_DATA_MULTIPART} or ${CONTENT_TYPE_FORM_DATA_URL_ENCODED}, got ${this.#content_type}!`);
         }
 
         return (await this.webResponse()).formData();
@@ -248,11 +248,11 @@ export class Body {
      */
     async html() {
         if (this.#stream === null) {
-            throw new Error("No stream");
+            throw new Error("No stream!");
         }
 
         if (!(this.#content_type?.includes(CONTENT_TYPE_HTML) ?? false)) {
-            throw new Error(`Content type needs to be ${CONTENT_TYPE_HTML}, got ${this.#content_type}`);
+            throw new Error(`Content type needs to be ${CONTENT_TYPE_HTML}, got ${this.#content_type}!`);
         }
 
         return this.string();
@@ -263,11 +263,11 @@ export class Body {
      */
     async json() {
         if (this.#stream === null) {
-            throw new Error("No stream");
+            throw new Error("No stream!");
         }
 
         if (!(this.#content_type?.includes(CONTENT_TYPE_JSON) ?? false)) {
-            throw new Error(`Content type needs to be ${CONTENT_TYPE_JSON}, got ${this.#content_type}`);
+            throw new Error(`Content type needs to be ${CONTENT_TYPE_JSON}, got ${this.#content_type}!`);
         }
 
         return bodyAsJson(this.#stream);
@@ -292,7 +292,7 @@ export class Body {
      */
     async string() {
         if (this.#stream === null) {
-            throw new Error("No stream");
+            throw new Error("No stream!");
         }
 
         return bodyAsString(this.#stream);
@@ -303,11 +303,11 @@ export class Body {
      */
     async text() {
         if (this.#stream === null) {
-            throw new Error("No stream");
+            throw new Error("No stream!");
         }
 
         if (!(this.#content_type?.includes(CONTENT_TYPE_TEXT) ?? false)) {
-            throw new Error(`Content type needs to be ${CONTENT_TYPE_TEXT}, got ${this.#content_type}`);
+            throw new Error(`Content type needs to be ${CONTENT_TYPE_TEXT}, got ${this.#content_type}!`);
         }
 
         return this.string();
