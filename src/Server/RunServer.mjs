@@ -227,7 +227,7 @@ export class RunServer {
 
             await this.#mapResponse(
                 HttpServerResponse.text(
-                    "Invalid request",
+                    "Invalid request!",
                     STATUS_CODE_400
                 ),
                 res
@@ -277,7 +277,7 @@ export class RunServer {
         } else {
             await this.#mapResponse(
                 HttpServerResponse.text(
-                    "Route not found",
+                    "Route not found!",
                     STATUS_CODE_404
                 ),
                 res,

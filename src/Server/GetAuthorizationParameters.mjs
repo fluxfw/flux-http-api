@@ -42,7 +42,7 @@ export class GetAuthorizationParameters {
 
         if (!authorization.startsWith(`${schema} `)) {
             return HttpServerResponse.text(
-                "Invalid authorization schema",
+                "Invalid authorization schema!",
                 STATUS_CODE_400
             );
         }
@@ -51,7 +51,7 @@ export class GetAuthorizationParameters {
 
         if (authorization_parameters === "") {
             return HttpServerResponse.text(
-                "Invalid authorization parameters",
+                "Invalid authorization parameters!",
                 STATUS_CODE_400
             );
         }

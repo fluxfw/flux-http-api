@@ -48,7 +48,7 @@ export class GetStaticFileResponse {
         } catch (error) {
             if ((error?.code ?? null) === "ENOENT") {
                 return HttpServerResponse.text(
-                    "File not found",
+                    "File not found!",
                     STATUS_CODE_404
                 );
             }
@@ -59,7 +59,7 @@ export class GetStaticFileResponse {
         if (!_stat.isFile()) {
             if (content_type !== null || !_stat.isDirectory()) {
                 return HttpServerResponse.text(
-                    "File not found",
+                    "File not found!",
                     STATUS_CODE_404
                 );
             }

@@ -40,7 +40,7 @@ export class GetFilteredStaticFileResponse {
     async getFilteredStaticFileResponse(root, path, request, content_type = null, headers = null) {
         if (path.includes("..") || path.includes("//") || path.includes("\\")) {
             return HttpServerResponse.text(
-                "Invalid path",
+                "Invalid path!",
                 STATUS_CODE_400
             );
         }
