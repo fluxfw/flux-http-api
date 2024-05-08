@@ -1,29 +1,29 @@
 import { extname } from "node:path";
 
-/** @typedef {import("../FluxHttp.mjs").FluxHttp} FluxHttp */
+/** @typedef {import("../Http.mjs").Http} Http */
 
 export class GetMimeTypeByPath {
     /**
-     * @type {FluxHttp}
+     * @type {Http}
      */
-    #flux_http;
+    #http;
 
     /**
-     * @param {FluxHttp} flux_http
+     * @param {Http} http
      * @returns {Promise<GetMimeTypeByPath>}
      */
-    static async new(flux_http) {
+    static async new(http) {
         return new this(
-            flux_http
+            http
         );
     }
 
     /**
-     * @param {FluxHttp} flux_http
+     * @param {Http} http
      * @private
      */
-    constructor(flux_http) {
-        this.#flux_http = flux_http;
+    constructor(http) {
+        this.#http = http;
     }
 
     /**
@@ -31,7 +31,7 @@ export class GetMimeTypeByPath {
      * @returns {Promise<string | null>}
      */
     async getMimeTypeByPath(path) {
-        return this.#flux_http.getMimeTypeByExtension(
+        return this.#http.getMimeTypeByExtension(
             extname(path).substring(1)
         );
     }

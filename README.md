@@ -1,3 +1,1 @@
-# flux-http
-
-Run http server
+# http

@@ -7,7 +7,7 @@
 /** @typedef {import("node:http").ServerResponse} ServerResponse */
 /** @typedef {import("./ShutdownHandler/ShutdownHandler.mjs").ShutdownHandler} ShutdownHandler */
 
-export class FluxHttp {
+export class Http {
     /**
      * @type {ShutdownHandler | null}
      */
@@ -15,7 +15,7 @@ export class FluxHttp {
 
     /**
      * @param {ShutdownHandler | null} shutdown_handler
-     * @returns {Promise<FluxHttp>}
+     * @returns {Promise<Http>}
      */
     static async new(shutdown_handler = null) {
         return new this(

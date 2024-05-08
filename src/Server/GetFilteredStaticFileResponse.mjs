@@ -2,31 +2,31 @@ import { HttpServerResponse } from "./HttpServerResponse.mjs";
 import { join } from "node:path";
 import { STATUS_CODE_400 } from "../Status/STATUS_CODE.mjs";
 
-/** @typedef {import("../FluxHttp.mjs").FluxHttp} FluxHttp */
+/** @typedef {import("../Http.mjs").Http} Http */
 /** @typedef {import("./HttpServerRequest.mjs").HttpServerRequest} HttpServerRequest */
 
 export class GetFilteredStaticFileResponse {
     /**
-     * @type {FluxHttp}
+     * @type {Http}
      */
-    #flux_http;
+    #http;
 
     /**
-     * @param {FluxHttp} flux_http
+     * @param {Http} http
      * @returns {Promise<GetFilteredStaticFileResponse>}
      */
-    static async new(flux_http) {
+    static async new(http) {
         return new this(
-            flux_http
+            http
         );
     }
 
     /**
-     * @param {FluxHttp} flux_http
+     * @param {Http} http
      * @private
      */
-    constructor(flux_http) {
-        this.#flux_http = flux_http;
+    constructor(http) {
+        this.#http = http;
     }
 
     /**
@@ -45,7 +45,7 @@ export class GetFilteredStaticFileResponse {
             );
         }
 
-        return this.#flux_http.getStaticFileResponse(
+        return this.#http.getStaticFileResponse(
             join(root, path.startsWith("/") ? path.substring(1) : path),
             request,
             content_type,
