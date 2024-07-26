@@ -1,6 +1,7 @@
 /** @typedef {import("./Server/handleRequest.mjs").handleRequest} handleRequest */
 /** @typedef {import("./Server/HttpServerRequest.mjs").HttpServerRequest} HttpServerRequest */
 /** @typedef {import("./Server/HttpServerResponse.mjs").HttpServerResponse} HttpServerResponse */
+/** @typedef {import("./Logger/Logger.mjs").Logger} Logger */
 /** @typedef {import("./Range/RangeUnit.mjs").RangeUnit} RangeUnit */
 /** @typedef {import("./Range/RangeValue.mjs").RangeValue} RangeValue */
 /** @typedef {import("./Server/_Server.mjs").Server} Server */
@@ -9,25 +10,33 @@
 
 export class Http {
     /**
+     * @type {Logger}
+     */
+    #logger;
+    /**
      * @type {ShutdownHandler | null}
      */
     #shutdown_handler;
 
     /**
+     * @param {Logger | null} logger
      * @param {ShutdownHandler | null} shutdown_handler
      * @returns {Promise<Http>}
      */
-    static async new(shutdown_handler = null) {
+    static async new(logger = null, shutdown_handler = null) {
         return new this(
+            logger ?? console,
             shutdown_handler
         );
     }
 
     /**
+     * @param {Logger} logger
      * @param {ShutdownHandler | null} shutdown_handler
      * @private
      */
-    constructor(shutdown_handler) {
+    constructor(logger, shutdown_handler) {
+        this.#logger = logger;
         this.#shutdown_handler = shutdown_handler;
     }
 
@@ -117,6 +126,7 @@ export class Http {
      */
     async runServer(handle_request, server = null) {
         await (await (await import("./Server/RunServer.mjs")).RunServer.new(
+            this.#logger,
             this.#shutdown_handler
         ))
             .runServer(
@@ -132,6 +142,7 @@ export class Http {
      */
     async _setCookies(_res, cookies) {
         await (await (await import("./Server/RunServer.mjs")).RunServer.new(
+            this.#logger,
             this.#shutdown_handler
         ))
             ._setCookies(

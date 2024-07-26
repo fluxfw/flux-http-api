@@ -15,31 +15,40 @@ import { STATUS_CODE_400, STATUS_CODE_404, STATUS_CODE_500 } from "../Status/STA
 
 /** @typedef {import("./handleRequest.mjs").handleRequest} handleRequest */
 /** @typedef {import("node:http").IncomingMessage} IncomingMessage */
+/** @typedef {import("../Logger/Logger.mjs").Logger} Logger */
 /** @typedef {import("./_Server.mjs").Server} Server */
 /** @typedef {import("node:http").ServerResponse} ServerResponse */
 /** @typedef {import("../ShutdownHandler/ShutdownHandler.mjs").ShutdownHandler} ShutdownHandler */
 
 export class RunServer {
     /**
+     * @type {Logger}
+     */
+    #logger;
+    /**
      * @type {ShutdownHandler | null}
      */
     #shutdown_handler;
 
     /**
+     * @param {Logger} logger
      * @param {ShutdownHandler | null} shutdown_handler
      * @returns {Promise<RunServer>}
      */
-    static async new(shutdown_handler = null) {
+    static async new(logger, shutdown_handler = null) {
         return new this(
+            logger,
             shutdown_handler
         );
     }
 
     /**
+     * @param {Logger} logger
      * @param {ShutdownHandler | null} shutdown_handler
      * @private
      */
-    constructor(shutdown_handler) {
+    constructor(logger, shutdown_handler) {
+        this.#logger = logger;
         this.#shutdown_handler = shutdown_handler;
     }
 
@@ -223,7 +232,9 @@ export class RunServer {
                 forwarded_headers
             );
         } catch (error) {
-            console.error(error);
+            this.#logger.error(
+                error
+            );
 
             await this.#mapResponse(
                 HttpServerResponse.text(
@@ -254,7 +265,9 @@ export class RunServer {
                 request
             );
         } catch (error) {
-            console.error(error);
+            this.#logger.error(
+                error
+            );
 
             await this.#mapResponse(
                 HttpServerResponse.new(
@@ -357,7 +370,9 @@ export class RunServer {
 
             await pipeline(stream, res);
         } catch (error) {
-            console.error(error);
+            this.#logger.error(
+                error
+            );
 
             if (!res.headersSent) {
                 res.statusCode = STATUS_CODE_500;
